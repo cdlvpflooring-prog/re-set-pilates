@@ -1,0 +1,116 @@
+import { useEffect } from "react";
+import { arbox, hasPublicBooking } from "../config/arbox";
+import { allPlans } from "../config/pricing";
+import { isTodo, mapsLink, siteConfig } from "../config/site";
+import { founder } from "../config/team";
+
+/** Per-page title, description and optional JSON-LD. */
+export function useSeo(meta: { title: string; desc: string }, jsonLd?: object) {
+  const ld = jsonLd ? JSON.stringify(jsonLd) : "";
+  useEffect(() => {
+    document.title = meta.title;
+    const set = (sel: string, attr: string, key: string, content: string) => {
+      let el = document.head.querySelector<HTMLMetaElement>(sel);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
+      }
+      el.content = content;
+    };
+    set('meta[name="description"]', "name", "description", meta.desc);
+    set('meta[property="og:title"]', "property", "og:title", meta.title);
+    set('meta[property="og:description"]', "property", "og:description", meta.desc);
+    set('meta[property="og:image"]', "property", "og:image", siteConfig.studioMedia.ogImage);
+
+    let script: HTMLScriptElement | null = null;
+    if (ld) {
+      script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.text = ld;
+      document.head.appendChild(script);
+    }
+    return () => script?.remove();
+  }, [meta.title, meta.desc, ld]);
+}
+
+const DAY: Record<string, string> = { Su: "Sunday", Mo: "Monday", Tu: "Tuesday", We: "Wednesday", Th: "Thursday", Fr: "Friday", Sa: "Saturday" };
+
+/**
+ * Local business schema for Google. Name, address, phone and hours must match the
+ * Google Business Profile exactly. Unconfirmed (TODO_VERIFY) fields are left out, never guessed.
+ */
+export const localBusinessLd = (lang: string) => {
+  const c = siteConfig.contact;
+  const s = siteConfig.social;
+  const origin = typeof location === "undefined" ? "" : location.origin;
+  const abs = (path: string) => (path.startsWith("http") ? path : origin + path);
+  const he = lang === "he";
+  const known = (v?: string) => (isTodo(v) ? undefined : v);
+  const offer = (p: (typeof allPlans)[number]) => ({
+    "@type": "Offer",
+    name:
+      p.billingType === "monthly"
+        ? p.perWeek === "unlimited"
+          ? he ? "מנוי חודשי ללא הגבלה" : "Unlimited monthly membership"
+          : he ? `מנוי חודשי, ${p.perWeek} פעמים בשבוע` : `Monthly membership, ${p.perWeek}x a week`
+        : he ? `כרטיסיית ${p.sessions} שיעורים` : `${p.sessions}-class pass`,
+    price: p.price,
+    priceCurrency: p.currency,
+    ...(known(p.arboxUrl) && { url: p.arboxUrl }),
+  });
+
+  return {
+    "@context": "https://schema.org",
+    "@type": ["ExerciseGym", "HealthClub"],
+    "@id": `${origin}/#studio`,
+    name: siteConfig.brand.name,
+    alternateName: ["RE:SET Pilates", "reset pilates", "ריסט פילאטיס"],
+    slogan: siteConfig.brand.tagline,
+    description: he
+      ? "סטודיו בוטיק לפילאטיס מכשירים (רפורמר) בהוד השרון. קבוצות של עד 5 מתאמנות, פילאטיס מזרן, אימונים אישיים ודואו."
+      : "Boutique Reformer Pilates studio in Hod Hasharon. Groups of up to 5, plus Mat Pilates, private and duo sessions.",
+    url: `${origin}/`,
+    logo: abs(siteConfig.studioMedia.logoDisc),
+    image: [abs(siteConfig.studioMedia.heroPoster), abs(siteConfig.studioMedia.ogImage)],
+    ...(known(c.phone) && { telephone: c.phone }),
+    ...(known(c.email) && { email: c.email }),
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: he ? c.streetHe : c.streetEn,
+      addressLocality: he ? c.cityHe : c.cityEn,
+      ...(known(c.postalCode) && { postalCode: c.postalCode }),
+      addressCountry: "IL",
+    },
+    ...(c.geoVerified && { geo: { "@type": "GeoCoordinates", latitude: c.geo.lat, longitude: c.geo.lng } }),
+    hasMap: mapsLink(),
+    areaServed: { "@type": "City", name: he ? c.cityHe : c.cityEn },
+    ...(c.openingHours.length > 0 && {
+      openingHoursSpecification: c.openingHours.map((h) => ({
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: h.days.map((d) => DAY[d]),
+        opens: h.opens,
+        closes: h.closes,
+      })),
+    }),
+    priceRange: "₪₪",
+    currenciesAccepted: "ILS",
+    knowsLanguage: ["he", "en"],
+    founder: { "@type": "Person", name: he ? founder.nameHe : founder.nameEn },
+    makesOffer: allPlans.filter((p) => p.active && p.approved).map(offer),
+    ...(hasPublicBooking(arbox.publicBookingUrl) && {
+      potentialAction: { "@type": "ReserveAction", target: arbox.publicBookingUrl, name: he ? "הזמנת שיעור" : "Book a class" },
+    }),
+    sameAs: [s.instagram, s.tiktok, s.facebook, known(s.googleBusiness)].filter(Boolean),
+  };
+};
+
+export const faqLd = (items: { q: string; a: string }[]) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((i) => ({
+    "@type": "Question",
+    name: i.q,
+    acceptedAnswer: { "@type": "Answer", text: i.a },
+  })),
+});

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://TODO_VERIFY_DOMAIN/sitemap.xml
