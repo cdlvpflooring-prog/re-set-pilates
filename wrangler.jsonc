@@ -1,0 +1,10 @@
+// Cloudflare deployment settings. The site is a static single-page app built into ./dist.
+// Unknown paths (e.g. /he/schedule opened directly) fall back to index.html so the app's router handles them.
+{
+  "name": "re-set-pilates",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}

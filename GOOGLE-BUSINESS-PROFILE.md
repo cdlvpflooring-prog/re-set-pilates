@@ -194,6 +194,96 @@ Goal: 25+ reviews in the first 90 days, then 4+ a month, steady rather than in b
 
 ---
 
+## 12. Stand-out extras (beyond photos)
+
+The goal: every tab of the profile has something in it, and something new appears every week. Google ranks complete, active profiles higher, and people click the one that looks alive.
+
+### 12.1 Action buttons (fill all of them)
+
+| Button | Value |
+|---|---|
+| Call | studio phone (**NEED**) |
+| Chat / WhatsApp | in Edit profile → Contact → Chat, add the WhatsApp link `https://wa.me/972XXXXXXXXX` (**NEED** number; available in most regions) |
+| Book / Appointments | Arbox public booking link (**NEED**) |
+| Website | site link with the UTM from section 1 |
+
+A profile with Call + WhatsApp + Book gets a row of three buttons instead of one, which is the most visible difference on a phone.
+
+### 12.2 Extra services (only add what Orit actually offers — tick to confirm)
+
+Each extra service becomes something Google can match a search to. Paste the description into the service's text box.
+
+| ☐ | Service | Description (Hebrew) |
+|---|---|---|
+| ☐ | פילאטיס למתחילות | שיעור רפורמר בקצב שמאפשר ללמוד את המכשיר והבסיס. קבוצה של עד 5, כך שהמדריכה מלווה אותך בכל תרגיל. |
+| ☐ | פילאטיס בהריון | אימון מותאם לשלבי ההריון, בתיאום מראש. (**NEED** עד איזה שבוע) |
+| ☐ | פילאטיס אחרי לידה | חזרה הדרגתית לתנועה, חיזוק רצפת אגן ושרירי בטן עמוקים. |
+| ☐ | פילאטיס לכאבי גב ויציבה | חיזוק ליבה ושיפור יציבה בתנועה מבוקרת. לא מחליף טיפול רפואי. |
+| ☐ | פילאטיס לגיל השלישי | עבודה עדינה על יציבות, שיווי משקל וגמישות. |
+| ☐ | שיעור לנשים בלבד | קבוצה סגורה לנשים, באווירה פרטית ונעימה, בתיאום מראש. |
+| ☐ | שיעור ניסיון | שיעור ראשון להיכרות עם הסטודיו והרפורמר. (**NEED** מחיר / הצעה) |
+| ☐ | כרטיס מתנה | שיעורים או מנוי במתנה. (only once gift cards are live) |
+
+Do not list anything the studio doesn't really run. Google and users both punish that.
+
+### 12.3 Product descriptions (paste into each product card)
+
+- **מנוי 1× בשבוע** — שיעור רפורמר אחד בשבוע בקבוצה של עד 5. מתאים להתחלה רגועה או כהשלמה לאימון אחר.
+- **מנוי 2× בשבוע** — הקצב שבו מתחילים להרגיש שינוי בחוזק וביציבה. שני שיעורים בשבוע.
+- **מנוי 3× בשבוע** — המנוי הפופולרי. שלושה שיעורים בשבוע לתוצאות עקביות.
+- **מנוי 4× בשבוע** — למתאמנות שהפילאטיס הוא חלק קבוע מהשבוע שלהן.
+- **מנוי ללא הגבלה** — כל השיעורים, כמה שתרצי.
+- **כרטיסיית 5 / 10 / 15** — שיעורים לניצול גמיש תוך חודשיים, בלי התחייבות חודשית.
+
+### 12.4 Offer and event posts (ready to post)
+
+Offer posts get a tag on the profile and in Maps. Keep one active at all times.
+
+1. **Offer — first class** (if Orit approves an intro price):
+   > שיעור ראשון ב-re:set במחיר היכרות. קבוצה של עד 5 מתאמנות, מדריכה שמלווה אותך מהרגע הראשון. מקומות מוגבלים בכל שיעור.
+   Button: Book · set start and end dates.
+2. **Offer — launch pricing** (section 8, already written).
+3. **Offer — bring a friend**:
+   > מגיעות בזוג? שיעור דואו או שתי מקומות באותו שיעור. כי עם חברה הולכים יותר. (**NEED** what the deal is)
+4. **Event — open house / opening day** (**NEED** date):
+   > בואי להכיר את הסטודיו: שיעורי טעימה של 30 דקות, היכרות עם הרפורמר ועם אורית. ההרשמה מראש, 5 מקומות בכל סבב.
+5. **Event — monthly workshop** (ideas to pick from): פילאטיס ונשימה · שיעור אמא ובת · סדנת יציבה לעבודה מול מחשב.
+
+### 12.5 Four-week post calendar (one post a week, Sunday morning)
+
+| Week | Type | Topic |
+|---|---|---|
+| 1 | Update | מה זה רפורמר? (springs close-up photo) |
+| 2 | Update | הכירי את אורית (portrait) |
+| 3 | Offer | first class / launch price |
+| 4 | Update | 3 דברים שכדאי לדעת לפני השיעור הראשון (what to wear, arrive 10 min early, grip socks) |
+
+Then repeat the pattern: tip, studio moment, offer, member story (with permission). Holiday weeks: a short post with the holiday hours.
+
+### 12.6 Reviews that say something
+
+When asking for a review (section 10), add one line so reviews mention what Google needs to match searches, without scripting the words:
+
+> אם בא לך, ספרי איזה שיעור עשית ואיך הרגשת אחריו 🤍
+
+Ask members who post a review to add a photo from the studio. Reviews with photos show first.
+
+### 12.7 Local signals (outside the profile, helps ranking in Hod Hasharon)
+
+- Post the opening in Hod Hasharon community Facebook groups and neighbourhood WhatsApp groups (with a link to the Google profile).
+- Ask for a listing / mention on: the Hod Hasharon municipality business directory, local news sites, the Arbox studio page.
+- Partner referrals: physiotherapists, women's health clinics, pregnancy and postnatal practitioners, nearby hair/nail salons. Swap cards and ask them to link to the site.
+- Instagram: tag the location on every post and story; it feeds the same map place.
+
+### 12.8 Upkeep (15 minutes a week)
+
+- Answer every review and question within 48 hours.
+- Check "Suggested edits" so nobody changes the hours or address.
+- One post, three new photos.
+- Monthly: read Performance (searches, calls, directions, bookings) and note what changed.
+
+---
+
 ## Open items to collect from Orit
 
 1. Phone number (and WhatsApp if separate)
@@ -206,3 +296,5 @@ Goal: 25+ reviews in the first 90 days, then 4+ a month, steady rather than in b
 8. Payment methods accepted
 9. Pregnancy policy (up to which week)
 10. Photos: real studio shoot, exterior with sign, Orit portrait, short videos
+11. Which extra services in 12.2 are real (beginners, pregnancy, postnatal, back care, seniors, women-only, intro class)
+12. Offers she approves: intro class price, bring-a-friend deal, open house date
