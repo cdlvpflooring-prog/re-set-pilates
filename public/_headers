@@ -1,7 +1,8 @@
-# Always fetch the newest service worker and app shell; cache built assets for a year.
+# Always fetch the newest service worker and app shell.
+# /assets holds both built code and studio photos, so photos stay swappable: cache for a day, not forever.
 /sw.js
   Cache-Control: no-cache
 /index.html
   Cache-Control: no-cache
 /assets/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=86400
