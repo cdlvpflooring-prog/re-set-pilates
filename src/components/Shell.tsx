@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { isTodo, siteConfig } from "../config/site";
@@ -55,16 +55,16 @@ function Header({ section }: { section: string }) {
   const { t, href } = useI18n();
   const scrolled = useScrolled();
   const nav = useNavigate();
+  const loc = useLocation();
+  const [menu, setMenu] = useState(false);
   const isRoot = ROOTS.includes(section);
   const overHero = section === "" || section === "about";
-  const links: [string, string][] = [
-    ["", t.nav.home],
-    ["schedule", t.nav.scheduleTab],
-    ["services", t.nav.classes],
-    ["pricing", t.nav.memberships],
-    ["about", t.nav.studio],
-  ];  return (
-    <header className={`hdr ${scrolled || !overHero ? "is-solid" : ""} ${isRoot ? "" : "hdr--pushed"}`}>
+
+  // Close the menu whenever the page changes
+  useEffect(() => setMenu(false), [loc.pathname]);
+
+  return (
+    <header className={`hdr ${scrolled || !overHero || menu ? "is-solid" : ""} ${isRoot ? "" : "hdr--pushed"}`}>
       <div className="wrap hdr__in">
         <div className="hdr__start">
           {!isRoot && (
@@ -73,40 +73,130 @@ function Header({ section }: { section: string }) {
               {t.common.back}
             </button>
           )}
-          <nav className="hdr__nav" aria-label={t.common.menu}>
-            {links.map(([to, label]) => (
-              <NavLink key={to} to={href(to)} end={to === ""}>
-                {label}
-              </NavLink>
-            ))}
-          </nav>
         </div>
         <Link to={href()} className="hdr__brand">
           <Wordmark />
         </Link>
         <div className="hdr__end">
           <LangToggle />
-          <Link to={href("profile")} className="icon-btn hdr__profile" aria-label={t.nav.profile}>
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.4">
-              <circle cx="10" cy="7" r="3.4" />
-              <path d="M3.5 17.5c.8-3.2 3.4-4.8 6.5-4.8s5.7 1.6 6.5 4.8" strokeLinecap="round" />
-            </svg>
-          </Link>
           <Link to={href("schedule")} className="btn btn--sand btn--sm hdr__book" onClick={() => track("book_reformer_click", { source: "header" })}>
             {t.common.bookShort}
           </Link>
+          <button
+            className={`burger ${menu ? "is-open" : ""}`}
+            onClick={() => setMenu(!menu)}
+            aria-expanded={menu}
+            aria-controls="site-menu"
+            aria-label={menu ? t.common.close : t.common.menu}
+          >
+            <i />
+            <i />
+            <i />
+          </button>
         </div>
       </div>
-      <nav className="cattabs" aria-label={t.common.menu}>
-        <div className="cattabs__in">
-          {links.map(([to, label]) => (
-            <NavLink key={to} to={href(to)} end={to === ""} className="cattab">
-              {label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
+      <SiteMenu open={menu} onClose={() => setMenu(false)} />
     </header>
+  );
+}
+
+/** Full menu behind the 3-line button: every section of the site in one place. */
+function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { t, href } = useI18n();
+  const reduce = useReducedMotion();
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [open, onClose]);
+
+  const main: [string, string][] = [
+    ["", t.nav.home],
+    ["schedule", t.nav.scheduleTab],
+    ["services", t.nav.classes],
+    ["pricing", t.nav.memberships],
+    ["about", t.nav.studio],
+  ];
+  const more: [string, string][] = [
+    ["my", t.nav.myClasses],
+    ["profile", t.nav.profile],
+    ["quiz", t.nav.quiz],
+    ["gift", t.nav.gift],
+    ["faq", t.nav.faq],
+    ["contact", t.nav.contact],
+  ];
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <>
+          <motion.div
+            className="menu-scrim"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+          />
+          <motion.nav
+            id="site-menu"
+            className="menu"
+            aria-label={t.common.menu}
+            initial={reduce ? { opacity: 0 } : { opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={reduce ? { opacity: 0 } : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: [0.2, 0.7, 0.2, 1] }}
+          >
+            <ul className="menu__main">
+              {main.map(([to, label], i) => (
+                <motion.li
+                  key={to}
+                  initial={reduce ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.24, delay: 0.03 * i, ease: [0.2, 0.7, 0.2, 1] }}
+                >
+                  <NavLink to={href(to)} end={to === ""} onClick={onClose}>
+                    {label}
+                    <span className="chev" aria-hidden />
+                  </NavLink>
+                </motion.li>
+              ))}
+            </ul>
+            <ul className="menu__more">
+              {more.map(([to, label]) => (
+                <li key={to}>
+                  <NavLink to={href(to)} onClick={onClose}>
+                    {label}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+            <div className="menu__foot">
+              <Link
+                to={href("schedule")}
+                className="btn btn--dark btn--block btn--arrow"
+                onClick={() => {
+                  track("book_reformer_click", { source: "menu" });
+                  onClose();
+                }}
+              >
+                {t.nav.bookTitle}
+              </Link>
+              <a className="menu__mail" href={`mailto:${siteConfig.contact.email}`} dir="ltr">
+                {siteConfig.contact.email}
+              </a>
+            </div>
+          </motion.nav>
+        </>
+      )}
+    </AnimatePresence>
   );
 }
 
