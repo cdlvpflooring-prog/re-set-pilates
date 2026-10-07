@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { planName } from "../components/blocks";
-import { LangToggle } from "../components/Shell";
+import { planName, planTone } from "../components/blocks";
+import { LangToggle, Wordmark } from "../components/Shell";
 import { Switch } from "../components/ui";
 import { planById } from "../config/pricing";
 import { siteConfig } from "../config/site";
-import { fromISO } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
+import { planUsage } from "../lib/plan";
 import { useStore } from "../lib/store";
 
 export default function Profile() {
@@ -15,22 +15,9 @@ export default function Profile() {
   const [hint, setHint] = useState(false);
   const plan = store.planId ? planById(store.planId) : undefined;
 
-  // Demo usage figures derived from local bookings; real numbers come from Arbox.
-  const weekEnd = new Date();
-  weekEnd.setDate(weekEnd.getDate() + 7);
-  const thisWeek = store.upcoming.filter((b) => fromISO(b.date) < weekEnd).length;
-  let usage = "";
-  let pct = 0;
-  if (plan?.billingType === "monthly") {
-    const cap = plan.perWeek === "unlimited" ? null : plan.perWeek!;
-    usage = cap ? `${Math.min(thisWeek, cap)} / ${cap} · ${t.profile.thisWeek}` : `${thisWeek} · ${t.profile.thisWeek}`;
-    pct = cap ? Math.min(1, thisWeek / cap) : 1;
-  } else if (plan) {
-    const total = plan.sessions! + (siteConfig.flags.launchPricing ? (plan.bonusSessions ?? 0) : 0);
-    const left = Math.max(0, total - store.bookings.length);
-    usage = `${left} ${t.profile.sessionsLeft}`;
-    pct = left / total;
-  }
+  // Demo usage figures from local bookings; real balances come from Arbox once connected.
+  const usage = plan ? planUsage(plan, store.bookings, new Date(), store.memberSince) : null;
+  const pct = usage && usage.cap ? Math.min(1, usage.used / usage.cap) : 1;
   const since = store.memberSince ? new Date(store.memberSince) : null;
   const until = since ? new Date(since) : new Date();
   until.setMonth(until.getMonth() + (plan?.validityMonths ?? 1));
@@ -48,22 +35,40 @@ export default function Profile() {
           </span>
         </div>
 
-        {plan ? (
-          <div className="member-card stack gap-16">
+        {plan && usage ? (
+          <div className="stack gap-12">
             <span className="eyebrow">{t.profile.membership}</span>
-            <span className="display d-md">{planName(plan, t)}</span>
-            <div className="stack gap-8">
-              <span className="small muted">{usage}</span>
-              <div className="progress">
-                <i style={{ width: `${Math.round(pct * 100)}%` }} />
+            <div className={`mcard mcard--member ${planTone(plan.id)}`}>
+              <div className="row between gap-12">
+                <Wordmark />
+                <span className="mcard__renew">
+                  {plan.billingType === "monthly" ? t.profile.renews : t.profile.validUntil}{" "}
+                  <b dir="ltr">
+                    {until.getDate()}.{until.getMonth() + 1}
+                  </b>
+                </span>
+              </div>
+              <div className="stack gap-8">
+                <span className="mcard__name">{planName(plan, t)}</span>
+                <span className="mcard__usage">
+                  {usage.cap === null ? (
+                    <>
+                      <b>{usage.used}</b> {t.profile.bookedWeek} · {t.profile.unlimitedNote}
+                    </>
+                  ) : (
+                    <>
+                      <b>
+                        {usage.used} / {usage.cap}
+                      </b>{" "}
+                      {plan.billingType === "monthly" ? t.profile.bookedWeek : t.profile.bookedPass}
+                    </>
+                  )}
+                </span>
+                <span className="mcard__bar" aria-hidden>
+                  <i style={{ width: `${Math.round(pct * 100)}%` }} />
+                </span>
               </div>
             </div>
-            <span className="tiny">
-              {plan.billingType === "monthly" ? t.profile.renews : t.profile.validUntil}{" "}
-              <span style={{ direction: "ltr", display: "inline-block" }}>
-                {until.getDate()}.{until.getMonth() + 1}
-              </span>
-            </span>
             <Link to={href("pricing")} className="btn btn--secondary btn--sm" style={{ alignSelf: "flex-start" }}>
               {t.profile.manage}
             </Link>

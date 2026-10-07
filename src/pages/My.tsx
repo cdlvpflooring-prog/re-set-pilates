@@ -41,7 +41,7 @@ export default function My() {
                         <b>{d.getDate()}</b>
                       </span>
                       <span className="stack gap-4">
-                        <span style={{ fontWeight: 500 }}>{t.services.items[b.service].name}</span>
+                        <span className="key">{t.services.items[b.service].name}</span>
                         <span className="small muted">
                           <span className="nums">{b.time}</span> · {instructorName(b.instructorId, isHe)}
                         </span>

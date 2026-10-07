@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, planName, pricesVisible, serviceTarget } from "../components/blocks";
+import { planTone, GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, planName, pricesVisible, serviceTarget } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
 import { Wordmark } from "../components/Shell";
 import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
@@ -15,7 +15,6 @@ import { localBusinessLd, useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
 
 const FEATURED = ["m1x", "m3x", "munl"];
-const CARD_TONE = ["mcard--cream", "mcard--sand", "mcard--ink"];
 
 /** One long page: hero → why → classes → schedule → pricing → people → visit → questions → book. */
 export default function Home() {
@@ -82,10 +81,10 @@ export default function Home() {
             </span>
             <span className="stack gap-4" style={{ flex: 1 }}>
               <span className="eyebrow">{t.home.nextClass}</span>
-              <span style={{ fontWeight: 500 }}>
+              <span className="key">
                 <span className="nums">{next.time}</span> · {t.services.items[next.service].name}
               </span>
-              <span className="tiny">{fmtDate(fromISO(next.date))}</span>
+              <span className="key key--date">{fmtDate(fromISO(next.date))}</span>
             </span>
             <span className="chev" aria-hidden />
           </Link>
@@ -203,7 +202,7 @@ export default function Home() {
           <div className="plans">
             {plans.map((p, i) => (
               <Reveal key={p.id} delay={i * 90} className="plan">
-                <div className={`mcard ${CARD_TONE[i % 3]}`} aria-hidden>
+                <div className={`mcard ${planTone(p.id)}`} aria-hidden>
                   <Wordmark />
                   <div className="stack">
                     <span className="mcard__name">{planName(p, t)}</span>

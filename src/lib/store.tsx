@@ -1,5 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { slotStart, type ClassSlot } from "./booking";
+import { planById } from "../config/pricing";
+import { fromISO, slotStart, type ClassSlot } from "./booking";
+import { planUsage } from "./plan";
 
 export interface Booking {
   id: string;
@@ -82,7 +84,12 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       bed,
       remind,
     };
-    setS((p) => ({ ...p, bookings: [...p.bookings.filter((x) => x.slotId !== slot.id), b] }));
+    setS((p) => {
+      // Never book past the plan's allowance (weekly cap or pass balance)
+      const plan = p.planId ? planById(p.planId) : undefined;
+      if (plan && planUsage(plan, p.bookings, fromISO(slot.date), p.memberSince).left <= 0) return p;
+      return { ...p, bookings: [...p.bookings.filter((x) => x.slotId !== slot.id), b] };
+    });
     return b;
   }, []);
   const cancel = useCallback((id: string) => setS((p) => ({ ...p, bookings: p.bookings.filter((b) => b.id !== id) })), []);

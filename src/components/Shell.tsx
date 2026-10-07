@@ -58,13 +58,12 @@ function Header({ section }: { section: string }) {
   const isRoot = ROOTS.includes(section);
   const overHero = section === "" || section === "about";
   const links: [string, string][] = [
-    ["schedule", t.nav.schedule],
-    ["services", t.nav.services],
-    ["pricing", t.nav.pricing],
-    ["about", t.nav.about],
-    ["contact", t.nav.contact],
-  ];
-  return (
+    ["", t.nav.home],
+    ["schedule", t.nav.scheduleTab],
+    ["services", t.nav.classes],
+    ["pricing", t.nav.memberships],
+    ["about", t.nav.studio],
+  ];  return (
     <header className={`hdr ${scrolled || !overHero ? "is-solid" : ""} ${isRoot ? "" : "hdr--pushed"}`}>
       <div className="wrap hdr__in">
         <div className="hdr__start">
@@ -76,7 +75,7 @@ function Header({ section }: { section: string }) {
           )}
           <nav className="hdr__nav" aria-label={t.common.menu}>
             {links.map(([to, label]) => (
-              <NavLink key={to} to={href(to)}>
+              <NavLink key={to} to={href(to)} end={to === ""}>
                 {label}
               </NavLink>
             ))}
@@ -98,6 +97,15 @@ function Header({ section }: { section: string }) {
           </Link>
         </div>
       </div>
+      <nav className="cattabs" aria-label={t.common.menu}>
+        <div className="cattabs__in">
+          {links.map(([to, label]) => (
+            <NavLink key={to} to={href(to)} end={to === ""} className="cattab">
+              {label}
+            </NavLink>
+          ))}
+        </div>
+      </nav>
     </header>
   );
 }

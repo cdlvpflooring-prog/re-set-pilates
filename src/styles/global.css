@@ -1256,3 +1256,106 @@ html[lang="he"] .hdr .hdr__book { font-size: 16px; }
 @media (min-width: 900px) { #classes .reveal:nth-child(5) { grid-column: 1 / -1; } }
 /* Bottom menu is a phone-only control; keep it hidden on larger screens */
 @media (min-width: 1000px) { .tabbar { display: none; } }
+
+/* ───────── v1.8 · easier to read, category tabs ───────── */
+
+/* Stronger text contrast everywhere */
+.tone-dark, .tone-light {
+  --fg-2: rgba(31, 22, 18, 0.8);
+  --fg-3: rgba(31, 22, 18, 0.64);
+}
+body { color: #1f1612; }
+.muted { color: var(--fg-2); }
+.tiny { color: var(--fg-3); font-weight: 500; }
+.small { font-weight: 450; }
+.lede, p { font-weight: 400; }
+.eyebrow { font-weight: 700; }
+html[lang="he"] .lede, html[lang="he"] p { font-weight: 400; }
+
+/* Key facts: times, dates, addresses, class names, plan names */
+.key { font-weight: 700; color: #1f1612; font-size: 16px; }
+.key--date { font-size: 14.5px; font-weight: 600; color: rgba(31, 22, 18, 0.82); }
+.kv > span:last-child { font-weight: 700; color: #1f1612; }
+.kv > span:first-child { color: rgba(31, 22, 18, 0.75); font-weight: 500; }
+#visit .d-sm, .contact-address { font-weight: 700; }
+.date-tile { font-weight: 700; }
+.date-tile b { font-weight: 800; }
+.price-row .key, .plan .d-sm { font-weight: 700; }
+.stat b { font-weight: 700; }
+.stat span { font-weight: 600; color: rgba(31, 22, 18, 0.72); }
+.rows > * { font-weight: 600; }
+.rows .muted { font-weight: 500; }
+
+/* Schedule: dates and times stand out */
+.day { color: rgba(31, 22, 18, 0.72); font-weight: 700; font-size: 12.5px; }
+.day b { font-weight: 700; color: #1f1612; }
+.day[aria-selected="true"], .day[aria-selected="true"] b { color: #1f1612; }
+.slot2__time { font-size: 18px; font-weight: 800; color: #1f1612; letter-spacing: -0.01em; }
+.slot2__name { font-weight: 650; }
+.slot2__spots { font-weight: 700; color: #1f1612; }
+.slot2 .small.muted { font-weight: 600; color: rgba(31, 22, 18, 0.72); }
+.pill { font-weight: 700; }
+.acc__btn { font-weight: 650; }
+
+/* Category tabs under the header (phones and tablets) */
+.cattabs { display: none; }
+@media (max-width: 999px) {
+  :root { --hdr: 108px; }
+  .hdr__in { height: 60px; }
+  .cattabs { display: block; padding: 0 0 10px; }
+  .cattabs__in {
+    display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none;
+    padding-inline: var(--gutter); scroll-padding-inline: var(--gutter);
+  }
+  .cattabs__in::-webkit-scrollbar { display: none; }
+  .cattab {
+    flex: none; display: inline-flex; align-items: center; min-height: 36px; padding: 0 15px; border-radius: 999px;
+    background: rgba(31, 22, 18, 0.06); color: #1f1612; font-size: 14px; font-weight: 700; white-space: nowrap;
+    transition: background-color var(--t-ui) ease, color var(--t-ui) ease, transform var(--t-fast) var(--ease-out);
+  }
+  html[lang="he"] .cattab { font-size: 14.5px; }
+  .cattab:active { transform: scale(0.96); }
+  .cattab.active { background: #1f1612; color: #fffdfa; }
+}
+/* Desktop: the same five categories as pill tabs in the header row */
+@media (min-width: 1000px) {
+  .hdr__nav { gap: 6px; }
+  .hdr__nav a { padding: 8px 16px; border-radius: 999px; text-transform: none; letter-spacing: 0; }
+  .hdr__nav a::after { display: none; }
+  .hdr__nav a.active { background: #1f1612; color: #fffdfa; }
+  @media (hover: hover) and (pointer: fine) { .hdr__nav a:not(.active):hover { background: rgba(31, 22, 18, 0.07); } }
+}
+
+/* Plan allowance line on the booking sheet */
+.plan-left { padding: 12px 16px; border-radius: 14px; background: #f3ede6; font-weight: 700; font-size: 15px; text-align: center; }
+.plan-left.is-out { background: #f9dcd6; color: #8f3f2b; }
+
+/* Member's own card: same artwork as the cards sold on the site, with clear usage */
+.mcard--member { aspect-ratio: auto; min-height: 210px; gap: 18px; }
+.mcard--member .wordmark { font-size: 30px; }
+.mcard__renew { font-size: 13px; font-weight: 600; opacity: 0.9; text-align: end; }
+.mcard__renew b { font-size: 16px; font-weight: 800; display: block; }
+.mcard--member .mcard__name { font-size: 24px; font-weight: 700; letter-spacing: -0.02em; }
+.mcard__usage { font-size: 15px; font-weight: 600; }
+.mcard__usage b { font-size: 22px; font-weight: 800; margin-inline-end: 4px; }
+.mcard__bar { display: block; height: 6px; border-radius: 6px; background: rgba(31, 22, 18, 0.15); overflow: hidden; }
+.mcard--ink .mcard__bar, .mcard--sand .mcard__bar { background: rgba(255, 253, 250, 0.28); }
+.mcard__bar i { display: block; height: 100%; border-radius: 6px; background: currentColor; transition: width 600ms var(--ease-out); }
+/* Phone category tabs: classic underlined tabs, spread across the full width so all five always fit */
+@media (max-width: 999px) {
+  :root { --hdr: 100px; }
+  .cattabs { padding: 0; border-top: 1px solid rgba(31, 22, 18, 0.07); }
+  .cattabs__in { justify-content: space-between; gap: 4px; overflow-x: auto; }
+  .cattab {
+    position: relative; min-height: 40px; padding: 0 2px; border-radius: 0; background: none;
+    font-size: 14px; font-weight: 700; color: rgba(31, 22, 18, 0.62);
+  }
+  html[lang="he"] .cattab { font-size: 14px; }
+  .cattab.active { background: none; color: #1f1612; }
+  .cattab::after {
+    content: ""; position: absolute; inset: auto 0 0 0; height: 2.5px; border-radius: 2px;
+    background: #1f1612; transform: scaleX(0); transition: transform 220ms var(--ease-out);
+  }
+  .cattab.active::after { transform: scaleX(1); }
+}
+@media (max-width: 360px) { .cattab, html[lang="he"] .cattab { font-size: 13px; } }

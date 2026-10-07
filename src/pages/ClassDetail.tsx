@@ -4,11 +4,13 @@ import { instructorName } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
 import { Check, Sheet, Switch } from "../components/ui";
 import { arbox, hasPublicBooking } from "../config/arbox";
+import { planById } from "../config/pricing";
 import { serviceById } from "../config/services";
 import { track } from "../lib/analytics";
 import { bookingProvider, fromISO, slotStart, type ClassSlot } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { downloadIcs } from "../lib/ics";
+import { planUsage } from "../lib/plan";
 import { useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
 
@@ -55,7 +57,12 @@ export default function ClassDetail() {
 
   // When the public Arbox link is configured, every confirmed booking is completed there.
   const arboxUrl = [arbox.services[slot.service], arbox.publicBookingUrl].find(hasPublicBooking);
+  // Plan limit: weekly cap for monthly plans, remaining sessions for passes
+  const plan = store.planId ? planById(store.planId) : undefined;
+  const usage = plan ? planUsage(plan, store.bookings, fromISO(slot.date), store.memberSince) : null;
+  const atLimit = !!usage && usage.left <= 0;
   const confirm = () => {
+    if (atLimit) return;
     if (arboxUrl) window.open(arboxUrl, "_blank", "noopener");
     store.book(slot, isReformer ? bed : null, remind);
     track("booking_confirmed", { service: slot.service });
@@ -100,7 +107,7 @@ export default function ClassDetail() {
         {isReformer && !existing && !slot.full && (
           <div className="card stack gap-16">
             <div className="row between">
-              <h2 style={{ fontSize: 15, fontWeight: 500 }}>{t.klass.chooseBed}</h2>
+              <h2 className="key">{t.klass.chooseBed}</h2>
               <span className="small hi">
                 {bedLabel}
               </span>
@@ -192,7 +199,25 @@ export default function ClassDetail() {
                 <Switch checked={remind} onChange={setRemind} label={t.confirm.remind} />
               </div>
             </div>
-            {store.isMember ? (
+            {usage && plan && (
+              <p className={`plan-left ${atLimit ? "is-out" : ""}`}>
+                {atLimit
+                  ? (plan.billingType === "monthly" ? t.confirm.limitWeek : t.confirm.limitPass).replaceAll("{n}", String(usage.cap))
+                  : usage.cap === null
+                    ? t.profile.unlimitedNote
+                    : (plan.billingType === "monthly" ? t.confirm.leftWeek : t.confirm.leftPass)
+                        .replace("{left}", String(usage.left))
+                        .replace("{cap}", String(usage.cap))}
+              </p>
+            )}
+            {store.isMember && atLimit ? (
+              <>
+                <p className="small muted center">{plan?.billingType === "monthly" ? t.confirm.limitHint : t.confirm.limitPassHint}</p>
+                <Link to={href(`pricing?next=${slot.id}`)} className="btn btn--sand btn--block">
+                  {t.confirm.upgrade}
+                </Link>
+              </>
+            ) : store.isMember ? (
               <button className="btn btn--sand btn--block" onClick={confirm}>
                 {arboxUrl ? t.confirm.finishArbox : t.confirm.confirmBtn}
               </button>

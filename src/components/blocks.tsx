@@ -157,7 +157,7 @@ export function PricingList({ next, limit }: { next?: string; limit?: boolean })
             onClick={() => track("membership_click", { plan: p.id })}
           >
             <span className="stack gap-4" style={{ flex: 1 }}>
-              <span className="row gap-8" style={{ fontWeight: 500 }}>
+              <span className="row gap-8 key">
                 {planName(p, t)}
                 {p.popular && <span className="badge">{t.pricing.popular}</span>}
               </span>
@@ -316,7 +316,7 @@ export function ScheduleBoard() {
       {!bookingProvider.isLive && <p className="tiny center">{t.common.demoData}</p>}
       <div className="card row between gap-16">
         <span className="stack gap-4">
-          <span style={{ fontWeight: 500 }}>{t.schedule.privateDuo}</span>
+          <span className="key">{t.schedule.privateDuo}</span>
           <span className="tiny">{t.schedule.byAppointment}</span>
         </span>
         <Link to={href("contact?interest=private")} className="btn btn--blush btn--sm">
@@ -398,3 +398,7 @@ export function MapEmbed() {
     </div>
   );
 }
+
+/** Colour of a plan's membership card — identical on the pricing cards and the member's profile card. */
+export const planTone = (id: string) =>
+  ["m1x", "p5"].includes(id) ? "mcard--cream" : ["m2x", "m3x", "p10"].includes(id) ? "mcard--sand" : "mcard--ink";

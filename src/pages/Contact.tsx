@@ -44,7 +44,7 @@ export default function Contact() {
             <MapEmbed />
             <div className="card row between gap-16">
               <span className="stack gap-4">
-                <span style={{ fontWeight: 500 }}>{isHe ? `${c.streetHe}, ${c.cityHe}` : `${c.streetEn}, ${c.cityEn}`}</span>
+                <span className="key">{isHe ? `${c.streetHe}, ${c.cityHe}` : `${c.streetEn}, ${c.cityEn}`}</span>
                 <span className="tiny">
                   {t.contact.parking}: <Verified value={c.parking} />
                 </span>
