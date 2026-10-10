@@ -495,3 +495,16 @@ Added:
 - New tab **Trainer Check-ins** (Orit only): Member, Booking, Date, Energy 1–5, Soreness 0–10, Pain 0–10, Pain locations, Member notes, Safety review, Review reason, Orit's resolution
 
 Relay value mapping: quiz `strength/calm/care/together` → Strength / Calm & mobility / Gentle return / Together; `none/some/regular` → None / Some / Regular; `group/solo/pair` → Small group / One-to-one / With a friend; payment `card` → Credit card; bed index +1; booked via App; purchases → Payments status Pending.
+
+### Test run with sample data (10 Oct 2026)
+
+One linked sample customer ("SAMPLE Maya Levi") was added to every tab, plus a sample instructor, campaign and two classes. All records start with "SAMPLE" and can be deleted.
+
+Fixed after the test:
+- Lifetime spend and "Paid in full" counted pending payments → new Payments "Confirmed amount"; Members "Lifetime spend (paid)"; Memberships "Paid (confirmed)" (old rollups renamed "All payments (incl. pending)").
+- 24-hour rule used a date-only class time → Classes "Start (unix)", Bookings "Class start (unix)"; "Hours notice when cancelled" is now exact (tested: 23 h → late cancel).
+- Cancelled bookings still took a spot → Bookings "Holds a spot (1/0)", Classes "Spots taken"; "Spots left" uses it ("Booked" renamed "All bookings (incl. cancelled)").
+- "Days since last class" counted future bookings and was off by one → uses new "Last attended class", in Israel time ("Last class date" renamed "Latest booking date").
+- Number formulas returned text (broke "more than 21 days" style filters) → Spots left, Sessions left, Hours notice, Cost per lead, Response time now return numbers.
+
+Still open: Memberships "Days to renewal" returns text (change `""` to `BLANK()` in its formula); delete the Bookings field "UNUSED - safe to delete".
