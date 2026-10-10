@@ -480,3 +480,18 @@ Arbox data (members, plans, classes, payments) is copied in on a schedule once t
 
 **Relay setup**
 - Claude writes the Cloudflare Worker in the repo; the owner deploys it from the Cloudflare dashboard and pastes a fresh Airtable key as a secret there.
+
+### Applied to the live base (10 Oct 2026)
+
+Checked: all 16 tabs present; the 11 rows in Plans & Prices match `src/config/pricing.ts` (prices, launch prices, bonus sessions, popular badges); quiz, payment, bed and booking-status options cover every value the site produces.
+
+Added:
+- Plans & Prices → **Website ID** (filled: m1x, m2x, m3x, m4x, munl, p5, p10, p15, private, duo, gift)
+- Members → **Signs in with** (WhatsApp code / Google / Email link), **Trainer profile completed**
+- Leads & Inquiries → **How did you hear**, **Marketing consent**
+- Health & Consent → **Terms accepted on**, **Signed via** (Profile / Studio QR code / Paper), **Signature (typed name)**
+- Chat Questions → **Answer used** (the site's chat answer id)
+- Classes → **Website class ID** (e.g. reformer_2026-10-12_1800)
+- New tab **Trainer Check-ins** (Orit only): Member, Booking, Date, Energy 1–5, Soreness 0–10, Pain 0–10, Pain locations, Member notes, Safety review, Review reason, Orit's resolution
+
+Relay value mapping: quiz `strength/calm/care/together` → Strength / Calm & mobility / Gentle return / Together; `none/some/regular` → None / Some / Regular; `group/solo/pair` → Small group / One-to-one / With a friend; payment `card` → Credit card; bed index +1; booked via App; purchases → Payments status Pending.
