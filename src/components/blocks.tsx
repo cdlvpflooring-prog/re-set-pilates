@@ -276,7 +276,7 @@ function useTurnstile(active: boolean) {
   const key = siteConfig.turnstileSiteKey;
   useEffect(() => {
     if (!active || !key || !el) return;
-    const render = () => window.turnstile?.render(el, { sitekey: key, language: lang, size: "flexible", callback: setToken, "expired-callback": () => setToken("") });
+    const render = () => window.turnstile?.render(el, { sitekey: key, language: lang, size: "flexible", theme: "light", callback: setToken, "expired-callback": () => setToken("") });
     if (window.turnstile) return void render();
     const s = document.createElement("script");
     s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";

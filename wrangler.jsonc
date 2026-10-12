@@ -17,6 +17,7 @@
     { "pattern": "www.resetpilates.org", "custom_domain": true }
   ],
   "workers_dev": true,
+  "preview_urls": true,
   "vars": {
     "AIRTABLE_BASE": "app0Wp3uV9jXJDAXZ"
   },
