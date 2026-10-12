@@ -29,6 +29,9 @@ export default function Home() {
   const reduceMotion = useReducedMotion();
   const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
   const showVideo = !!media.heroVideo && !reduceMotion && !saveData;
+  // Phones get the 720p file (about half the bytes); the hero frame there is at most ~400px wide anyway.
+  const phone = typeof window !== "undefined" && window.matchMedia("(max-width: 999px)").matches;
+  const heroSrc = phone && media.heroVideoPhone ? media.heroVideoPhone : media.heroVideo;
   const c = siteConfig.contact;
   const launch = siteConfig.flags.launchPricing;
   const maps = mapsLink();
@@ -45,7 +48,7 @@ export default function Home() {
       <section className="hero">
         <div className="hero__media" ref={heroRef}>
           {showVideo ? (
-            <video src={media.heroVideo} poster={media.heroPoster} autoPlay muted loop playsInline preload="metadata" />
+            <video src={heroSrc} poster={media.heroPoster} autoPlay muted loop playsInline preload="metadata" />
           ) : (
             <img src={media.heroPoster} alt="" />
           )}
