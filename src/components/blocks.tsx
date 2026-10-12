@@ -398,7 +398,3 @@ export function MapEmbed() {
     </div>
   );
 }
-
-/** Colour of a plan's membership card — identical on the pricing cards and the member's profile card. */
-export const planTone = (id: string) =>
-  ["m1x", "p5"].includes(id) ? "mcard--cream" : ["m2x", "m3x", "p10"].includes(id) ? "mcard--sand" : "mcard--ink";

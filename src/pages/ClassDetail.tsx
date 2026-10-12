@@ -57,14 +57,13 @@ export default function ClassDetail() {
 
   // When the public Arbox link is configured, every confirmed booking is completed there.
   const arboxUrl = [arbox.services[slot.service], arbox.publicBookingUrl].find(hasPublicBooking);
-  // Plan limit: weekly cap for monthly plans, remaining sessions for passes
+  // Plan limit: weekly cap for monthly plans, remaining sessions and validity for passes
   const plan = store.planId ? planById(store.planId) : undefined;
-  const usage = plan ? planUsage(plan, store.bookings, fromISO(slot.date), store.memberSince) : null;
+  const usage = plan ? planUsage(plan, store.bookings.filter((b) => b.slotId !== slot.id), fromISO(slot.date), store.planStart) : null;
   const atLimit = !!usage && usage.left <= 0;
   const confirm = () => {
-    if (atLimit) return;
+    if (atLimit || !store.book(slot, isReformer ? bed : null, remind)) return;
     if (arboxUrl) window.open(arboxUrl, "_blank", "noopener");
-    store.book(slot, isReformer ? bed : null, remind);
     track("booking_confirmed", { service: slot.service });
     setConfirmed(true);
   };
@@ -202,7 +201,11 @@ export default function ClassDetail() {
             {usage && plan && (
               <p className={`plan-left ${atLimit ? "is-out" : ""}`}>
                 {atLimit
-                  ? (plan.billingType === "monthly" ? t.confirm.limitWeek : t.confirm.limitPass).replaceAll("{n}", String(usage.cap))
+                  ? usage.expired
+                    ? t.confirm.passExpired
+                    : (plan.billingType === "monthly" ? t.confirm.limitWeek : t.confirm.limitPass)
+                        .replace("{used}", String(usage.used))
+                        .replace("{cap}", String(usage.cap))
                   : usage.cap === null
                     ? t.profile.unlimitedNote
                     : (plan.billingType === "monthly" ? t.confirm.leftWeek : t.confirm.leftPass)

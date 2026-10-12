@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { Link } from "react-router-dom";
-import { planTone, GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, planName, pricesVisible, serviceTarget } from "../components/blocks";
+import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, planName, pricesVisible, serviceTarget } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
 import { Wordmark } from "../components/Shell";
 import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
@@ -202,7 +202,7 @@ export default function Home() {
           <div className="plans">
             {plans.map((p, i) => (
               <Reveal key={p.id} delay={i * 90} className="plan">
-                <div className={`mcard ${planTone(p.id)}`} aria-hidden>
+                <div className={`mcard mcard--${p.tone}`} aria-hidden>
                   <Wordmark />
                   <div className="stack">
                     <span className="mcard__name">{planName(p, t)}</span>

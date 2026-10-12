@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { planName, planTone } from "../components/blocks";
+import { planName } from "../components/blocks";
 import { LangToggle, Wordmark } from "../components/Shell";
 import { Switch } from "../components/ui";
 import { planById } from "../config/pricing";
 import { siteConfig } from "../config/site";
 import { useI18n } from "../lib/i18n";
-import { planUsage } from "../lib/plan";
+import { planEnd, planUsage } from "../lib/plan";
 import { useStore } from "../lib/store";
 
 export default function Profile() {
@@ -16,11 +16,10 @@ export default function Profile() {
   const plan = store.planId ? planById(store.planId) : undefined;
 
   // Demo usage figures from local bookings; real balances come from Arbox once connected.
-  const usage = plan ? planUsage(plan, store.bookings, new Date(), store.memberSince) : null;
+  const usage = plan ? planUsage(plan, store.bookings, new Date(), store.planStart) : null;
   const pct = usage && usage.cap ? Math.min(1, usage.used / usage.cap) : 1;
   const since = store.memberSince ? new Date(store.memberSince) : null;
-  const until = since ? new Date(since) : new Date();
-  until.setMonth(until.getMonth() + (plan?.validityMonths ?? 1));
+  const until = plan ? planEnd(plan, store.planStart) : new Date();
 
   return (
     <div className="page page--app tone-dark has-tabbar">
@@ -38,7 +37,7 @@ export default function Profile() {
         {plan && usage ? (
           <div className="stack gap-12">
             <span className="eyebrow">{t.profile.membership}</span>
-            <div className={`mcard mcard--member ${planTone(plan.id)}`}>
+            <div className={`mcard mcard--member mcard--${plan.tone}`}>
               <div className="row between gap-12">
                 <Wordmark />
                 <span className="mcard__renew">
