@@ -387,6 +387,8 @@ export const he: Content = {
     fInterest: "מה מעניין אותך",
     send: "שלחי",
     sent: "המייל מוכן · לחצי שליחה באפליקציית המייל",
+    sentDirect: "תודה! נחזור אלייך בקרוב",
+    sending: "שולחים…",
     email: "אימייל",
     google: "גוגל",
     googleReview: "דרגי אותנו בגוגל",

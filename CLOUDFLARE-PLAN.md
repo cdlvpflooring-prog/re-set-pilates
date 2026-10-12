@@ -10,17 +10,30 @@ Written 2026-10-12. Cloudflare changes its free limits from time to time, so che
 
 | Item | Status |
 |---|---|
-| Site code | On GitHub: `cdlvpflooring-prog/re-set-pilates` (public), branch `main` |
-| Cloudflare settings in the code | Done. `wrangler.jsonc` publishes `./dist`, and direct links like `/he/schedule` work. `public/_headers` now adds security headers (see section 3). |
-| Cloudflare account | The connected account already runs `cdlvp-site`. **The re:set site is not on Cloudflare yet.** No storage (KV, D1) is set up, and R2 file storage is switched off. |
-| Domain | Not bought or chosen yet (`robots.txt` still says `TODO_VERIFY_DOMAIN`) |
-| Terminal | Node is not installed, but **Bun is**, and Bun can run Wrangler. Use `bunx wrangler …` wherever guides say `npx wrangler …`. The token is in `~/.zshrc` (clean up the duplicate lines, see section 9). |
-| Airtable | "Reset Pilates" base is built. Nothing on the site writes to it yet. That needs the Worker relay in section 5. |
+| Decisions | **Cloudflare account:** a new one under `resetpilates11@gmail.com`. **Domain:** `resetpilates.org`. |
+| Site code | On GitHub: `cdlvpflooring-prog/re-set-pilates` (public). This work is on branch `claude/cloudflare-wrangler-api-token-03d807` and goes live when merged into `main`. |
+| Cloudflare settings in the code | **Built.** `wrangler.jsonc` publishes the site plus a small Worker (`worker/index.ts`) for `/api/*` and `/go/*`. `public/_headers` adds the security headers. `robots.txt` and `sitemap.xml` use `resetpilates.org`. |
+| Lead form | **Built.** "Call me back" now posts to `/api/lead`, and the Worker writes it into Airtable → **Leads & Inquiries** (Channel "Website form", Status "New"). If the Worker can't save it (no token yet, or offline), the old ready-to-send email still opens, so no lead is lost. Bot protection: origin check, hidden bot trap, phone/email validation, plus Turnstile once a key is added. |
+| Flyer / QR links | **Built.** `resetpilates.org/go/book`, `/go/wa`, `/go/review`, `/go/map`, `/go/ig`, `/go/tiktok`, `/go/fb`, `/go/prices`, `/go/gift`, `/go/quiz`. `?utm_source=…` is passed on to site pages. `/go/wa` and `/go/review` point to the contact page until the WhatsApp number and Google review link are filled in `src/config/site.ts`. |
+| Cloudflare account | **Not created yet** (owner step 1 below). The Cloudflare connector in Claude sessions is the CDLVP account, so it can't see the new one. |
+| Terminal | Node is not installed, but **Bun is**, and Bun can run Wrangler. Use `bunx wrangler …` wherever guides say `npx wrangler …`. The token now in `~/.zshrc` belongs to whichever account it was made in. Make a new one in the re:set account if you want terminal access there. |
 
-## 1. Two decisions before starting
+## 1. Go-live checklist (in this order)
 
-1. **Which Cloudflare account?** Either use the existing account (simplest: one login and one bill, next to `cdlvp-site`), or open a separate account for re:set with `resetpilates11@gmail.com`. A separate account is cleaner if the studio could ever be sold or handed to Orit to run alone. You can always invite the other login as a member later.
-2. **Which domain?** For example `resetpilates.co.il` (Israeli, from an Israeli registrar) or `resetpilates.com` (Cloudflare Registrar sells `.com` at cost, without the usual markup). Until a domain exists, the site runs at a free `re-set-pilates.<account>.workers.dev` address, which is fine for a soft launch and for testing on phones.
+| # | Step | Who | Done when |
+|---|---|---|---|
+| 1 | Create the Cloudflare account at dash.cloudflare.com/sign-up with `resetpilates11@gmail.com`. Turn on **two-factor login** straight away (My Profile → Authentication). | Owner | You can log in with a code |
+| 2 | **Domain.** If `resetpilates.org` isn't bought yet: Domain Registration → Register Domains → `resetpilates.org` (Cloudflare charges cost price, no markup). If it was bought elsewhere: Add a domain → `resetpilates.org` → Free plan → change the nameservers at that registrar to the two Cloudflare gives you. | Owner | The domain shows **Active** |
+| 3 | **Merge this branch into `main` and push.** The Worker, headers and lead form ship together. | Owner (or ask Claude) | `main` on GitHub has `worker/index.ts` |
+| 4 | **Publish:** section 2 below (Workers & Pages → Import repository). | Owner / Claude in Chrome block 1 | The `workers.dev` link opens the site |
+| 5 | **Connect the domain:** Worker `re-set-pilates` → Settings → Domains & Routes → Add → Custom domain → `resetpilates.org`. Add `www.resetpilates.org` too. Then Rules → Redirect Rules → template **"Redirect from WWW to root"**. | Owner / Chrome block 2 | `https://resetpilates.org` and `www.` both open the site |
+| 6 | **Airtable token for the Worker:** airtable.com/create/tokens → name "re:set website", scope **`data.records:write` only**, access **Reset Pilates base only**. Paste it into Worker → Settings → Variables and Secrets → Add → **Secret** → name `AIRTABLE_TOKEN`. Never paste it in chat. | Owner | — |
+| 7 | **Turnstile:** Turnstile → Add widget → name "re:set forms", hostname `resetpilates.org`, mode **Managed**. Put the **secret key** in the Worker as secret `TURNSTILE_SECRET`. Give Claude the **site key** (it's public) for `turnstileSiteKey` in `src/config/site.ts`. | Owner + Claude | — |
+| 8 | **Check:** open `https://resetpilates.org/api/health`. It should show `"airtable":true,"turnstile":true`. Then send a test lead from `/he/contact` and see it appear in Airtable → Leads & Inquiries. Delete the test row. | Owner / Claude | The lead appears in Airtable |
+| 9 | **Lead alert:** in Airtable, Automations → "When a record is created" in Leads & Inquiries → "Send email" to `resetpilates11@gmail.com` with name, phone and interest. | Owner / Claude | Test lead triggers an email |
+| 10 | Security settings (section 3), Email Routing `hello@resetpilates.org` (Chrome block 3), rate-limit rule (block 5), Web Analytics. | Owner / Chrome blocks 2, 3, 5 | — |
+| 11 | Before announcing: `flags.demoMode` off, WhatsApp number and Google review link filled in, phone check in Hebrew and English (`LAUNCH-CHECKLIST.md`). | Owner + Claude | — |
+| 12 | Google: Search Console → add `resetpilates.org` (verify with a DNS record, one click on Cloudflare) → submit `https://resetpilates.org/sitemap.xml`. Put the site link in the Google Business Profile. | Owner | Sitemap shows "Success" |
 
 ---
 
@@ -81,9 +94,9 @@ One small Worker, `reset-api`, sits next to the site on the same domain under `/
 
 | # | What | Cloudflare tool | What it solves (from `LAUNCH-CHECKLIST.md`) |
 |---|---|---|---|
-| 1 | **Lead form → Airtable + email to Orit** | Worker + Turnstile + Email Routing "send email" | Leads land in Airtable "Leads & Inquiries" and Orit gets an email. No more "opens your mail app" step. |
+| 1 | **Lead form → Airtable** ✅ built | Worker + Turnstile (+ Airtable automation for the email to Orit) | Leads land in Airtable "Leads & Inquiries" and Orit gets an email. No more "opens your mail app" step. |
 | 2 | **studio email address**: `hello@<domain>` → `resetpilates11@gmail.com` | **Email Routing** (free) | Professional address on the site and Google profile, while everything still arrives in the existing Gmail |
-| 3 | **Flyer / QR short links**: `/wa`, `/book`, `/review`, `/map`, `/ig` | **Redirect Rules** (free) or the Worker | Print a QR once and change where it points any time. Each link can count scans. |
+| 3 | **Flyer / QR short links** ✅ built: `/go/wa`, `/go/book`, `/go/review`, `/go/map`, `/go/ig` … | The Worker (targets live in `src/config/site.ts`) | Print a QR once and change where it points any time. Each link can count scans. |
 | 4 | **Gift card codes** | **D1** database (free) + Worker | Unique code per gift, stored and redeemable, with an expiry date |
 | 5 | **Waitlist + "remind me"** | D1 + **Cron Triggers** (scheduled Worker, free) | Every few minutes, check for freed spots and email or WhatsApp the next person |
 | 6 | **Class reminders and a daily digest for Orit** | Cron Triggers + Email | Tomorrow's bookings and new leads, emailed at 7:00 each morning |
@@ -92,7 +105,7 @@ One small Worker, `reset-api`, sits next to the site on the same domain under `/
 | 9 | **Photos and video after the pro shoot** | **R2** (10 GB free, no download fees) + **Images** resizing | Big hero video and photos without slowing the site |
 | 10 | **Private studio pages** (for example an Orit dashboard or the demo "Studio view") | **Cloudflare Access / Zero Trust** (free up to 50 users) | Only approved emails can open `/studio/*`, with a one-time code sent to their inbox. No password system to build. |
 
-Order to build: **#2 and #3 first** (no code, 15 minutes each), then **#1** (one Worker, unlocks everything else), then 4–7, then 8–10 when the content is ready.
+#1 and #3 are built. Next: **#2** (no code, 15 minutes), then 4–7, then 8–10 when the content is ready.
 
 ## 6. Timeline
 
@@ -138,7 +151,7 @@ Do not change anything else. Do not create API tokens or enter passwords.
 
 ### Block 2: security (after the domain is added to Cloudflare)
 ```
-On the zone <DOMAIN>, check and report the current value of each setting below, then
+On the zone resetpilates.org, check and report the current value of each setting below, then
 list what you would change and wait for my "yes" before changing anything:
 - SSL/TLS mode → Full (strict)
 - Always Use HTTPS on, Minimum TLS 1.2, TLS 1.3 on, Automatic HTTPS Rewrites on
@@ -152,27 +165,24 @@ list what you would change and wait for my "yes" before changing anything:
 
 ### Block 3: studio email
 ```
-On zone <DOMAIN>, open Email → Email Routing.
-Set up hello@<DOMAIN> to forward to resetpilates11@gmail.com.
+On zone resetpilates.org, open Email → Email Routing.
+Set up hello@resetpilates.org to forward to resetpilates11@gmail.com.
 Cloudflare will send a verification email to that Gmail; tell me when to go click it.
 Let Cloudflare add its MX and SPF DNS records. Show me the records before saving.
 Also add a DMARC TXT record: _dmarc  "v=DMARC1; p=quarantine; rua=mailto:resetpilates11@gmail.com"
 ```
 
-### Block 4: QR short links
+### Block 4: connect the domain to the site
 ```
-On zone <DOMAIN>, go to Rules → Redirect Rules and create these (302, keep query string off):
-/wa      → <WhatsApp link, I will give it>
-/book    → https://<DOMAIN>/he/schedule
-/review  → <Google review link, I will give it>
-/map     → <Google Maps link>
-/ig      → <Instagram profile>
-Show me the list before saving. If the free plan limit stops you, tell me how many fit.
+On the re:set Cloudflare account, open Workers & Pages → re-set-pilates → Settings → Domains & Routes.
+Add custom domains resetpilates.org and www.resetpilates.org. Show me what you will add and wait for my "yes".
+Then go to the resetpilates.org zone → Rules → Redirect Rules → Create from template "Redirect from WWW to root".
+Show me the rule before deploying it. Finally open https://www.resetpilates.org and tell me where it lands.
 ```
 
 ### Block 5: rate limit (after the `/api` Worker exists)
 ```
-On zone <DOMAIN>, Security → WAF → Rate limiting rules: create one rule
+On zone resetpilates.org, Security → WAF → Rate limiting rules: create one rule
 "api-protect": requests to URI path starting with /api/, more than 10 per 1 minute per IP → Block for 1 minute.
 Show me the rule before deploying it.
 ```
