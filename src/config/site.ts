@@ -66,7 +66,7 @@ export const siteConfig = {
   ] as { id: "arbox" | "bit" | "card"; url: string }[],
   analytics: { ga4MeasurementId: TODO },
   studioMedia: {
-    heroVideo: "", // e.g. "/media/hero.mp4" — drop in real footage; poster is used until then
+    heroVideo: "/media/hero.mp4", // Seedance 1.5 Pro test take from the studio photo (12s, silent); replace with real footage after the shoot
     heroPoster: "/assets/studio-wide.jpg", // the re:set studio render; replace with the real photo after the shoot
     ogImage: "/assets/studio.jpg",
     logoDisc: "/assets/logo-gold-ring.jpg",
