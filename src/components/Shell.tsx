@@ -1,5 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { isTodo, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
@@ -57,6 +57,7 @@ function Header({ section }: { section: string }) {
   const nav = useNavigate();
   const loc = useLocation();
   const [menu, setMenu] = useState(false);
+  const closeMenu = useCallback(() => setMenu(false), []);
   const isRoot = ROOTS.includes(section);
   const overHero = section === "" || section === "about";
 
@@ -95,7 +96,7 @@ function Header({ section }: { section: string }) {
           </button>
         </div>
       </div>
-      <SiteMenu open={menu} onClose={() => setMenu(false)} />
+      <SiteMenu open={menu} onClose={closeMenu} />
     </header>
   );
 }
