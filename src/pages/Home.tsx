@@ -165,7 +165,12 @@ export default function Home() {
                     onClick={() => track("service_view", { service: s.id })}
                   >
                     <span className="row between gap-16">
-                      <span className="display d-md">{sc.name}</span>
+                      <span className="row gap-12">
+                        <span className="thumb" aria-hidden>
+                          <img src={s.thumb} alt="" style={{ objectPosition: s.thumbPos }} loading="lazy" />
+                        </span>
+                        <span className="display d-md">{sc.name}</span>
+                      </span>
                       <span className="arrow-ne" aria-hidden />
                     </span>
                     <span className="flow-row__desc">{sc.desc}</span>

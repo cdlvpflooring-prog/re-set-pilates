@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { pricing, type PricingItem } from "../config/pricing";
@@ -288,6 +289,9 @@ function useTurnstile(active: boolean) {
 }
 
 /** Service chips, day strip and bookable class list. State lives in the URL (?service=&date=). */
+/** Formats that can be booked from the schedule (the others are by request). */
+const bookableServices = services.filter((s) => s.bookable);
+
 export function ScheduleBoard() {
   const { t, href } = useI18n();
   const [params, setParams] = useSearchParams();
@@ -333,12 +337,38 @@ export function ScheduleBoard() {
 
   return (
     <div className="stack gap-16">
-      <div className="row gap-8">
-        {(["reformer", "mat"] as const).map((s) => (
-          <button key={s} className="pill" aria-pressed={service === s} onClick={() => set("service", s)}>
-            {t.services.items[s].short}
-          </button>
-        ))}
+      <div className="ctabs" role="tablist" aria-label={t.home.classesTitle}>
+        {bookableServices.map((svc) => {
+          const s = svc.id as BookableService;
+          const on = service === s;
+          return (
+            <button
+              key={s}
+              role="tab"
+              className="ctab"
+              aria-selected={on}
+              tabIndex={on ? 0 : -1}
+              onClick={() => set("service", s)}
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                e.preventDefault();
+                const i = bookableServices.findIndex((b) => b.id === service);
+                const next = bookableServices[(i + (e.key === "ArrowRight" ? 1 : -1) + bookableServices.length) % bookableServices.length];
+                set("service", next.id);
+                (e.currentTarget.parentElement?.children[bookableServices.indexOf(next)] as HTMLElement | undefined)?.focus();
+              }}
+            >
+              <span className="ctab__img">
+                <img src={svc.thumb} alt="" style={{ objectPosition: svc.thumbPos }} />
+              </span>
+              <span className="ctab__txt">
+                <b>{t.services.items[s].short}</b>
+                <small>{t.services.items[s].meta}</small>
+              </span>
+              {on && <motion.span layoutId="ctab-ring" className="ctab__ring" transition={{ type: "spring", duration: 0.4, bounce: 0.15 }} />}
+            </button>
+          );
+        })}
       </div>
       <div className="days" role="tablist" aria-label={t.schedule.title}>
         {days.map((d, i) => {
