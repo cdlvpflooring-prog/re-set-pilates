@@ -1,15 +1,15 @@
-// English copy. Keep the shape identical to he.ts — the type is derived from this file.
+// English copy. Keep the shape identical to he.ts: the type is derived from this file.
 export const en = {
   meta: {
-    home: { title: "re:set pilates — Reformer Pilates in Hod Hasharon", desc: "Boutique Reformer Pilates in groups of five. Mat, private and duo sessions in Hod Hasharon." },
-    schedule: { title: "Schedule — re:set pilates", desc: "Pick a class, a day and a bed. Reformer and Mat Pilates in Hod Hasharon." },
-    services: { title: "Services — re:set pilates", desc: "Reformer small groups, Mat Pilates, private 1:1 and duo training." },
-    pricing: { title: "Pricing — re:set pilates", desc: "Monthly memberships and class passes for re:set pilates." },
-    about: { title: "The studio — re:set pilates", desc: "Five Reformer beds, one instructor, full attention. The re:set story." },
-    faq: { title: "FAQ — Reformer Pilates questions, answered", desc: "What Reformer Pilates is, who it suits, what to wear and how booking works." },
-    contact: { title: "Contact — re:set pilates", desc: "WhatsApp, directions and contact details for re:set pilates, Hod Hasharon." },
-    quiz: { title: "Find your class — re:set pilates", desc: "Three quick questions to find the Pilates format that fits you." },
-    gift: { title: "Gift cards — re:set pilates", desc: "Give someone a reset. re:set pilates gift cards." },
+    home: { title: "re:set pilates | Reformer Pilates in Hod Hasharon", desc: "Boutique Reformer Pilates in groups of five. Mat, private and duo sessions in Hod Hasharon." },
+    schedule: { title: "Schedule | re:set pilates", desc: "Pick a class, a day and a bed. Reformer and Mat Pilates in Hod Hasharon." },
+    services: { title: "Services | re:set pilates", desc: "Reformer small groups, Mat Pilates, private 1:1 and duo training." },
+    pricing: { title: "Pricing | re:set pilates", desc: "Monthly memberships and class passes for re:set pilates." },
+    about: { title: "The studio | re:set pilates", desc: "Five Reformer beds, one instructor, full attention. The re:set story." },
+    faq: { title: "FAQ | Reformer Pilates questions, answered", desc: "What Reformer Pilates is, who it suits, what to wear and how booking works." },
+    contact: { title: "Contact | re:set pilates", desc: "WhatsApp, directions and contact details for re:set pilates, Hod Hasharon." },
+    quiz: { title: "Find your class | re:set pilates", desc: "Three quick questions to find the Pilates format that fits you." },
+    gift: { title: "Gift cards | re:set pilates", desc: "Give someone a reset. re:set pilates gift cards." },
   },
   common: {
     langSwitch: "עב",
@@ -56,6 +56,7 @@ export const en = {
     profile: "Profile",
     gift: "Gift cards",
     quiz: "Find your class",
+    progress: "My progress",
   },
   welcome: {
     supporting: "STRONG BODY · CALM MIND · HAPPIER YOU",
@@ -90,7 +91,7 @@ export const en = {
     googleTitle: "Reviews on Google",
     googleRead: "Read all reviews",
     googleWrite: "Leave a Google review",
-    sampleBadge: "Sample — replace with a real Google review",
+    sampleBadge: "Sample. Replace with a real Google review",
     emailUs: "Email us",
     ctaTitle: ["Your bed", "is waiting."],
     sayHello: "Say hello",
@@ -327,6 +328,7 @@ export const en = {
     demo: "Demo: switch member / new visitor",
     name: "Maya Levi",
     firstName: "Maya",
+    progressTeaser: "Your goal, streak and how you feel after class",
   },
   about: {
     eyebrow: "The studio",

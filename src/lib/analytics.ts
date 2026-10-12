@@ -14,7 +14,15 @@ export type AnalyticsEvent =
   | "quiz_complete"
   | "gift_card_start"
   | "chat_open"
-  | "chat_question";
+  | "chat_question"
+  // Progress profile: never carries health values, only that something happened
+  | "progress_view"
+  | "onboarding_step"
+  | "onboarding_complete"
+  | "checkin_submit"
+  | "milestone_earned"
+  | "progress_export"
+  | "recommendation_view";
 
 export function track(event: AnalyticsEvent, params: Record<string, string | number | boolean> = {}) {
   const w = window as unknown as { dataLayer?: unknown[] };

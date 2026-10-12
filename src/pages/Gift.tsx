@@ -7,7 +7,7 @@ import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
 
-/** Gift card flow (mock checkout — nothing is charged or sent). */
+/** Gift card flow (mock checkout: nothing is charged or sent). */
 export default function Gift() {
   const { t } = useI18n();
   useSeo(t.meta.gift);
@@ -45,7 +45,7 @@ export default function Gift() {
               </div>
               <div className="stack gap-4" style={{ position: "relative" }}>
                 <span className="eyebrow">{t.gift.cardLine}</span>
-                <span className="display d-md">{to || "—"}</span>
+                <span className="display d-md">{to || "·"}</span>
                 <span className="small muted">
                   {label}
                   {from ? ` · ${from}` : ""}

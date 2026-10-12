@@ -1,6 +1,6 @@
 import { TODO } from "./site";
 
-// Arbox is the booking/membership backend. Only public customer links belong here —
+// Arbox is the booking/membership backend. Only public customer links belong here -
 // never the Arbox management (staff) URL.
 export const arbox = {
   publicBookingUrl: TODO,

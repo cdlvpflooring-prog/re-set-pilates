@@ -201,7 +201,7 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
     const phone = String(f.get("phone") ?? "");
     saveProfile({ name, phone });
     track("lead_form_submit", { interest });
-    const subject = `re:set pilates — ${t.contact.leadTitle} (${name})`;
+    const subject = `re:set pilates | ${t.contact.leadTitle} (${name})`;
     const body = `${t.contact.fName}: ${name}\n${t.contact.fPhone}: ${phone}\n${t.contact.fInterest}: ${t.services.items[interest as ServiceId]?.name ?? interest}`;
     window.location.href = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setSent(true);

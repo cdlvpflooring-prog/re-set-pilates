@@ -40,3 +40,12 @@ Everything below works on screen as a demo. This is what each flow still needs b
 - Turn off demo mode (`flags.demoMode`) and confirm launch pricing on/off.
 - Google Analytics ID, sitemap, and the real domain in `public/robots.txt`.
 - Check on a real iPhone and Android phone, in Hebrew and English.
+
+## My progress (AI trainer MVP, spec in `AI-TRAINER-SPEC.md`)
+- Works as a demo only: answers, check-ins and progress live in the visitor's own browser. Needs sign-in and a private server database (health data encrypted, seen only by the member and her instructor) before real use.
+- Attendance comes from sample data plus the visitor's own demo bookings. Needs Arbox attendance sync.
+- Safety reviews (pain 7+, rising pain, high soreness, onboarding red flags) show in a demo "Studio view" inside Details. Needs a real staff screen and a notification to Orit (WhatsApp / email) that retries until she acknowledges.
+- Orit must approve: health-consent wording, the "stop and see a doctor" wording, all thresholds and score targets in `src/config/trainer.ts`, whether clients may self-test at home, and who covers safety reviews when she is away.
+- Included resources are sample titles with no content. Supply real videos/guides and set `approved: true`.
+- Personal paid suggestions are switched off (`paidCards.enabled: false`) until Arbox catalog and membership data are connected; members who opt in see a plain link to the price list.
+- Not built yet (phase 2 in the spec): spring/level progression graph, re-assessment radar chart, trainer level-ups, AI-written recaps and load suggestions, nutrition.
