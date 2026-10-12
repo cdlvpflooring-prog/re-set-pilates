@@ -185,29 +185,45 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
   const { t } = useI18n();
   const { profile, saveProfile } = useStore();
   const [interest, setInterest] = useState<string>(initialInterest ?? "reformer");
-  const [sent, setSent] = useState(false);
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "mailed">("idle");
   const [started, setStarted] = useState(false);
+  const turnstile = useTurnstile(started);
   const onStart = () => {
     if (!started) {
       setStarted(true);
       track("lead_form_start");
     }
   };
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
-    // Goes to the studio Gmail. Until a form service is connected, this opens a ready-to-send email draft.
     const f = new FormData(e.currentTarget as HTMLFormElement);
     const name = String(f.get("name") ?? "");
     const phone = String(f.get("phone") ?? "");
     saveProfile({ name, phone });
     track("lead_form_submit", { interest });
+    setStatus("sending");
+    // Straight into Airtable through the Cloudflare Worker (/api/lead).
+    try {
+      const r = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ name, phone, interest, page: location.pathname, website: f.get("website"), turnstile: turnstile.token }),
+      });
+      if (r.ok) return setStatus("sent");
+    } catch {
+      // offline or no Worker (local dev): fall through to the email draft
+    }
+    // Fallback: a ready-to-send email draft to the studio Gmail.
     const subject = `re:set pilates | ${t.contact.leadTitle} (${name})`;
     const body = `${t.contact.fName}: ${name}\n${t.contact.fPhone}: ${phone}\n${t.contact.fInterest}: ${t.services.items[interest as ServiceId]?.name ?? interest}`;
     window.location.href = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setSent(true);
+    setStatus("mailed");
   };
+  const done = status === "sent" || status === "mailed";
   return (
     <form className="card stack gap-16" onSubmit={submit} onFocus={onStart}>
+      {/* Honeypot: hidden from people, filled in by bots. */}
+      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden", clipPath: "inset(50%)", pointerEvents: "none" }} />
       <div className="stack gap-4">
         <h2 className="display d-sm">{t.contact.leadTitle}</h2>
         <p className="small muted">{t.contact.leadSub}</p>
@@ -238,11 +254,37 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
           ))}
         </div>
       </div>
-      <button className={`btn ${sent ? "btn--secondary" : "btn--blush"}`} disabled={sent} aria-live="polite">
-        {sent ? t.contact.sent : t.contact.send}
+      <div ref={turnstile.ref} />
+      <button className={`btn ${done ? "btn--secondary" : "btn--blush"}`} disabled={status !== "idle"} aria-live="polite">
+        {status === "sent" ? t.contact.sentDirect : status === "mailed" ? t.contact.sent : status === "sending" ? t.contact.sending : t.contact.send}
       </button>
     </form>
   );
+}
+
+declare global {
+  interface Window {
+    turnstile?: { render(el: HTMLElement, opts: Record<string, unknown>): string };
+  }
+}
+
+/** Cloudflare Turnstile bot check. Loads only once the visitor starts the form, and only when a site key is set. */
+function useTurnstile(active: boolean) {
+  const { lang } = useI18n();
+  const [token, setToken] = useState("");
+  const [el, setEl] = useState<HTMLDivElement | null>(null);
+  const key = siteConfig.turnstileSiteKey;
+  useEffect(() => {
+    if (!active || !key || !el) return;
+    const render = () => window.turnstile?.render(el, { sitekey: key, language: lang, size: "flexible", theme: "light", callback: setToken, "expired-callback": () => setToken("") });
+    if (window.turnstile) return void render();
+    const s = document.createElement("script");
+    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+    s.async = true;
+    s.onload = render;
+    document.head.appendChild(s);
+  }, [active, key, el, lang]);
+  return { ref: setEl, token };
 }
 
 /** Service chips, day strip and bookable class list. State lives in the URL (?service=&date=). */

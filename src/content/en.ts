@@ -387,6 +387,8 @@ export const en = {
     fInterest: "I am interested in",
     send: "Send",
     sent: "Your email is ready · tap send in your mail app",
+    sentDirect: "Thank you! We will be in touch soon",
+    sending: "Sending…",
     email: "Email",
     google: "Google",
     googleReview: "Review us on Google",
