@@ -1,0 +1,29 @@
+# One-off, run by hand: re-encode the hero video with ffmpeg (not installed on the studio Mac) and commit
+# a 1080p file for desktop plus a lighter 720p file for phones. Run again after dropping a new hero.mp4 in.
+name: compress-hero
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  encode:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Encode
+        run: |
+          set -e
+          cd public/media
+          ffmpeg -v error -i hero.mp4 -an -c:v libx264 -preset slow -crf 25 -maxrate 3000k -bufsize 6000k \
+            -vf "scale=1920:-2" -pix_fmt yuv420p -movflags +faststart -y hero-1080.tmp.mp4
+          ffmpeg -v error -i hero.mp4 -an -c:v libx264 -preset slow -crf 26 -maxrate 1600k -bufsize 3200k \
+            -vf "scale=1280:-2" -pix_fmt yuv420p -movflags +faststart -y hero-720.mp4
+          mv hero-1080.tmp.mp4 hero.mp4
+          ls -la
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/media
+          git commit -m "Compress hero video (1080p + 720p for phones)" || echo "nothing to commit"
+          git push
