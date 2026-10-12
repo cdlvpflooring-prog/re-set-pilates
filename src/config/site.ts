@@ -68,7 +68,7 @@ export const siteConfig = {
   // Public web address (Cloudflare). Used for the sitemap and robots.txt.
   siteUrl: "https://resetpilates.org",
   // Cloudflare Turnstile site key (public). Leave empty to skip the bot check; the secret key lives only in the Worker.
-  turnstileSiteKey: "",
+  turnstileSiteKey: "0x4AAAAAAFU9mcKzrVwPIAhL",
   studioMedia: {
     heroVideo: "", // e.g. "/media/hero.mp4" — drop in real footage; poster is used until then
     heroPoster: "/assets/studio-wide.jpg", // the re:set studio render; replace with the real photo after the shoot
