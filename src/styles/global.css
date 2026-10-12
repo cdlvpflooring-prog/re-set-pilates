@@ -1539,3 +1539,9 @@ html[lang="he"] .ctab__txt b { letter-spacing: 0; }
   .chat { right: auto; inset-inline: 12px; }
   .chat-fab__badge { inset-inline: auto -2px; }
 }
+
+/* Phone hero fits one screen: the picture takes whatever height the headline and Book button leave over. */
+@media (max-width: 999px) {
+  .hero__media { aspect-ratio: auto; height: clamp(150px, calc(100svh - 430px), 360px); }
+  .hero__body { padding-bottom: calc(14px + var(--safe-b)); }
+}

@@ -32,8 +32,21 @@ export function ChatWidget() {
   const wa = siteConfig.contact.whatsapp;
   const waReady = !isTodo(wa);
   // Booking and checkout are focused flows (the booking sheet has its own "Ask Orit" button); keep the bubble off their controls.
-  const section = useLocation().pathname.split("/")[2] ?? "";
-  const hideFab = section === "class" || section === "checkout";
+  const { pathname } = useLocation();
+  const section = pathname.split("/")[2] ?? "";
+  // On Home the bubble stays out of the way until the hero's Book button has scrolled off screen.
+  const [overHero, setOverHero] = useState(false);
+  useEffect(() => {
+    const cta = document.querySelector(".hero__offer");
+    if (!cta) {
+      setOverHero(false);
+      return;
+    }
+    const io = new IntersectionObserver(([e]) => setOverHero(e.isIntersecting), { threshold: 0.2 });
+    io.observe(cta);
+    return () => io.disconnect();
+  }, [pathname]);
+  const hideFab = section === "class" || section === "checkout" || overHero;
 
   // Any part of the app can open the chat: window.dispatchEvent(new CustomEvent(OPEN_CHAT))
   useEffect(() => {
