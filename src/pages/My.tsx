@@ -22,7 +22,7 @@ export default function My() {
 
         {store.upcoming.length === 0 ? (
           <div className="card card--dashed stack gap-12 center" style={{ padding: 28 }}>
-            <div className="media my-empty__img" aria-hidden>
+            <div className="media media--bare my-empty__img" aria-hidden>
               <img src="/assets/ex-rest.jpg" alt="" style={{ objectPosition: "50% 40%" }} />
             </div>
             <h2 className="display d-sm">{t.my.emptyTitle}</h2>

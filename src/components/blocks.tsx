@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { pricing, type PricingItem } from "../config/pricing";
-import { serviceById, services, type ServiceConfig, type ServiceId } from "../config/services";
+import { services, type ServiceConfig, type ServiceId } from "../config/services";
 import { isTodo, mapsEmbedSrc, siteConfig } from "../config/site";
 import { instructors, reviews, type Person } from "../config/team";
 import type { Content } from "../content/en";
@@ -247,6 +247,9 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
 }
 
 /** Service chips, day strip and bookable class list. State lives in the URL (?service=&date=). */
+/** Formats that can be booked from the schedule (the others are by request). */
+const bookableServices = services.filter((s) => s.bookable);
+
 export function ScheduleBoard() {
   const { t, href } = useI18n();
   const [params, setParams] = useSearchParams();
@@ -293,13 +296,28 @@ export function ScheduleBoard() {
   return (
     <div className="stack gap-16">
       <div className="ctabs" role="tablist" aria-label={t.home.classesTitle}>
-        {(["reformer", "mat"] as const).map((s) => {
-          const svc = serviceById(s)!;
+        {bookableServices.map((svc) => {
+          const s = svc.id as BookableService;
           const on = service === s;
           return (
-            <button key={s} role="tab" className="ctab" aria-selected={on} onClick={() => set("service", s)}>
+            <button
+              key={s}
+              role="tab"
+              className="ctab"
+              aria-selected={on}
+              tabIndex={on ? 0 : -1}
+              onClick={() => set("service", s)}
+              onKeyDown={(e) => {
+                if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+                e.preventDefault();
+                const i = bookableServices.findIndex((b) => b.id === service);
+                const next = bookableServices[(i + (e.key === "ArrowRight" ? 1 : -1) + bookableServices.length) % bookableServices.length];
+                set("service", next.id);
+                (e.currentTarget.parentElement?.children[bookableServices.indexOf(next)] as HTMLElement | undefined)?.focus();
+              }}
+            >
               <span className="ctab__img">
-                <img src={svc.thumb} alt="" style={{ objectPosition: svc.thumbPos }} loading="lazy" />
+                <img src={svc.thumb} alt="" style={{ objectPosition: svc.thumbPos }} />
               </span>
               <span className="ctab__txt">
                 <b>{t.services.items[s].short}</b>
