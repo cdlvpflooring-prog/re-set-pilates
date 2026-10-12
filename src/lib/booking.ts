@@ -78,6 +78,7 @@ const mockProvider: BookingProvider = {
   async getSlot(id) {
     const [service, date, hhmm] = id.split("_");
     if ((service !== "reformer" && service !== "mat") || !date || !hhmm) return null;
+    if (toISO(fromISO(date)) !== date) return null; // malformed or impossible date
     const time = `${hhmm.slice(0, 2)}:${hhmm.slice(2)}`;
     const row = TEMPLATE[service].find(([t]) => t === time);
     return row ? build(service, date, time, row[1]) : null;

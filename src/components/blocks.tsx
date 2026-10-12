@@ -7,7 +7,7 @@ import { isTodo, mapsEmbedSrc, siteConfig } from "../config/site";
 import { instructors, reviews, type Person } from "../config/team";
 import type { Content } from "../content/en";
 import { track } from "../lib/analytics";
-import { bookingProvider, toISO, upcomingDays, type BookableService, type ClassSlot } from "../lib/booking";
+import { bookingProvider, fromISO, toISO, upcomingDays, type BookableService, type ClassSlot } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { useStore } from "../lib/store";
 import { MaskImg, Price, Segmented } from "./ui";
@@ -187,6 +187,7 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
   const { profile, saveProfile } = useStore();
   const [interest, setInterest] = useState<string>(initialInterest ?? "reformer");
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "mailed">("idle");
+  const [error, setError] = useState<"phone" | "bot" | null>(null);
   const [started, setStarted] = useState(false);
   const turnstile = useTurnstile(started);
   const onStart = () => {
@@ -203,6 +204,7 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
     saveProfile({ name, phone });
     track("lead_form_submit", { interest });
     setStatus("sending");
+    setError(null);
     // Straight into Airtable through the Cloudflare Worker (/api/lead).
     try {
       const r = await fetch("/api/lead", {
@@ -211,6 +213,13 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
         body: JSON.stringify({ name, phone, interest, page: location.pathname, website: f.get("website"), turnstile: turnstile.token }),
       });
       if (r.ok) return setStatus("sent");
+      // The visitor can fix these; only infrastructure failures fall back to the email draft.
+      const code = (await r.json().catch(() => ({}))).error;
+      if (code === "fields" || code === "turnstile") {
+        setError(code === "fields" ? "phone" : "bot");
+        setStatus("idle");
+        return;
+      }
     } catch {
       // offline or no Worker (local dev): fall through to the email draft
     }
@@ -256,6 +265,11 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
         </div>
       </div>
       <div ref={turnstile.ref} />
+      {error && (
+        <p className="small" role="alert" style={{ color: "var(--accent)" }}>
+          {error === "phone" ? t.contact.errPhone : t.contact.errBot}
+        </p>
+      )}
       <button className={`btn ${done ? "btn--secondary" : "btn--blush"}`} disabled={status !== "idle"} aria-live="polite">
         {status === "sent" ? t.contact.sentDirect : status === "mailed" ? t.contact.sent : status === "sending" ? t.contact.sending : t.contact.send}
       </button>
@@ -299,7 +313,9 @@ export function ScheduleBoard() {
   const days = upcomingDays(10);
   // Default to the first day that still has classes (today may already be over).
   const [firstOpen, setFirstOpen] = useState(toISO(days[0]));
-  const date = params.get("date") ?? firstOpen;
+  // A shared or bookmarked link with a past ?date= falls back to the first open day.
+  const wanted = params.get("date");
+  const date = wanted && wanted >= toISO(days[0]) && toISO(fromISO(wanted)) === wanted ? wanted : firstOpen;
   const [slots, setSlots] = useState<ClassSlot[] | null>(null);
 
   useEffect(() => {

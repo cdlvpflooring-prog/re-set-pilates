@@ -14,6 +14,7 @@ export interface Booking {
   bed: number | null;
   remind: boolean;
   bookedAt?: string; // when the booking was made (ISO)
+  cancelledLate?: boolean; // cancelled inside the policy window: no longer attended, but the session stays used
 }
 
 interface Persisted {
@@ -33,7 +34,8 @@ interface Store extends Persisted {
   past: Booking[];
   /** Returns null when the plan's allowance is used up (weekly cap, pass balance or expired pass). */
   book: (slot: ClassSlot, bed: number | null, remind: boolean) => Booking | null;
-  cancel: (bookingId: string) => void;
+  /** `late` keeps the booking on the record (hidden from lists) so the plan still counts it. */
+  cancel: (bookingId: string, late?: boolean) => void;
   joinWaitlist: (slotId: string) => void;
   leaveWaitlist: (slotId: string) => void;
   setPlan: (planId: string | null) => void;
@@ -101,7 +103,14 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setS((p) => (allowed(p) ? { ...p, bookings: [...p.bookings.filter((x) => x.slotId !== slot.id), b] } : p));
     return b;
   }, []);
-  const cancel = useCallback((id: string) => setS((p) => ({ ...p, bookings: p.bookings.filter((b) => b.id !== id) })), []);
+  const cancel = useCallback(
+    (id: string, late = false) =>
+      setS((p) => ({
+        ...p,
+        bookings: late ? p.bookings.map((b) => (b.id === id ? { ...b, cancelledLate: true } : b)) : p.bookings.filter((b) => b.id !== id),
+      })),
+    [],
+  );
   const joinWaitlist = useCallback((id: string) => setS((p) => ({ ...p, waitlist: [...new Set([...p.waitlist, id])] })), []);
   const leaveWaitlist = useCallback((id: string) => setS((p) => ({ ...p, waitlist: p.waitlist.filter((w) => w !== id) })), []);
   const setPlan = useCallback(
@@ -120,9 +129,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   );
   const markWelcomeSeen = useCallback(() => setS((p) => (p.seenWelcome ? p : { ...p, seenWelcome: true })), []);
 
+  // Upcoming/past depend on the clock: refresh once a minute and whenever the app comes back to the foreground.
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const bump = () => setTick((n) => n + 1);
+    const i = setInterval(bump, 60_000);
+    document.addEventListener("visibilitychange", bump);
+    return () => {
+      clearInterval(i);
+      document.removeEventListener("visibilitychange", bump);
+    };
+  }, []);
+
   const value = useMemo<Store>(() => {
     const now = new Date();
-    const sorted = [...s.bookings].sort((a, b) => slotStart(a).getTime() - slotStart(b).getTime());
+    const sorted = s.bookings.filter((b) => !b.cancelledLate).sort((a, b) => slotStart(a).getTime() - slotStart(b).getTime());
     return {
       ...s,
       isMember: !!s.planId,
@@ -137,7 +158,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       markWelcomeSeen,
       saveProfile,
     };
-  }, [s, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- tick only forces the clock-based split to recompute
+  }, [s, tick, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

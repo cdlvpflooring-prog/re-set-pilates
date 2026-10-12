@@ -1,5 +1,7 @@
 import { siteConfig } from "../config/site";
 
+// iCalendar TEXT values escape backslash, semicolon, comma and newlines.
+const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 
 export function downloadIcs(opts: { title: string; start: Date; minutes: number; description?: string }) {
@@ -13,9 +15,9 @@ export function downloadIcs(opts: { title: string; start: Date; minutes: number;
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART:${stamp(opts.start)}`,
     `DTEND:${stamp(end)}`,
-    `SUMMARY:${opts.title} · re:set pilates`,
-    `LOCATION:${siteConfig.contact.mapsQuery}`,
-    opts.description ? `DESCRIPTION:${opts.description}` : "",
+    `SUMMARY:${esc(opts.title)} · re:set pilates`,
+    `LOCATION:${esc(siteConfig.contact.mapsQuery)}`,
+    opts.description ? `DESCRIPTION:${esc(opts.description)}` : "",
     "BEGIN:VALARM",
     "TRIGGER:-PT2H",
     "ACTION:DISPLAY",
@@ -31,5 +33,6 @@ export function downloadIcs(opts: { title: string; start: Date; minutes: number;
   a.href = url;
   a.download = "reset-pilates-class.ics";
   a.click();
-  URL.revokeObjectURL(url);
+  // iOS Safari consumes the blob after the click returns; revoking synchronously can cancel the download.
+  setTimeout(() => URL.revokeObjectURL(url), 10_000);
 }

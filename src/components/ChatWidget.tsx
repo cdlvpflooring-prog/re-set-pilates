@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useLocation } from "react-router-dom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { isTodo, siteConfig } from "../config/site";
@@ -30,6 +31,9 @@ export function ChatWidget() {
   const name = isHe ? founder.nameHe.split(" ")[0] : founder.nameEn.split(" ")[0];
   const wa = siteConfig.contact.whatsapp;
   const waReady = !isTodo(wa);
+  // Booking and checkout are focused flows (the booking sheet has its own "Ask Orit" button); keep the bubble off their controls.
+  const section = useLocation().pathname.split("/")[2] ?? "";
+  const hideFab = section === "class" || section === "checkout";
 
   // Any part of the app can open the chat: window.dispatchEvent(new CustomEvent(OPEN_CHAT))
   useEffect(() => {
@@ -188,6 +192,7 @@ export function ChatWidget() {
 
       <button
         className={`chat-fab ${open ? "is-open" : ""}`}
+        hidden={hideFab && !open}
         onClick={() => {
           if (!open) track("chat_open");
           setOpen(!open);

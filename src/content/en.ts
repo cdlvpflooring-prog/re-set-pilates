@@ -302,6 +302,7 @@ export const en = {
     history: "Past classes",
     waitlist: "Waitlist",
     leave: "Leave",
+    lateCancel: "This class starts in under {hours} hours. You can still cancel, but the session counts as used.",
   },
   profile: {
     guest: "Welcome",
@@ -389,6 +390,8 @@ export const en = {
     sent: "Your email is ready · tap send in your mail app",
     sentDirect: "Thank you! We will be in touch soon",
     sending: "Sending…",
+    errPhone: "Please check the phone number (7 to 15 digits).",
+    errBot: "The bot check did not pass. Please try again, or write to us by email.",
     email: "Email",
     google: "Google",
     googleReview: "Review us on Google",

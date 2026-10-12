@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { PageHead, instructorName } from "../components/blocks";
 import { Sheet } from "../components/ui";
-import { mapsLink } from "../config/site";
+import { mapsLink, siteConfig } from "../config/site";
 import { fromISO, slotStart } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { downloadIcs } from "../lib/ics";
@@ -14,6 +14,8 @@ export default function My() {
   const store = useStore();
   const [toCancel, setToCancel] = useState<Booking | null>(null);
   const maps = mapsLink();
+  // Inside the policy window the session stays used (same rule as a no-show).
+  const isLate = (b: Booking) => slotStart(b).getTime() - Date.now() < siteConfig.policies.cancelHours * 3600_000;
 
   return (
     <div className="page tone-dark has-tabbar">
@@ -123,10 +125,11 @@ export default function My() {
             <p className="muted small">
               {t.services.items[toCancel.service].name} · {fmtDate(fromISO(toCancel.date))} · <span className="nums">{toCancel.time}</span>
             </p>
+            {isLate(toCancel) && <p className="notice">{t.my.lateCancel.replace("{hours}", String(siteConfig.policies.cancelHours))}</p>}
             <button
               className="btn btn--blush btn--block"
               onClick={() => {
-                store.cancel(toCancel.id);
+                store.cancel(toCancel.id, isLate(toCancel));
                 setToCancel(null);
               }}
             >

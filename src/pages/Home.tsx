@@ -4,6 +4,7 @@ import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, pla
 import { openChat } from "../components/ChatWidget";
 import { Wordmark } from "../components/Shell";
 import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
+import { useReducedMotion } from "motion/react";
 import { pricing } from "../config/pricing";
 import { services } from "../config/services";
 import { isTodo, mapsLink, siteConfig } from "../config/site";
@@ -24,6 +25,10 @@ export default function Home() {
   const heroRef = useParallax<HTMLDivElement>(-0.9);
   const next = upcoming[0];
   const media = siteConfig.studioMedia;
+  // Reduce Motion or Data Saver: show the still poster instead of streaming the hero video.
+  const reduceMotion = useReducedMotion();
+  const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData === true;
+  const showVideo = !!media.heroVideo && !reduceMotion && !saveData;
   const c = siteConfig.contact;
   const launch = siteConfig.flags.launchPricing;
   const maps = mapsLink();
@@ -39,8 +44,8 @@ export default function Home() {
       {/* Hero */}
       <section className="hero">
         <div className="hero__media" ref={heroRef}>
-          {media.heroVideo ? (
-            <video src={media.heroVideo} poster={media.heroPoster} autoPlay muted loop playsInline />
+          {showVideo ? (
+            <video src={media.heroVideo} poster={media.heroPoster} autoPlay muted loop playsInline preload="metadata" />
           ) : (
             <img src={media.heroPoster} alt="" />
           )}
