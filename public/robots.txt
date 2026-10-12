@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://TODO_VERIFY_DOMAIN/sitemap.xml
+Disallow: /api/
+Sitemap: https://resetpilates.org/sitemap.xml

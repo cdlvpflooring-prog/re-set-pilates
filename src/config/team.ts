@@ -1,5 +1,5 @@
 // Founder and instructor roster.
-// Instructors are PLACEHOLDERS (names, bios, portraits) until the real team is confirmed —
+// Instructors are PLACEHOLDERS (names, bios, portraits) until the real team is confirmed -
 // replace them and set `approved: true`. Drop portrait files in /public/assets and set `portrait`.
 export interface Person {
   id: string;
@@ -69,7 +69,7 @@ export interface Review {
   stars?: number;
   source?: "google";
   approved: boolean; // real, permitted to publish
-  sample?: boolean; // layout placeholder — shown only in demo mode, clearly labelled
+  sample?: boolean; // layout placeholder: shown only in demo mode, clearly labelled
 }
 // Replace the samples with real Google reviews (copy the text and first name + initial), set approved: true,
 // and delete the sample entries. Samples never show when demo mode is off.

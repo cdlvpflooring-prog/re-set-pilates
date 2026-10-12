@@ -65,7 +65,7 @@ export function ServiceDetail() {
   const { t, href } = useI18n();
   const s = serviceBySlug(slug) ?? services[0];
   const c = t.services.items[s.id];
-  useSeo({ title: `${c.name} — re:set pilates`, desc: c.desc });
+  useSeo({ title: `${c.name} | re:set pilates`, desc: c.desc });
   return (
     <div className="page page--bleed tone-dark">
       <section className="phero">

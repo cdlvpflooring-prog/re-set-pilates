@@ -25,7 +25,7 @@ Everything below works on screen as a demo. This is what each flow still needs b
 
 ## Contact and leads
 - Main contact is resetpilates11@gmail.com (set in `src/config/site.ts`).
-- The "call me back" form opens a ready-to-send email to that Gmail in the visitor's mail app. To receive leads silently (no email app step), connect a form service such as Formspree or EmailJS to the same Gmail.
+- The "call me back" form sends straight into Airtable (Leads & Inquiries) through the Cloudflare Worker once `AIRTABLE_TOKEN` is set on the Worker. Until then, or if sending fails, it opens a ready-to-send email to that Gmail as before. Steps: `CLOUDFLARE-PLAN.md` section 1.
 - Google Business Profile: create/claim the listing, then paste the profile link and the review link into `social.googleBusiness` and `social.googleReview`.
 - The three Google reviews on the home page are labelled samples (demo mode only). Replace them with real reviews in `src/config/team.ts`.
 - WhatsApp, phone and parking details are still "to be confirmed".
@@ -36,7 +36,16 @@ Everything below works on screen as a demo. This is what each flow still needs b
 - Reviews and press (hidden until real ones exist).
 
 ## Before going live
-- A web address and hosting, set up so page links work when opened directly.
+- Web address `resetpilates.org` on Cloudflare: follow the go-live checklist in `CLOUDFLARE-PLAN.md`.
 - Turn off demo mode (`flags.demoMode`) and confirm launch pricing on/off.
-- Google Analytics ID, sitemap, and the real domain in `public/robots.txt`.
+- Google Analytics ID (or Cloudflare Web Analytics). Sitemap and `robots.txt` are set for `resetpilates.org`.
 - Check on a real iPhone and Android phone, in Hebrew and English.
+
+## My progress (AI trainer MVP, spec in `AI-TRAINER-SPEC.md`)
+- Works as a demo only: answers, check-ins and progress live in the visitor's own browser. Needs sign-in and a private server database (health data encrypted, seen only by the member and her instructor) before real use.
+- Attendance comes from sample data plus the visitor's own demo bookings. Needs Arbox attendance sync.
+- Safety reviews (pain 7+, rising pain, high soreness, onboarding red flags) show in a demo "Studio view" inside Details. Needs a real staff screen and a notification to Orit (WhatsApp / email) that retries until she acknowledges.
+- Orit must approve: health-consent wording, the "stop and see a doctor" wording, all thresholds and score targets in `src/config/trainer.ts`, whether clients may self-test at home, and who covers safety reviews when she is away.
+- Included resources are sample titles with no content. Supply real videos/guides and set `approved: true`.
+- Personal paid suggestions are switched off (`paidCards.enabled: false`) until Arbox catalog and membership data are connected; members who opt in see a plain link to the price list.
+- Not built yet (phase 2 in the spec): spring/level progression graph, re-assessment radar chart, trainer level-ups, AI-written recaps and load suggestions, nutrition.

@@ -29,11 +29,11 @@ const H = siteConfig.policies.cancelHours;
 
 const monthly = (he: boolean) =>
   pricing.memberships
-    .map((p) => `${p.perWeek === "unlimited" ? (he ? "ללא הגבלה" : "Unlimited") : he ? `${p.perWeek} בשבוע` : `${p.perWeek}× a week`} — ₪${price(p)}`)
+    .map((p) => `${p.perWeek === "unlimited" ? (he ? "ללא הגבלה" : "Unlimited") : he ? `${p.perWeek} בשבוע` : `${p.perWeek}× a week`}: ₪${price(p)}`)
     .join("\n");
 const passes = (he: boolean) =>
   pricing.passes
-    .map((p) => `${p.sessions} ${he ? "כניסות" : "sessions"} — ₪${p.price}${launch && p.bonusSessions ? (he ? " (+1 בהשקה)" : " (+1 at launch)") : ""}`)
+    .map((p) => `${p.sessions} ${he ? "כניסות" : "sessions"}: ₪${p.price}${launch && p.bonusSessions ? (he ? " (+1 בהשקה)" : " (+1 at launch)") : ""}`)
     .join("\n");
 
 const book = (he: boolean): ChatAction => ({ label: he ? "ללוח השיעורים" : "Open the schedule", to: "schedule" });
