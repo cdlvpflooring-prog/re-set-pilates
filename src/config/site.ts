@@ -1,5 +1,5 @@
 // Single source of truth for business data. Anything TODO_VERIFY is unresolved
-// business data, not design — never hard-code these values inside components.
+// business data, not design: never hard-code these values inside components.
 export const TODO = "TODO_VERIFY";
 export const isTodo = (v?: string) => !v || v.startsWith(TODO);
 
@@ -26,14 +26,14 @@ export const siteConfig = {
   contact: {
     phone: TODO,
     whatsapp: TODO, // international digits only, e.g. 9725XXXXXXXX
-    email: "resetpilates11@gmail.com", // main customer contact — all important communication goes here
+    email: "resetpilates11@gmail.com", // main customer contact: all important communication goes here
     streetHe: "גזית 1",
     streetEn: "Gazit 1",
     cityHe: "הוד השרון",
     cityEn: "Hod Hasharon",
     publicAddress: "TODO_VERIFY_PUBLIC_ADDRESS",
     mapsQuery: "Gazit 1, Hod Hasharon, Israel",
-    geo: { lat: 32.1506, lng: 34.8888 }, // approximate — TODO_VERIFY
+    geo: { lat: 32.1506, lng: 34.8888 }, // approximate: TODO_VERIFY
     geoVerified: false, // set true once lat/lng match the pin on the Google profile; only then is it published in the schema
     postalCode: TODO,
     hours: TODO,
@@ -45,7 +45,7 @@ export const siteConfig = {
   // Feature flags
   policies: {
     cancelHours: 24, // cancel at least this many hours before class to get the session back
-    pregnancyUpTo: TODO, // e.g. "week 30" — Orit to confirm
+    pregnancyUpTo: TODO, // e.g. "week 30": Orit to confirm
   },
   flags: {
     // Launch pricing overlay (never overwrites the core pricing model).
@@ -66,7 +66,7 @@ export const siteConfig = {
   ] as { id: "arbox" | "bit" | "card"; url: string }[],
   analytics: { ga4MeasurementId: TODO },
   studioMedia: {
-    heroVideo: "", // e.g. "/media/hero.mp4" — drop in real footage; poster is used until then
+    heroVideo: "", // e.g. "/media/hero.mp4": drop in real footage; poster is used until then
     heroPoster: "/assets/studio-wide.jpg", // the re:set studio render; replace with the real photo after the shoot
     ogImage: "/assets/studio.jpg",
     logoDisc: "/assets/logo-gold-ring.jpg",

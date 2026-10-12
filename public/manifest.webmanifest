@@ -1,7 +1,7 @@
 {
   "name": "re:set pilates",
   "short_name": "re:set",
-  "description": "Reformer Pilates in small groups of five — Hod Hasharon.",
+  "description": "Reformer Pilates in small groups of five, Hod Hasharon.",
   "start_url": "/he/?source=pwa",
   "scope": "/",
   "display": "standalone",

@@ -83,6 +83,14 @@ export default function Profile() {
           </div>
         )}
 
+        <Link to={href("progress")} className="nextstep row between gap-12">
+          <span className="stack gap-4">
+            <span className="eyebrow">{t.nav.progress}</span>
+            <b className="key">{t.profile.progressTeaser}</b>
+          </span>
+          <span className="chev" aria-hidden />
+        </Link>
+
         <div className="card rows" style={{ paddingBlock: 4 }}>
           <Link to={href("my")}>
             {t.nav.myClasses}

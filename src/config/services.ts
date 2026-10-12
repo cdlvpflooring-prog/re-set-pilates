@@ -3,7 +3,7 @@ export type ServiceId = "reformer" | "mat" | "private" | "duo" | "women";
 export interface ServiceConfig {
   id: ServiceId;
   slug: string;
-  image: string; // photo slot — empty shows line art; set a path after the shoot
+  image: string; // photo slot: empty shows line art; set a path after the shoot
   pos: string; // object-position
   bookable: boolean; // bookable in the schedule vs. by request
   capacity?: number;

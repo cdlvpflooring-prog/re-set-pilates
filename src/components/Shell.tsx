@@ -126,6 +126,7 @@ function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   ];
   const more: [string, string][] = [
     ["my", t.nav.myClasses],
+    ["progress", t.nav.progress],
     ["profile", t.nav.profile],
     ["quiz", t.nav.quiz],
     ["gift", t.nav.gift],
@@ -209,7 +210,7 @@ function TabBar({ section }: { section: string }) {
     ["my", t.nav.mine],
     ["profile", t.nav.profile],
   ];
-  const activeKey = section === "class" ? "schedule" : section === "checkout" ? "profile" : section;
+  const activeKey = section === "class" ? "schedule" : section === "checkout" || section === "progress" ? "profile" : section;
   return (
     <nav className="tabbar" aria-label={t.common.menu}>
       {tabs.map(([to, label]) => {
