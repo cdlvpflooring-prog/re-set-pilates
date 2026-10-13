@@ -1581,3 +1581,26 @@ html[lang="he"] .hero--ed .hero__title { font-family: "Heebo", "Inter", sans-ser
   .hero--ed .hero__offer { grid-column: 2; grid-row: 1 / span 3; align-self: end; }
 }
 @media (prefers-reduced-motion: reduce) { .hero--ed .hero__media img, .hero--ed .hero__media video { animation: none; } }
+
+/* ───────── v2.3 · design system across the site: serif display, studio-dark band, serif wordmark ───────── */
+/* Display titles in English take the serif (Hebrew keeps Heebo: the serif has no Hebrew) */
+html[lang="en"] main h1.display, html[lang="en"] .phead__title, html[lang="en"] .d-xl, html[lang="en"] .d-lg,
+html[lang="en"] .d-md, html[lang="en"] .d-sm {
+  font-family: "Cormorant Garamond", "Frank Ruhl Libre", Georgia, serif; font-weight: 500; letter-spacing: -0.01em;
+}
+html[lang="en"] main h1.display, html[lang="en"] .phead__title, html[lang="en"] .d-xl, html[lang="en"] .d-lg { font-size: calc(var(--t-title) * 1.12); line-height: 1.0; }
+html[lang="en"] .d-md { font-size: calc(var(--t-sub) * 1.25); line-height: 1.08; }
+html[lang="en"] .d-sm { font-size: calc(var(--t-sub) * 1.15); line-height: 1.15; }
+html[lang="en"] #classes .flow-row .d-md { font-weight: 600; }
+
+/* The wordmark in the serif, as in the design system */
+.wordmark { font-family: "Cormorant Garamond", Georgia, serif; font-weight: 600; letter-spacing: 0; }
+.wordmark i { color: var(--clay); }
+
+/* Studio-dark brand band (bottom "Your bed is waiting"): the hero's palette, the gold button */
+.tone-studio { --bg: #1a1411; --fg: #fcf1dc; --fg-2: #d9ccb6; --fg-3: rgba(252, 241, 220, 0.6); --accent: #f1d3ad; --accent-2: #f1d3ad; --line: rgba(252, 241, 220, 0.14); --card: #241c17;
+  background: #1a1411; color: #fcf1dc; }
+.tone-studio .lede, .tone-studio .muted { color: #d9ccb6; }
+.btn--gold { background: #f1d3ad; color: #1a1411; }
+@media (hover: hover) and (pointer: fine) { .btn--gold:hover { box-shadow: 0 10px 28px rgba(241, 211, 173, 0.28); } }
+.hero--ed .btn--gold { justify-content: space-between; padding-inline: 22px; min-height: 54px; }

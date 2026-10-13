@@ -351,7 +351,7 @@ export default function Home() {
       </section>
 
       {/* Book */}
-      <section className="section tone-sand">
+      <section className="section tone-studio">
         <Reveal className="wrap stack gap-24">
           <h2 className="display d-xl">
             {t.home.ctaTitle.map((l) => (
@@ -362,7 +362,7 @@ export default function Home() {
           </h2>
           <p className="lede">{t.home.sub}</p>
           <div>
-            <a href="#schedule" className="btn btn--dark btn--arrow" onClick={() => track("book_reformer_click", { source: "footer" })}>
+            <a href="#schedule" className="btn btn--gold btn--arrow" onClick={() => track("book_reformer_click", { source: "footer" })}>
               {t.nav.bookTitle}
             </a>
           </div>
