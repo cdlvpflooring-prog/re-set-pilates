@@ -70,6 +70,8 @@ export const he: Content = {
     greetingEvening: "ערב טוב",
     eyebrow: "סטודיו בוטיק לרפורמר · הוד השרון",
     heroTitle: ["פילאטיס רפורמר,", "בחדר של חמש."],
+    heroEditorial: ["הכוח שלך,", "מתחיל מחדש."],
+    heroSecondary: "השיעור הראשון · מה מחכה לך",
     statHead: ["חמש מיטות.", "כל תשומת הלב."],
     stats: [
       { n: "5 מתאמנות", l: "מקסימום בשיעור" },

@@ -1545,3 +1545,39 @@ html[lang="he"] .ctab__txt b { letter-spacing: 0; }
   .hero__media { aspect-ratio: auto; height: clamp(150px, calc(100svh - 430px), 360px); }
   .hero__body { padding-bottom: calc(14px + var(--safe-b)); }
 }
+
+/* ───────── v2.3 · Editorial hero (design system: Studio theme) ───────── */
+.hero--ed {
+  --ed-ink: #1a1411; --ed-cream: #fcf1dc; --ed-cream-2: #d9ccb6; --ed-gold: #f1d3ad;
+  position: relative; display: flex; flex-direction: column; justify-content: flex-end;
+  min-height: 0; margin: 0; background: var(--ed-ink); color: var(--ed-cream); overflow: hidden;
+  height: calc(100svh - var(--hdr) - var(--safe-t)); max-height: 820px;
+}
+.hero--ed .hero__media { position: absolute; inset: 0; margin: 0; height: auto; aspect-ratio: auto; border-radius: 0; z-index: 0; transform: none !important; }
+.hero--ed .hero__media img, .hero--ed .hero__media video { width: 100%; height: 100%; object-fit: cover; object-position: 48% 50%; filter: none; animation: hero-fade 900ms ease-out both; }
+.hero--ed .hero__scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, rgba(26,20,17,0.42) 0%, rgba(26,20,17,0) 26%, rgba(26,20,17,0) 42%, rgba(26,20,17,0.92) 76%, #1a1411 100%); }
+.hero--ed .hero__body { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 14px; max-width: var(--max); margin-inline: auto; width: 100%;
+  padding: 0 var(--gutter) calc(24px + var(--safe-b)); }
+.hero--ed .hero__mark { width: 60px; height: 60px; border-radius: 50%; overflow: hidden; box-shadow: 0 0 36px rgba(241,211,173,0.45); }
+.hero--ed .hero__mark img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+.hero--ed .eyebrow { color: var(--ed-gold); }
+.hero--ed .hero__title { direction: inherit; margin: 0; font-family: "Cormorant Garamond", "Frank Ruhl Libre", Georgia, serif; font-weight: 500; font-size: clamp(44px, 12.5vw, 56px); line-height: 0.98; letter-spacing: -0.01em; color: var(--ed-cream); max-width: 12ch; text-wrap: balance; }
+.hero--ed .hero__title em { font-style: italic; }
+html[lang="he"] .hero--ed .hero__title { font-family: "Heebo", "Inter", sans-serif; font-weight: 700; font-size: clamp(38px, 10.5vw, 50px); line-height: 1.06; letter-spacing: 0; }
+.hero--ed .lede { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--ed-cream-2); max-width: 32ch; }
+.hero--ed .hero__offer { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; padding: 0; background: transparent; box-shadow: none; border: 0; }
+.hero--ed .btn--gold { background: var(--ed-gold); color: var(--ed-ink); justify-content: space-between; padding-inline: 22px; min-height: 54px; }
+.hero--ed .btn--outline { background: transparent; color: var(--ed-cream); border: 1px solid rgba(252,241,220,0.42); min-height: 48px; font-weight: 500; font-size: 14px; }
+.hero--ed .hero__note { font-size: 12px; font-weight: 600; color: var(--ed-gold); text-align: center; }
+@media (hover: hover) and (pointer: fine) { .hero--ed .btn--gold:hover { box-shadow: 0 10px 28px rgba(241,211,173,0.28); } .hero--ed .btn--outline:hover { border-color: var(--ed-cream); } }
+@media (max-width: 999px) { .hero--ed { height: calc(100svh - var(--hdr) - var(--safe-t) - 70px); min-height: 520px; } }
+@media (min-width: 1000px) {
+  .hero--ed { height: min(78svh, 760px); min-height: 560px; }
+  .hero--ed .hero__body { padding-bottom: 56px; display: grid; grid-template-columns: minmax(0, 1fr) 380px; align-items: end; column-gap: 64px; }
+  .hero--ed .hero__mark { grid-column: 1; width: 72px; height: 72px; }
+  .hero--ed .hero__title { grid-column: 1; font-size: clamp(64px, 7vw, 96px); max-width: 11ch; }
+  .hero--ed .lede { grid-column: 1; font-size: 18px; max-width: 40ch; }
+  .hero--ed .hero__offer { grid-column: 2; grid-row: 1 / span 3; align-self: end; }
+}
+@media (prefers-reduced-motion: reduce) { .hero--ed .hero__media img, .hero--ed .hero__media video { animation: none; } }

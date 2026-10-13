@@ -45,7 +45,8 @@ export default function Home() {
   return (
     <div className="page page--bleed tone-dark">
       {/* Hero */}
-      <section className="hero">
+      {/* Editorial first screen: full-bleed studio film, the brass ring, a serif headline (design system: HeroEditorial) */}
+      <section className="hero hero--ed">
         <div className="hero__media" ref={heroRef}>
           {showVideo ? (
             <video src={heroSrc} poster={media.heroPoster} autoPlay muted loop playsInline preload="metadata" />
@@ -53,28 +54,34 @@ export default function Home() {
             <img src={media.heroPoster} alt="" />
           )}
         </div>
-        <div className="hero__shade" />
+        <div className="hero__scrim" aria-hidden />
         <div className="wrap hero__body">
+          <span className="hero__mark fade-up" style={d(100)}>
+            <img src={media.logoDisc} alt="" />
+          </span>
           {isMember && (
-            <p className="eyebrow fade-up" style={d(100)}>
+            <p className="eyebrow fade-up" style={d(150)}>
               {greeting}, {t.profile.firstName}
             </p>
           )}
           <h1 className="hero__title">
-            {t.home.heroTitle.map((line, i) => (
+            {t.home.heroEditorial.map((line, i) => (
               <span className="line" key={line}>
-                <span style={d(200 + i * 130)}>{line}</span>
+                <span style={d(200 + i * 130)}>{i === 1 && !isHe ? <em>{line}</em> : line}</span>
               </span>
             ))}
           </h1>
-          <p className="lede fade-up" style={d(700)}>
+          <p className="lede fade-up" style={d(650)}>
             {t.home.sub}
           </p>
-          <div className="hero__offer fade-up" style={d(850)}>
-            {launch && <span className="small">{t.common.announcement}</span>}
-            <a href="#schedule" className="btn btn--primary btn--block" onClick={() => track("book_reformer_click", { source: "hero" })}>
-              {t.nav.bookTitle}
+          <div className="hero__offer fade-up" style={d(800)}>
+            <a href="#schedule" className="btn btn--gold btn--block" onClick={() => track("book_reformer_click", { source: "hero" })}>
+              {t.nav.bookTitle} <span aria-hidden>→</span>
             </a>
+            <a href="#classes" className="btn btn--outline btn--block">
+              {t.home.heroSecondary}
+            </a>
+            {launch && <span className="hero__note">{t.common.announcement}</span>}
           </div>
         </div>
       </section>

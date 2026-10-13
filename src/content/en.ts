@@ -68,6 +68,8 @@ export const en = {
     greetingEvening: "Good evening",
     eyebrow: "Boutique Reformer studio · Hod Hasharon",
     heroTitle: ["Reformer Pilates,", "in a room of five."],
+    heroEditorial: ["Reset your", "strength."], // second line is set in italics
+    heroSecondary: "First class · what to expect",
     statHead: ["Five beds.", "Your full attention."],
     stats: [
       { n: "5 people", l: "Maximum per class" },
