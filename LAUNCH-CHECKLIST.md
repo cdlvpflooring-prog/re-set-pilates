@@ -36,7 +36,7 @@ Everything below works on screen as a demo. This is what each flow still needs b
 - Reviews and press (hidden until real ones exist).
 
 ## Before going live
-- Web address `resetpilates.org` on Cloudflare: follow the go-live checklist in `CLOUDFLARE-PLAN.md`.
+- Live at https://resetpilates.org (Cloudflare, auto-published from `main`). Open items: `CLOUDFLARE-PLAN.md` section 1.
 - Turn off demo mode (`flags.demoMode`) and confirm launch pricing on/off.
 - Google Analytics ID (or Cloudflare Web Analytics). Sitemap and `robots.txt` are set for `resetpilates.org`.
 - Check on a real iPhone and Android phone, in Hebrew and English.
