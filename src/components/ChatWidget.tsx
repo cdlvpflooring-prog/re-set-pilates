@@ -13,7 +13,7 @@ interface Msg extends ChatReply {
   from: "me" | "orit";
 }
 
-const AVATAR = "/assets/orit-face.jpg";
+const AVATAR = "/assets/orit-face.webp";
 export const OPEN_CHAT = "reset:open-chat";
 export const openChat = () => window.dispatchEvent(new CustomEvent(OPEN_CHAT));
 

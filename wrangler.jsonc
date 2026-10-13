@@ -1,6 +1,7 @@
 // Cloudflare deployment settings. The site is a static single-page app built into ./dist.
 // Unknown paths (e.g. /he/schedule opened directly) fall back to index.html so the app's router handles them.
-// worker/index.ts only runs for /api/* (lead form → Airtable) and /go/* (short links for flyers and QR codes).
+// worker/index.ts runs for /api/* (lead form → Airtable), /go/* (short links for flyers and QR codes)
+// and the pages themselves (adds link-preview tags; files under /assets, /media, /icons are served directly).
 // Secrets are not in this file: set AIRTABLE_TOKEN and TURNSTILE_SECRET in the dashboard (encrypted) or with `bunx wrangler secret put`.
 {
   "name": "re-set-pilates",
@@ -10,7 +11,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*", "/go/*"]
+    "run_worker_first": ["/api/*", "/go/*", "/", "/he", "/he/*", "/en", "/en/*"]
   },
   "routes": [
     { "pattern": "resetpilates.org", "custom_domain": true },

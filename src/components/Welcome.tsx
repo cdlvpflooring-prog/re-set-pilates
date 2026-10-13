@@ -22,7 +22,7 @@ export function Welcome() {
     <AnimatePresence>
       {show && (
         <motion.div className="welcome" exit={{ opacity: 0 }} transition={{ duration: 0.35 }} role="dialog" aria-label="re:set pilates">
-          <img src="/assets/studio-entry.jpg" alt="" />
+          <img src="/assets/studio-entry.webp" alt="" />
           <LangToggle className="welcome__lang" />
           <div className="welcome__body">
             <div className="logo-disc fade-up" style={d(150)}>

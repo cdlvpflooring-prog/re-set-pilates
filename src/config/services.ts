@@ -14,11 +14,11 @@ export interface ServiceConfig {
 }
 
 export const services: ServiceConfig[] = [
-  { id: "reformer", slug: "reformer-groups", image: "/assets/ex-group.jpg", pos: "50% 45%", thumb: "/assets/ex-tab-reformer-sm.jpg", thumbPos: "50% 60%", bookable: true, capacity: 5, minutes: 50, approved: true },
-  { id: "mat", slug: "mat-pilates", image: "/assets/ex-mat.jpg", pos: "50% 55%", thumb: "/assets/ex-tab-mat-sm.jpg", thumbPos: "50% 45%", bookable: true, minutes: 50, approved: true },
-  { id: "private", slug: "private-1to1", image: "/assets/ex-private.jpg", pos: "50% 45%", thumb: "/assets/ex-private-sm.jpg", thumbPos: "60% 40%", bookable: false, minutes: 50, approved: true },
-  { id: "duo", slug: "duo", image: "/assets/ex-duo.jpg", pos: "50% 40%", thumb: "/assets/ex-duo-sm.jpg", thumbPos: "50% 35%", bookable: false, minutes: 50, approved: true },
-  { id: "women", slug: "women-only", image: "/assets/ex-women.jpg", pos: "50% 40%", thumb: "/assets/ex-women-sm.jpg", thumbPos: "70% 40%", bookable: false, minutes: 50, approved: false },
+  { id: "reformer", slug: "reformer-groups", image: "/assets/ex-group.webp", pos: "50% 45%", thumb: "/assets/ex-tab-reformer-sm.webp", thumbPos: "50% 60%", bookable: true, capacity: 5, minutes: 50, approved: true },
+  { id: "mat", slug: "mat-pilates", image: "/assets/ex-mat.webp", pos: "50% 55%", thumb: "/assets/ex-tab-mat-sm.webp", thumbPos: "50% 45%", bookable: true, minutes: 50, approved: true },
+  { id: "private", slug: "private-1to1", image: "/assets/ex-private.webp", pos: "50% 45%", thumb: "/assets/ex-private-sm.webp", thumbPos: "60% 40%", bookable: false, minutes: 50, approved: true },
+  { id: "duo", slug: "duo", image: "/assets/ex-duo.webp", pos: "50% 40%", thumb: "/assets/ex-duo-sm.webp", thumbPos: "50% 35%", bookable: false, minutes: 50, approved: true },
+  { id: "women", slug: "women-only", image: "/assets/ex-women.webp", pos: "50% 40%", thumb: "/assets/ex-women-sm.webp", thumbPos: "70% 40%", bookable: false, minutes: 50, approved: false },
 ];
 
 export const serviceById = (id: string) => services.find((s) => s.id === id);

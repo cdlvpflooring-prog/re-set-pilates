@@ -1,10 +1,11 @@
 // Cloudflare Worker for re:set pilates. Static files are served by Cloudflare directly;
-// this script only runs for /api/* and /go/* (see run_worker_first in wrangler.jsonc).
+// this script runs for /api/* and /go/*, and for pages so they get link-preview tags (see run_worker_first in wrangler.jsonc).
 //
 // Secrets (set with `bunx wrangler secret put NAME`, or in the dashboard as encrypted variables):
 //   AIRTABLE_TOKEN    Airtable personal access token, data.records:write on the Reset Pilates base only
 //   TURNSTILE_SECRET  Turnstile secret key. When set, every form post must pass the check.
 import { isTodo, mapsLink, siteConfig } from "../src/config/site";
+import { withPreview } from "./preview";
 
 interface Env {
   ASSETS: { fetch(req: Request): Promise<Response> };
@@ -147,6 +148,7 @@ export default {
     }
     if (url.pathname.startsWith("/api/")) return json({ ok: false, error: "not_found" }, 404);
     if (url.pathname.startsWith("/go/")) return go(url.pathname.slice(4).replace(/\/$/, ""), url);
-    return env.ASSETS.fetch(req);
+    // Pages: add link-preview and search tags for the language and page being served.
+    return withPreview(await env.ASSETS.fetch(req), url);
   },
 };

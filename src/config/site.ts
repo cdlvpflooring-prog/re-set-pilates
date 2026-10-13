@@ -72,9 +72,9 @@ export const siteConfig = {
   studioMedia: {
     heroVideo: "/media/hero.mp4", // Seedance 1.5 Pro: empty studio at dawn, dolly in to the gold-ring sign (12s, 1080p, silent); replace with real footage after the shoot
     heroVideoPhone: "/media/hero-720.mp4", // lighter 720p encode served below 1000px (made by the compress-hero workflow)
-    heroPoster: "/assets/hero-poster.jpg", // first frame of the hero video (studio + sign); studio-wide.jpg is the plain studio photo
-    ogImage: "/assets/studio.jpg",
-    logoDisc: "/assets/logo-gold-ring.jpg",
+    heroPoster: "/assets/hero-poster.webp", // first frame of the hero video (studio + sign); studio-wide.jpg is the plain studio photo
+    ogImage: "/assets/og-studio.jpg",
+    logoDisc: "/assets/logo-gold-ring.webp",
     music: "", // optional user-uploaded track; never autoplays
   },
 };

@@ -14,7 +14,7 @@ export function About() {
   return (
     <div className="page page--bleed tone-dark">
       <section className="phero" style={{ minHeight: "min(78svh, 680px)" }}>
-        <img src="/assets/studio.jpg" alt="" style={{ objectPosition: "50% 60%" }} />
+        <img src="/assets/studio.webp" alt="" style={{ objectPosition: "50% 60%" }} />
         <div className="wrap phero__body stack gap-12">
           <span className="eyebrow fade-up" style={{ color: "var(--cream)" }}>
             {t.about.eyebrow}
@@ -45,7 +45,7 @@ export function About() {
               </div>
             </div>
           </Reveal>
-          <MaskImg src="/assets/studio-entry.jpg" ratio="4 / 5" pos="50% 40%" delay={120} />
+          <MaskImg src="/assets/studio-entry.webp" ratio="4 / 5" pos="50% 40%" delay={120} />
         </div>
       </section>
 
