@@ -69,7 +69,11 @@ function Header({ section }: { section: string }) {
       <div className="wrap hdr__in">
         <div className="hdr__start">
           {!isRoot && (
-            <button className="back hdr__back" onClick={() => (history.length > 1 ? nav(-1) : nav(href()))}>
+            <button
+              className="back hdr__back"
+              // Deep links (first entry in this tab) go home instead of leaving the site.
+              onClick={() => (loc.key === "default" || history.length <= 1 ? nav(href()) : nav(-1))}
+            >
               <span className="chev chev--back" aria-hidden />
               {t.common.back}
             </button>
