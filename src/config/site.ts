@@ -53,7 +53,7 @@ export const siteConfig = {
     // Prototype: show unapproved prices with a "pending approval" marker.
     showUnapprovedPrices: true,
     // Prototype: member/visitor switch on the profile screen. Remove in production.
-    demoMode: true,
+    demoMode: false,
     // Real reviews/press only; hidden until verified entries exist.
     showReviews: true,
   },
