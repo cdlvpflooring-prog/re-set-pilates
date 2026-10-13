@@ -222,7 +222,8 @@ function TabBar({ section }: { section: string }) {
         const active = activeKey === to;
         return (
           <Link key={to} to={href(to)} className={active ? "active" : ""} aria-current={active ? "page" : undefined}>
-            {active && <motion.span layoutId="tabdot" className="tabbar__dot" transition={{ type: "spring", duration: 0.4, bounce: 0.15 }} />}
+            {/* Static underline per tab (CSS scales it in): a shared-layout animation left it off-centre in RTL. */}
+            <span className="tabbar__dot" aria-hidden />
             {label}
           </Link>
         );

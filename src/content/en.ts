@@ -10,6 +10,8 @@ export const en = {
     contact: { title: "Contact | re:set pilates", desc: "WhatsApp, directions and contact details for re:set pilates, Hod Hasharon." },
     quiz: { title: "Find your class | re:set pilates", desc: "Three quick questions to find the Pilates format that fits you." },
     gift: { title: "Gift cards | re:set pilates", desc: "Give someone a reset. re:set pilates gift cards." },
+    my: { title: "My classes | re:set pilates", desc: "Your upcoming and past classes at re:set pilates." },
+    profile: { title: "Profile | re:set pilates", desc: "Your membership, details and preferences at re:set pilates." },
   },
   common: {
     langSwitch: "עב",

@@ -12,6 +12,8 @@ export const he: Content = {
     contact: { title: "צרי קשר | re:set pilates", desc: "וואטסאפ, ניווט ופרטי התקשרות לסטודיו re:set pilates בהוד השרון." },
     quiz: { title: "איזה שיעור מתאים לך | re:set pilates", desc: "שלוש שאלות קצרות שיעזרו לך למצוא את השיעור שמתאים לך." },
     gift: { title: "שוברי מתנה | re:set pilates", desc: "מתנה של ריסט. שוברי מתנה ל־re:set pilates." },
+    my: { title: "השיעורים שלי | re:set pilates", desc: "השיעורים הקרובים והקודמים שלך ב־re:set pilates." },
+    profile: { title: "פרופיל | re:set pilates", desc: "המנוי, הפרטים וההעדפות שלך ב־re:set pilates." },
   },
   common: {
     langSwitch: "EN",
