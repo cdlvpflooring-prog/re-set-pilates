@@ -5,11 +5,14 @@ import { Check } from "../components/ui";
 import { pricing } from "../config/pricing";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
+import { relay } from "../lib/relay";
 import { useSeo } from "../lib/seo";
+import { useStore } from "../lib/store";
+import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 
 /** Gift card flow (mock checkout — nothing is charged or sent). */
 export default function Gift() {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   useSeo(t.meta.gift);
   const passes = pricing.passes.filter(pricesVisible);
   const [choice, setChoice] = useState<string>(passes[0]?.id ?? "custom");
@@ -19,13 +22,33 @@ export default function Gift() {
   const [note, setNote] = useState("");
   const [done, setDone] = useState(false);
   const [notified, setNotified] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [code, setCode] = useState("");
+  const { profile, saveProfile } = useStore();
   const pass = passes.find((p) => p.id === choice);
   const value = pass ? effectivePrice(pass) : amount;
   const label = pass ? planName(pass, t) : t.gift.custom;
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
+    const f = new FormData(e.currentTarget as HTMLFormElement);
+    const buyer = readContact(f);
+    const x = readExtras(f);
     track("gift_card_start", { choice });
+    setSending(true);
+    const r = await relay("gift", {
+      lang,
+      buyer,
+      planId: pass ? pass.id : null,
+      amount: pass ? undefined : amount,
+      recipientName: to,
+      note: note || undefined,
+      consent: x.consent,
+      website: x.website,
+    });
+    saveProfile(profileFrom(buyer, x));
+    setCode(r.code ?? "");
+    setSending(false);
     setDone(true);
   };
 
@@ -34,7 +57,7 @@ export default function Gift() {
       <PageHead title={t.gift.title} sub={t.gift.sub} />
       <div className="wrap pbody screen">
         <div className="split split--top">
-          <div className="stack gap-12" style={{ position: "sticky", top: "calc(var(--hdr) + 20px)" }}>
+          <div className="stack gap-12 gift-preview">
             <div className="gift-card" aria-label={t.gift.preview}>
               <div className="row between" style={{ position: "relative" }}>
                 <Wordmark />
@@ -60,6 +83,11 @@ export default function Gift() {
               <Check />
               <h2 className="display d-md">{t.gift.doneTitle}</h2>
               <p className="muted">{t.gift.doneSub}</p>
+              {code && (
+                <p className="key">
+                  {t.gift.codeLabel}: <bdi dir="ltr">{code}</bdi>
+                </p>
+              )}
               <button className="btn btn--secondary" onClick={() => setDone(false)}>
                 {t.gift.another}
               </button>
@@ -97,8 +125,18 @@ export default function Gift() {
                 <label htmlFor="g-note">{t.gift.note}</label>
                 <textarea id="g-note" className="input" maxLength={120} placeholder={t.gift.notePh} value={note} onChange={(e) => setNote(e.target.value)} />
               </div>
+              <fieldset className="stack gap-12" style={{ border: 0, padding: 0, margin: 0 }}>
+                <legend className="eyebrow" style={{ marginBottom: 4 }}>
+                  {t.gift.buyerTitle}
+                </legend>
+                <p className="tiny" style={{ margin: 0 }}>{t.gift.buyerNote}</p>
+                <ContactFields id="g" profile={profile} />
+                <ConsentField profile={profile} />
+              </fieldset>
               <div className="notice">{t.gift.demoPay}</div>
-              <button className="btn btn--sand btn--block">{t.gift.send}</button>
+              <button className="btn btn--sand btn--block" disabled={sending}>
+                {sending ? t.form.sending : t.gift.send}
+              </button>
             </form>
           )}
         </div>

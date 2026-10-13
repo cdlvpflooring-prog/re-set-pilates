@@ -1,11 +1,15 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { serviceTarget } from "../components/blocks";
 import { serviceById, type ServiceId } from "../config/services";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
+import { relay } from "../lib/relay";
+import type { QuizMsg } from "../lib/relayTypes";
 import { useSeo } from "../lib/seo";
+import { useStore } from "../lib/store";
+import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 
 type Rec = "reformer" | "mat" | "private" | "duo";
 
@@ -18,7 +22,7 @@ function recommend(a: string[]): Rec {
 }
 
 export default function Quiz() {
-  const { t, href, dir } = useI18n();
+  const { t, href, dir, lang } = useI18n();
   useSeo(t.meta.quiz);
   const reduce = useReducedMotion();
   const [answers, setAnswers] = useState<string[]>([]);
@@ -29,10 +33,17 @@ export default function Quiz() {
   const sign = dir === "rtl" ? -1 : 1;
   const shift = reduce ? 0 : 24 * sign;
 
+  const [quizId, setQuizId] = useState<string | null>(null);
   const pick = (id: string) => {
     const next = [...answers, id];
     setAnswers(next);
-    if (next.length === total) track("quiz_complete", { result: recommend(next) });
+    if (next.length === total) {
+      const result = recommend(next);
+      track("quiz_complete", { result });
+      // Answers are saved anonymously; the visitor can add their number under the result.
+      const [goal, experience, style] = next as [QuizMsg["goal"], QuizMsg["experience"], QuizMsg["style"]];
+      relay("quiz", { lang, goal, experience, style, recommended: result }).then((r) => setQuizId(r.id ?? null));
+    }
   };
 
   return (
@@ -73,7 +84,18 @@ export default function Quiz() {
                 )}
               </>
             ) : (
-              rec && <Result rec={rec} onAgain={() => setAnswers([])} />
+              rec && (
+                <>
+                  <Result
+                    rec={rec}
+                    onAgain={() => {
+                      setAnswers([]);
+                      setQuizId(null);
+                    }}
+                  />
+                  {quizId && <LeaveNumber quizId={quizId} />}
+                </>
+              )
             )}
           </motion.div>
         </AnimatePresence>
@@ -104,4 +126,35 @@ export default function Quiz() {
       </>
     );
   }
+}
+
+/** Optional: under the quiz result, the visitor can leave their number for a personal plan. */
+function LeaveNumber({ quizId }: { quizId: string }) {
+  const { t, lang } = useI18n();
+  const { profile, saveProfile } = useStore();
+  const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    const f = new FormData(e.currentTarget as HTMLFormElement);
+    const contact = readContact(f);
+    const x = readExtras(f);
+    setState("sending");
+    await relay("quiz-contact", { lang, quizId, contact, consent: x.consent, website: x.website });
+    saveProfile(profileFrom(contact, x));
+    setState("done");
+  };
+  if (state === "done") return <p className="notice">{t.quiz.leaveDone}</p>;
+  return (
+    <form className="card stack gap-12" onSubmit={submit}>
+      <div className="stack gap-4">
+        <h2 className="key">{t.quiz.leaveTitle}</h2>
+        <p className="tiny" style={{ margin: 0 }}>{t.quiz.leaveSub}</p>
+      </div>
+      <ContactFields id="qz" profile={profile} email="none" />
+      <ConsentField profile={profile} />
+      <button className="btn btn--blush btn--block" disabled={state === "sending"}>
+        {state === "sending" ? t.form.sending : t.quiz.leaveBtn}
+      </button>
+    </form>
+  );
 }

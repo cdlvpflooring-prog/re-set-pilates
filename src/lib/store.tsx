@@ -13,6 +13,16 @@ export interface Booking {
   instructorId: string;
   bed: number | null;
   remind: boolean;
+  remoteId?: string; // Airtable record id from the relay, used to cancel there too
+}
+
+export interface Profile {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  email: string;
+  heard?: string; // "How did you hear about us?" — asked once
+  consented?: boolean; // ticked "Send me news and offers" at least once
 }
 
 interface Persisted {
@@ -22,7 +32,7 @@ interface Persisted {
   waitlist: string[]; // slot ids
   reminders: boolean;
   seenWelcome: boolean;
-  profile: { name: string; phone: string; email: string };
+  profile: Profile;
 }
 
 interface Store extends Persisted {
@@ -36,7 +46,8 @@ interface Store extends Persisted {
   setPlan: (planId: string | null) => void;
   setReminders: (on: boolean) => void;
   markWelcomeSeen: () => void;
-  saveProfile: (p: Partial<Persisted["profile"]>) => void;
+  saveProfile: (p: Partial<Profile>) => void;
+  setRemoteId: (bookingId: string, remoteId: string) => void;
 }
 
 const KEY = "reset.v1";
@@ -47,13 +58,19 @@ const initial: Persisted = {
   waitlist: [],
   reminders: true,
   seenWelcome: false,
-  profile: { name: "", phone: "", email: "" },
+  profile: { firstName: "", lastName: "", phone: "", email: "" },
 };
 
 function load(): Persisted {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) ?? "{}");
-    return { ...initial, ...saved, profile: { ...initial.profile, ...saved.profile } };
+    const { name, ...rest } = saved.profile ?? {};
+    // Older versions kept one "name" box: split it into first and last name.
+    if (name && !rest.firstName) {
+      const [first, ...last] = String(name).trim().split(/\s+/);
+      Object.assign(rest, { firstName: first ?? "", lastName: last.join(" ") });
+    }
+    return { ...initial, ...saved, profile: { ...initial.profile, ...rest } };
   } catch {
     return initial;
   }
@@ -101,8 +118,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [],
   );
   const setReminders = useCallback((on: boolean) => setS((p) => ({ ...p, reminders: on })), []);
-  const saveProfile = useCallback(
-    (pr: Partial<Persisted["profile"]>) => setS((p) => ({ ...p, profile: { ...p.profile, ...pr } })),
+  const saveProfile = useCallback((pr: Partial<Profile>) => setS((p) => ({ ...p, profile: { ...p.profile, ...pr } })), []);
+  const setRemoteId = useCallback(
+    (bookingId: string, remoteId: string) =>
+      setS((p) => ({ ...p, bookings: p.bookings.map((b) => (b.id === bookingId ? { ...b, remoteId } : b)) })),
     [],
   );
   const markWelcomeSeen = useCallback(() => setS((p) => (p.seenWelcome ? p : { ...p, seenWelcome: true })), []);
@@ -123,8 +142,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setReminders,
       markWelcomeSeen,
       saveProfile,
+      setRemoteId,
     };
-  }, [s, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile]);
+  }, [s, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile, setRemoteId]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

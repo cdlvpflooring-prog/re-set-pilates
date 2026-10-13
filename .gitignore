@@ -3,3 +3,5 @@ dist
 .DS_Store
 .versions
 .claude
+.dev.vars
+.wrangler/

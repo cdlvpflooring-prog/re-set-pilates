@@ -7,10 +7,11 @@ import { mapsLink } from "../config/site";
 import { fromISO, slotStart } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { downloadIcs } from "../lib/ics";
+import { relay } from "../lib/relay";
 import { useStore, type Booking } from "../lib/store";
 
 export default function My() {
-  const { t, href, isHe, fmtDate } = useI18n();
+  const { t, href, isHe, fmtDate, lang } = useI18n();
   const store = useStore();
   const [toCancel, setToCancel] = useState<Booking | null>(null);
   const maps = mapsLink();
@@ -123,6 +124,8 @@ export default function My() {
             <button
               className="btn btn--blush btn--block"
               onClick={() => {
+                // The relay decides on-time vs late cancel from the class time, so the 24-hour rule is applied in one place.
+                if (toCancel.remoteId) relay("cancel", { lang, bookingId: toCancel.remoteId, phone: store.profile.phone });
                 store.cancel(toCancel.id);
                 setToCancel(null);
               }}
