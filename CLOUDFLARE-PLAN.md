@@ -17,7 +17,8 @@ Written 2026-10-12. Cloudflare changes its free limits from time to time, so che
 | Flyer / QR links | Live: `resetpilates.org/go/book`, `/go/wa`, `/go/review`, `/go/map`, `/go/ig`, `/go/tiktok`, `/go/fb`, `/go/prices`, `/go/gift`, `/go/quiz`. `/go/wa` and `/go/review` go to the contact page until the WhatsApp number and Google review link are filled in `src/config/site.ts`. |
 | Security (dashboard) | Done: SSL Full (strict) · Always Use HTTPS · minimum TLS 1.2 · TLS 1.3 · DNSSEC (pending the registrar's DS record, automatic) · Bot Fight Mode · Browser Integrity Check · managed WAF + DDoS (always on) · rate limit on `/api/*` (10 req / 10 s per visitor). |
 | Security (code) | `public/_headers`: HSTS, Content-Security-Policy, no framing, camera/mic/location off. |
-| Email | `hello@resetpilates.org` → resetpilates11@gmail.com via Email Routing. MX, SPF and DKIM records added. DMARC: see section 1. |
+| Email | `hello@resetpilates.org` → resetpilates11@gmail.com via Email Routing. MX, SPF, DKIM and DMARC (`p=none`, reports to Cloudflare) records published. |
+| Analytics | Cloudflare Web Analytics is on for resetpilates.org (automatic setup, cookie-free). |
 | Speed | Photos served as WebP at display size (3.6 MB → 0.7 MB). Hero video 1080p + 720p for phones. Cache rules in `_headers`. |
 | Link previews / SEO | The Worker adds `<title>`, description, canonical, hreflang, Open Graph and Twitter tags per page and language, so WhatsApp/Instagram/Facebook/Google show the right text and the studio photo. Personal pages are `noindex`. `sitemap.xml` and `robots.txt` set for resetpilates.org. |
 | Terminal | Node 24 (via nvm) and Bun are installed. Wrangler is logged in to the re:set account by OAuth. `~/.zshrc` still exports an old `CLOUDFLARE_API_TOKEN` (4 copies) that overrides that login: delete those lines, or run `unset CLOUDFLARE_API_TOKEN` before any `wrangler` command. |
@@ -29,10 +30,9 @@ Written 2026-10-12. Cloudflare changes its free limits from time to time, so che
 | 1 | **Google Search Console:** add property `resetpilates.org` (Domain type) → verify via "Cloudflare" one-click (or add the TXT record it shows) → submit `https://resetpilates.org/sitemap.xml`. | Owner (Google login) |
 | 2 | **Google Business Profile:** paste the site link; once the profile is live, put the profile and review links into `social.googleBusiness` / `social.googleReview` in `src/config/site.ts` (that also switches on `/go/review`). | Owner → Claude |
 | 3 | **Before announcing:** `flags.demoMode` off, `showUnapprovedPrices` off, WhatsApp number + phone in `siteConfig.contact`, real reviews in `config/team.ts` (or `showReviews` off). See `LAUNCH-CHECKLIST.md`. | Owner decides → Claude |
-| 4 | **Web Analytics:** Cloudflare → Analytics & Logs → Web Analytics → add `resetpilates.org` (cookie-free, no banner needed). | Owner / Claude in Chrome |
-| 5 | **DMARC** record if not yet present: `_dmarc` TXT `v=DMARC1; p=quarantine; rua=mailto:resetpilates11@gmail.com`. | Claude in Chrome |
-| 6 | **Airtable alert:** remove the unused "Generate with AI" step from the "New lead → email Orit" automation so it does not spend AI credits per lead. | Owner (Airtable UI) |
-| 7 | Later: Phase 4 items in section 5 (gift codes in D1, waitlist + reminders with Cron, Workers AI for "Ask Orit", R2 for the pro shoot, Access for a studio-only view). | Claude |
+| 4 | **DMARC:** published as `p=none` (monitor only, reports to Cloudflare DMARC Management). Tighten to `p=quarantine` once it is decided whether anyone will send mail *from* @resetpilates.org (e.g. Gmail "send as"), which needs its own SPF/DKIM first. | Owner decides → Claude |
+| 5 | **Airtable alert:** remove the unused "Generate with AI" step from the "New lead → email Orit" automation so it does not spend AI credits per lead. | Owner (Airtable UI) |
+| 6 | Later: Phase 4 items in section 5 (gift codes in D1, waitlist + reminders with Cron, Workers AI for "Ask Orit", R2 for the pro shoot, Access for a studio-only view). | Claude |
 
 ---
 
