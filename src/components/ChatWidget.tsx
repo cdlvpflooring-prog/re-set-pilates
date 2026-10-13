@@ -215,7 +215,7 @@ export function ChatWidget() {
       >
         <img src={AVATAR} alt="" />
         <span className="chat-fab__badge" aria-hidden>
-          <svg viewBox="0 0 16 16" width="12" height="12">
+          <svg viewBox="0 0 16 16" width="14" height="14">
             <path d="M3 3.5h10a1 1 0 0 1 1 1v5.5a1 1 0 0 1-1 1H7l-3 2.5V11H3a1 1 0 0 1-1-1V4.5a1 1 0 0 1 1-1z" fill="currentColor" />
           </svg>
         </span>

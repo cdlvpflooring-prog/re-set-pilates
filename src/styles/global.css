@@ -277,7 +277,6 @@ html[lang="he"] .hdr__nav a { letter-spacing: 0.04em; font-size: 14px; }
   .hdr__nav { display: flex; }
   .hdr__book { display: inline-flex; }
   .hdr__brand .wordmark { font-size: 28px; }
-  .hdr__back { display: none; }
 }
 @media (max-width: 999px) {
   .hdr__in { grid-template-columns: auto 1fr auto; }
@@ -1532,12 +1531,9 @@ html[lang="he"] .ctab__txt b { letter-spacing: 0; }
 .my-empty__img { width: calc(100% + 28px); margin: -14px -14px 6px; aspect-ratio: 4 / 3; border-radius: 18px; background: var(--b-cream); }
 
 /* ───────── v2.2 · review fixes ───────── */
-/* The chat bubble sits on the inline-start side on phones: Book buttons are at the inline end in both languages. */
 .chat-fab[hidden] { display: none; }
 @media (max-width: 999px) {
-  .chat-fab { right: auto; inset-inline-start: 12px; }
   .chat { right: auto; inset-inline: 12px; }
-  .chat-fab__badge { inset-inline: auto -2px; }
 }
 
 /* Phone hero fits one screen: the picture takes whatever height the headline and Book button leave over. */
@@ -1581,6 +1577,19 @@ html[lang="he"] .hero--ed .hero__title { font-family: "Heebo", "Inter", sans-ser
   .hero--ed .hero__offer { grid-column: 2; grid-row: 1 / span 3; align-self: end; }
 }
 @media (prefers-reduced-motion: reduce) { .hero--ed .hero__media img, .hero--ed .hero__media video { animation: none; } }
+
+/* ───────── v2.4 · navigation audit ───────── */
+/* Desktop keeps the Back button on sub-pages too (the tab bar is phone-only) */
+@media (min-width: 1000px) { .hdr__back { display: inline-flex; } }
+/* Chat bubble: on the inline-end side (right in English, left in Hebrew) and a touch larger */
+.chat-fab { right: auto; inset-inline-end: 16px; width: 68px; height: 68px; }
+.chat-fab__badge { right: auto; inset-inline-end: -2px; width: 28px; height: 28px; }
+.chat { right: auto; inset-inline-end: 16px; transform-origin: bottom var(--chat-origin, right); }
+[dir="rtl"] .chat { --chat-origin: left; }
+@media (max-width: 999px) {
+  .chat-fab { inset-inline-end: 12px; width: 64px; height: 64px; }
+  .chat { inset-inline: 12px; bottom: calc(170px + var(--safe-b)); height: min(540px, calc(100dvh - 238px)); }
+}
 
 /* ───────── v2.3 · design system across the site: serif display, studio-dark band, serif wordmark ───────── */
 /* Display titles in English take the serif (Hebrew keeps Heebo: the serif has no Hebrew) */
