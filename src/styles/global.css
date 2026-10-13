@@ -1613,3 +1613,16 @@ html[lang="en"] #classes .flow-row .d-md { font-weight: 600; }
 .btn--gold { background: #f1d3ad; color: #1a1411; }
 @media (hover: hover) and (pointer: fine) { .btn--gold:hover { box-shadow: 0 10px 28px rgba(241, 211, 173, 0.28); } }
 .hero--ed .btn--gold { justify-content: space-between; padding-inline: 22px; min-height: 54px; }
+
+/* Tab indicator: centred with auto margins, not a transform. The tab-to-tab layout animation writes an inline
+   transform on this element and the two used to fight, leaving the line off-centre after a tap. */
+.tabbar__dot {
+  inset: auto 0 6px 0; margin-inline: auto; transform: scaleX(0);
+  transition: transform 220ms var(--ease-out);
+}
+.tabbar a.active .tabbar__dot { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) { .tabbar__dot { transition: none; } }
+/* Labels: no clipping on narrow phones ("My classes" is the widest) */
+.tabbar a { padding-inline: 0; }
+@media (max-width: 400px) { .tabbar a, .tabbar a.active, html[lang="he"] .tabbar a { font-size: 13px; } }
+@media (max-width: 360px) { .tabbar a, .tabbar a.active, html[lang="he"] .tabbar a { font-size: 12px; } }

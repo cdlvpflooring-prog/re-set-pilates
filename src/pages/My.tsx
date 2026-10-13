@@ -6,11 +6,13 @@ import { Sheet } from "../components/ui";
 import { mapsLink, siteConfig } from "../config/site";
 import { fromISO, slotStart } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
+import { useSeo } from "../lib/seo";
 import { downloadIcs } from "../lib/ics";
 import { useStore, type Booking } from "../lib/store";
 
 export default function My() {
   const { t, href, isHe, fmtDate } = useI18n();
+  useSeo(t.meta.my);
   const store = useStore();
   const [toCancel, setToCancel] = useState<Booking | null>(null);
   const maps = mapsLink();

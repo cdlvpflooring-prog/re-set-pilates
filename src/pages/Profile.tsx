@@ -6,11 +6,13 @@ import { Switch } from "../components/ui";
 import { planById } from "../config/pricing";
 import { siteConfig } from "../config/site";
 import { useI18n } from "../lib/i18n";
+import { useSeo } from "../lib/seo";
 import { planEnd, planUsage } from "../lib/plan";
 import { useStore } from "../lib/store";
 
 export default function Profile() {
   const { t, href, isHe } = useI18n();
+  useSeo(t.meta.profile);
   const store = useStore();
   const [hint, setHint] = useState(false);
   const plan = store.planId ? planById(store.planId) : undefined;
