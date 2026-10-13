@@ -85,19 +85,8 @@ export function withPreview(res: Response, url: URL): Response {
         el.setAttribute("dir", lang === "he" ? "rtl" : "ltr");
       },
     })
-    .on("title", { element: (el) => el.setInnerContent(meta.title) })
-    .on('meta[name="description"]', { element: (el) => el.setAttribute("content", meta.desc) })
-    .on("head", { element: (el) => el.append(tags, { html: true }) })
+    .on("title", { element: (el) => void el.setInnerContent(meta.title) })
+    .on('meta[name="description"]', { element: (el) => void el.setAttribute("content", meta.desc) })
+    .on("head", { element: (el) => void el.append(tags, { html: true }) })
     .transform(res);
-}
-
-// HTMLRewriter is built into the Workers runtime; these are the few members used above.
-declare class HTMLRewriter {
-  on(selector: string, handlers: { element(el: RewriterElement): void }): HTMLRewriter;
-  transform(res: Response): Response;
-}
-interface RewriterElement {
-  setAttribute(name: string, value: string): void;
-  setInnerContent(content: string): void;
-  append(content: string, options?: { html: boolean }): void;
 }

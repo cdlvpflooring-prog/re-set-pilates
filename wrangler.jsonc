@@ -1,12 +1,14 @@
 // Cloudflare deployment settings. The site is a static single-page app built into ./dist.
 // Unknown paths (e.g. /he/schedule opened directly) fall back to index.html so the app's router handles them.
-// worker/index.ts runs for /api/* (lead form → Airtable), /go/* (short links for flyers and QR codes)
+// worker/index.ts runs for /api/* (forms → Airtable relay), /go/* (short links for flyers and QR codes)
 // and the pages themselves (adds link-preview tags; files under /assets, /media, /icons are served directly).
 // Secrets are not in this file: set AIRTABLE_TOKEN and TURNSTILE_SECRET in the dashboard (encrypted) or with `bunx wrangler secret put`.
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "re-set-pilates",
   "main": "worker/index.ts",
-  "compatibility_date": "2026-10-01",
+  "compatibility_date": "2026-10-14",
+  "upload_source_maps": true,
   "assets": {
     "directory": "./dist",
     "binding": "ASSETS",
@@ -20,7 +22,19 @@
   "workers_dev": true,
   "preview_urls": true,
   "vars": {
+    // Airtable base "Reset Pilates". The access token is a secret: set AIRTABLE_TOKEN in the Cloudflare dashboard.
     "AIRTABLE_BASE": "app0Wp3uV9jXJDAXZ"
   },
-  "observability": { "enabled": true }
+  // Per-visitor limit on form posts (each Cloudflare location counts separately). The WAF rule on /api/* sits in front of this.
+  "ratelimits": [
+    {
+      "name": "FORM_LIMIT",
+      "namespace_id": "4710",
+      "simple": { "limit": 20, "period": 60 }
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "traces": { "enabled": true }
+  }
 }

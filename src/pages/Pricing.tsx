@@ -7,7 +7,9 @@ import { isTodo, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
+import { relay } from "../lib/relay";
 import { useStore } from "../lib/store";
+import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "../components/forms";
 
 export function Pricing() {
   const { t, href } = useI18n();
@@ -37,9 +39,10 @@ export function Pricing() {
 export function Checkout() {
   const { planId = "" } = useParams();
   const [params] = useSearchParams();
-  const { t, href } = useI18n();
+  const { t, href, lang } = useI18n();
   const store = useStore();
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
   const plan = planById(planId);
   const next = params.get("next");
 
@@ -58,16 +61,24 @@ export function Checkout() {
   const launch = siteConfig.flags.launchPricing;
   const payLabel = { arbox: t.checkout.payArbox, bit: t.checkout.payBit, card: t.checkout.payCard };
   const linksReady = siteConfig.payments.some((m) => !isTodo(m.url));
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault();
     const id = ((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value;
     const method = siteConfig.payments.find((m) => m.id === id);
+    if (!method) return;
     // Real payment happens at the provider's link (plan-specific Arbox link when configured).
-    const url = method?.id === "arbox" && !isTodo(plan.arboxUrl) ? plan.arboxUrl : method?.url;
-    const f = new FormData(e.currentTarget as HTMLFormElement);
-    store.saveProfile({ name: String(f.get("name") ?? ""), phone: String(f.get("phone") ?? ""), email: String(f.get("email") ?? "") });
+    // Opened before anything is awaited so the browser does not block the new tab.
+    const url = method.id === "arbox" && !isTodo(plan.arboxUrl) ? plan.arboxUrl : method.url;
     if (!isTodo(url)) window.open(url, "_blank", "noopener");
+    const f = new FormData(e.currentTarget as HTMLFormElement);
+    const contact = readContact(f);
+    const x = readExtras(f);
+    setSending(true);
+    // Saved in Airtable as a Pending payment until Orit confirms it.
+    await relay("checkout", { lang, contact, planId: plan.id, method: method.id, heard: x.heard, consent: x.consent, termsAccepted: true, website: x.website });
+    store.saveProfile(profileFrom(contact, x));
     store.setPlan(plan.id);
+    setSending(false);
     setDone(true);
   };
 
@@ -104,27 +115,24 @@ export function Checkout() {
               <legend className="eyebrow" style={{ marginBottom: 12 }}>
                 {t.checkout.details}
               </legend>
-              <div className="field">
-                <label htmlFor="co-name">{t.checkout.name}</label>
-                <input id="co-name" name="name" className="input" autoComplete="name" defaultValue={store.profile.name} required />
-              </div>
-              <div className="field">
-                <label htmlFor="co-phone">{t.checkout.phone}</label>
-                <input id="co-phone" name="phone" defaultValue={store.profile.phone} className="input" type="tel" inputMode="tel" autoComplete="tel" dir="ltr" required />
-              </div>
-              <div className="field">
-                <label htmlFor="co-email">{t.checkout.email}</label>
-                <input id="co-email" name="email" defaultValue={store.profile.email} className="input" type="email" autoComplete="email" dir="ltr" />
-              </div>
+              <ContactFields id="co" profile={store.profile} />
+              <HeardField id="co" profile={store.profile} />
             </fieldset>
             <div className="kv" style={{ borderBottom: 0, fontSize: 16 }}>
               <span>{t.checkout.total}</span>
               <span style={{ direction: "ltr" }}>₪{effectivePrice(plan)}</span>
             </div>
             <div className="stack gap-12">
+              <label className="tick">
+                <input type="checkbox" name="terms" required />
+                <span>{t.form.terms}</span>
+              </label>
+              <ConsentField profile={store.profile} />
+            </div>
+            <div className="stack gap-12">
               <span className="eyebrow">{t.checkout.choosePay}</span>
               {siteConfig.payments.map((m, i) => (
-                <button key={m.id} name="method" value={m.id} className={`btn btn--block ${i === 0 ? "btn--sand" : "btn--secondary"}`}>
+                <button key={m.id} name="method" value={m.id} disabled={sending} className={`btn btn--block ${i === 0 ? "btn--sand" : "btn--secondary"}`}>
                   {payLabel[m.id]}
                 </button>
               ))}
