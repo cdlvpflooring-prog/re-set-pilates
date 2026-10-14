@@ -47,7 +47,8 @@ async function passesTurnstile(secret: string | undefined, token: unknown, ip: s
   form.append("response", token.slice(0, 2048));
   if (ip) form.append("remoteip", ip);
   const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body: form });
-  const out = (await r.json()) as { success?: boolean };
+  const out = (await r.json()) as { success?: boolean; "error-codes"?: string[] };
+  if (out.success !== true) console.error(JSON.stringify({ msg: "turnstile rejected", codes: out["error-codes"] ?? [], tokenLength: token.length }));
   return out.success === true;
 }
 
