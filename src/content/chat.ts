@@ -14,6 +14,7 @@ export interface ChatReply {
   text: string;
   actions?: ChatAction[];
   handoff?: boolean; // offer WhatsApp to Orit
+  intent?: string; // id of the scripted answer used; empty when handed to Orit
 }
 interface Intent {
   id: string;
@@ -310,7 +311,7 @@ export function answer(input: string, lang: Lang): ChatReply {
       bestScore = score;
     }
   }
-  if (best) return best.reply(he);
+  if (best) return { ...best.reply(he), intent: best.id };
   return {
     text: he
       ? "שאלה טובה. אין לי עליה תשובה מדויקת, אבל אורית תשמח לענות. שלחי לה הודעה בוואטסאפ או השאירי פרטים."

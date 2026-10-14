@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { instructorName } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
@@ -12,11 +12,14 @@ import { useI18n } from "../lib/i18n";
 import { downloadIcs } from "../lib/ics";
 import { planUsage } from "../lib/plan";
 import { useSeo } from "../lib/seo";
+import { relay } from "../lib/relay";
+import type { Contact, SlotRef } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
+import { ContactFields, readContact } from "../components/forms";
 
 export default function ClassDetail() {
   const { id = "" } = useParams();
-  const { t, href, isHe, fmtDate } = useI18n();
+  const { t, href, isHe, fmtDate, lang } = useI18n();
   const store = useStore();
   const nav = useNavigate();
   const [slot, setSlot] = useState<ClassSlot | null | undefined>(undefined);
@@ -61,11 +64,35 @@ export default function ClassDetail() {
   const plan = store.planId ? planById(store.planId) : undefined;
   const usage = plan ? planUsage(plan, store.bookings.filter((b) => b.slotId !== slot.id), fromISO(slot.date), store.planStart) : null;
   const atLimit = !!usage && usage.left <= 0;
-  const confirm = () => {
-    if (atLimit || !store.book(slot, isReformer ? bed : null, remind)) return;
+  // Name and phone are asked once (first booking or waitlist), then remembered on this device.
+  const needsDetails = !store.profile.firstName || !store.profile.lastName || !store.profile.phone;
+  const slotRef: SlotRef = { slotId: slot.id, service: slot.service, date: slot.date, time: slot.time, minutes: slot.minutes, capacity: slot.capacity };
+  const whoFrom = (form: HTMLFormElement | null): Contact => {
+    if (form && needsDetails) {
+      const c = readContact(new FormData(form));
+      store.saveProfile({ firstName: c.firstName, lastName: c.lastName, phone: c.phone });
+      return c;
+    }
+    const p = store.profile;
+    return { firstName: p.firstName, lastName: p.lastName, phone: p.phone, email: p.email || undefined };
+  };
+  const confirm = (e: FormEvent) => {
+    e.preventDefault();
+    if (atLimit) return;
+    const local = store.book(slot, isReformer ? bed : null, remind);
+    if (!local) return;
     if (arboxUrl) window.open(arboxUrl, "_blank", "noopener");
+    const contact = whoFrom(e.currentTarget as HTMLFormElement);
+    relay("booking", { lang, contact, slot: slotRef, bed: isReformer ? bed : null }).then((r) => r.id && store.setRemoteId(local.id, r.id));
     track("booking_confirmed", { service: slot.service });
     setConfirmed(true);
+  };
+  const joinWaitlist = (e: FormEvent) => {
+    e.preventDefault();
+    const contact = whoFrom(e.currentTarget as HTMLFormElement);
+    store.joinWaitlist(slot.id);
+    relay("waitlist", { lang, contact, slot: slotRef });
+    track("waitlist_join", { service: slot.service });
   };
   const closeSheet = () => {
     setSheet(false);
@@ -142,16 +169,17 @@ export default function ClassDetail() {
           </div>
         ) : slot.full ? (
           <div className="stack gap-12">
-            <button
-              className="btn btn--secondary btn--block"
-              disabled={waitlisted}
-              onClick={() => {
-                store.joinWaitlist(slot.id);
-                track("waitlist_join", { service: slot.service });
-              }}
-            >
-              {waitlisted ? t.klass.waitJoined : t.klass.waitlist}
-            </button>
+            <form className="stack gap-12" onSubmit={joinWaitlist}>
+              {needsDetails && !waitlisted && (
+                <>
+                  <p className="small muted">{t.klass.waitDetails}</p>
+                  <ContactFields id="wl" profile={store.profile} email="none" />
+                </>
+              )}
+              <button className="btn btn--secondary btn--block" disabled={waitlisted}>
+                {waitlisted ? t.klass.waitJoined : t.klass.waitlist}
+              </button>
+            </form>
             <p className="tiny center" aria-live="polite">
               {waitlisted ? t.klass.waitNote : ""}
             </p>
@@ -221,9 +249,15 @@ export default function ClassDetail() {
                 </Link>
               </>
             ) : store.isMember ? (
-              <button className="btn btn--sand btn--block" onClick={confirm}>
-                {arboxUrl ? t.confirm.finishArbox : t.confirm.confirmBtn}
-              </button>
+              <form className="stack gap-12" onSubmit={confirm}>
+                {needsDetails && (
+                  <>
+                    <p className="small muted">{t.form.detailsNote}</p>
+                    <ContactFields id="bk" profile={store.profile} email="none" />
+                  </>
+                )}
+                <button className="btn btn--sand btn--block">{arboxUrl ? t.confirm.finishArbox : t.confirm.confirmBtn}</button>
+              </form>
             ) : (
               <Link to={href(`pricing?next=${slot.id}`)} className="btn btn--sand btn--block">
                 {t.confirm.choosePlan}

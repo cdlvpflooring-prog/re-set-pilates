@@ -443,3 +443,68 @@ Arbox data (members, plans, classes, payments) is copied in on a schedule once t
 1. **A token that can create the base.** The token shared can't see any bases or workspaces yet. Create a new one at airtable.com/create/tokens with scopes `data.records:read`, `data.records:write`, `schema.bases:read`, `schema.bases:write`, and access to the re:set workspace.
 2. **Replace the shared token.** It was pasted into a chat, so regenerate it and delete the old one.
 3. Decide who besides Orit gets access, and keep **Health & Consent** to Orit only.
+
+---
+
+## Website ↔ Airtable sync decisions (owner, 9–10 Oct 2026)
+
+**Accounts and sign-in**
+- Visitors give first name, last name and phone on their first booking; the app remembers them after that.
+- Sign-in options: WhatsApp code (WhatsApp Business account on the studio's new number; Meta charges a small fee per code), Google, and email magic link.
+- After buying a plan, the customer is invited to build a full profile (the AI trainer onboarding). They can skip it and finish later.
+
+**Consent**
+- Unticked "Send me news and offers" box on the lead form and at checkout → Members: Marketing consent, Consent date, Consent source.
+- Required tickbox at checkout: terms + 24-hour cancellation policy → Health & Consent: Terms & cancellation policy accepted, with date.
+- Waiver / health declaration: online form, opened from the profile or by scanning a QR code at the studio. Saved in Health & Consent (wording to be approved by a lawyer).
+
+**Health data**
+- AI trainer check-ins (pain, energy, soreness, pregnancy) go to a new **Trainer Check-ins** tab that only Orit can see, next to Health & Consent. Never in Members or marketing views.
+
+**Forms**
+- Lead form: first name, last name, phone, email (optional), interest, preferred time (morning / midday / evening), "How did you hear about us?", marketing opt-in.
+- "How did you hear about us?" is also asked once at checkout. Campaign links (`utm_` tags) are read automatically and saved as Source detail.
+- Gift cards: the buyer gives their own name, phone and email and receives the card (image + code) to forward or print. Recipient name and note stay on the card.
+- Quiz: the result shows first, then an optional "Leave your number and Orit will send you a plan". Answers are saved whether or not they leave details.
+- Ask Orit chat: every question is saved to Chat Questions with topic, language and whether it was answered. Question text is no longer sent to analytics.
+
+**Payments and alerts**
+- Purchases are saved as **Pending**. Orit marks them Paid by hand until the Arbox sync does it automatically.
+- New lead / booking / purchase / gift card: saved in Airtable, plus an email to resetpilates11@gmail.com and a WhatsApp message to Orit.
+
+**Matching details for the relay**
+- Plans & Prices gets a **Website ID** field (m1x, m2x, m3x, m4x, munl, p5, p10, p15) so checkout can link the right plan.
+- Bed numbers: the site counts 0–4, Airtable 1–5 (relay adds 1).
+- Payment method "card" → "Credit card".
+- Chat topics: the site's 26 answer topics are grouped into the 8 Airtable topics.
+
+**Relay setup**
+- Claude writes the Cloudflare Worker in the repo; the owner deploys it from the Cloudflare dashboard and pastes a fresh Airtable key as a secret there.
+
+### Applied to the live base (10 Oct 2026)
+
+Checked: all 16 tabs present; the 11 rows in Plans & Prices match `src/config/pricing.ts` (prices, launch prices, bonus sessions, popular badges); quiz, payment, bed and booking-status options cover every value the site produces.
+
+Added:
+- Plans & Prices → **Website ID** (filled: m1x, m2x, m3x, m4x, munl, p5, p10, p15, private, duo, gift)
+- Members → **Signs in with** (WhatsApp code / Google / Email link), **Trainer profile completed**
+- Leads & Inquiries → **How did you hear**, **Marketing consent**
+- Health & Consent → **Terms accepted on**, **Signed via** (Profile / Studio QR code / Paper), **Signature (typed name)**
+- Chat Questions → **Answer used** (the site's chat answer id)
+- Classes → **Website class ID** (e.g. reformer_2026-10-12_1800)
+- New tab **Trainer Check-ins** (Orit only): Member, Booking, Date, Energy 1–5, Soreness 0–10, Pain 0–10, Pain locations, Member notes, Safety review, Review reason, Orit's resolution
+
+Relay value mapping: quiz `strength/calm/care/together` → Strength / Calm & mobility / Gentle return / Together; `none/some/regular` → None / Some / Regular; `group/solo/pair` → Small group / One-to-one / With a friend; payment `card` → Credit card; bed index +1; booked via App; purchases → Payments status Pending.
+
+### Test run with sample data (10 Oct 2026)
+
+One linked sample customer ("SAMPLE Maya Levi") was added to every tab, plus a sample instructor, campaign and two classes. All records start with "SAMPLE" and can be deleted.
+
+Fixed after the test:
+- Lifetime spend and "Paid in full" counted pending payments → new Payments "Confirmed amount"; Members "Lifetime spend (paid)"; Memberships "Paid (confirmed)" (old rollups renamed "All payments (incl. pending)").
+- 24-hour rule used a date-only class time → Classes "Start (unix)", Bookings "Class start (unix)"; "Hours notice when cancelled" is now exact (tested: 23 h → late cancel).
+- Cancelled bookings still took a spot → Bookings "Holds a spot (1/0)", Classes "Spots taken"; "Spots left" uses it ("Booked" renamed "All bookings (incl. cancelled)").
+- "Days since last class" counted future bookings and was off by one → uses new "Last attended class", in Israel time ("Last class date" renamed "Latest booking date").
+- Number formulas returned text (broke "more than 21 days" style filters) → Spots left, Sessions left, Hours notice, Cost per lead, Response time now return numbers.
+
+Still open: Memberships "Days to renewal" returns text (change `""` to `BLANK()` in its formula); delete the Bookings field "UNUSED - safe to delete".

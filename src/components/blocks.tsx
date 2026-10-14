@@ -9,7 +9,10 @@ import type { Content } from "../content/en";
 import { track } from "../lib/analytics";
 import { bookingProvider, fromISO, toISO, upcomingDays, type BookableService, type ClassSlot } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
+import { relay } from "../lib/relay";
+import { PREF_TIMES, type PrefTime } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
+import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "./forms";
 import { MaskImg, Price, Segmented } from "./ui";
 
 export const instructorName = (id: string, isHe: boolean) => {
@@ -183,10 +186,11 @@ export function PricingList({ next, limit }: { next?: string; limit?: boolean })
 }
 
 export function LeadForm({ initialInterest }: { initialInterest?: string }) {
-  const { t } = useI18n();
+  const { t, lang } = useI18n();
   const { profile, saveProfile } = useStore();
   const [interest, setInterest] = useState<string>(initialInterest ?? "reformer");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "mailed">("idle");
+  const [prefTime, setPrefTime] = useState<PrefTime | undefined>();
+  const [state, setState] = useState<"idle" | "sending" | "sent" | "queued" | "failed">("idle");
   const [error, setError] = useState<"phone" | "bot" | null>(null);
   const [started, setStarted] = useState(false);
   const turnstile = useTurnstile(started);
@@ -199,55 +203,29 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget as HTMLFormElement);
-    const name = String(f.get("name") ?? "");
-    const phone = String(f.get("phone") ?? "");
-    saveProfile({ name, phone });
+    const contact = readContact(f);
+    const x = readExtras(f);
+    setState("sending");
     track("lead_form_submit", { interest });
-    setStatus("sending");
     setError(null);
-    // Straight into Airtable through the Cloudflare Worker (/api/lead).
-    try {
-      const r = await fetch("/api/lead", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name, phone, interest, page: location.pathname, website: f.get("website"), turnstile: turnstile.token }),
-      });
-      if (r.ok) return setStatus("sent");
-      // The visitor can fix these; only infrastructure failures fall back to the email draft.
-      const code = (await r.json().catch(() => ({}))).error;
-      if (code === "fields" || code === "turnstile") {
-        setError(code === "fields" ? "phone" : "bot");
-        setStatus("idle");
-        return;
-      }
-    } catch {
-      // offline or no Worker (local dev): fall through to the email draft
+    const r = await relay("lead", { lang, contact, interest, prefTime, heard: x.heard, consent: x.consent, website: x.website, turnstile: turnstile.token });
+    if (r.ok || r.queued) saveProfile(profileFrom(contact, x));
+    // The visitor can fix these two; anything else is an infrastructure failure.
+    if (!r.ok && !r.queued && (r.error === "turnstile" || r.error?.startsWith("bad ") || r.error === "missing field")) {
+      setError(r.error === "turnstile" ? "bot" : "phone");
+      setState("idle");
+      return;
     }
-    // Fallback: a ready-to-send email draft to the studio Gmail.
-    const subject = `re:set pilates | ${t.contact.leadTitle} (${name})`;
-    const body = `${t.contact.fName}: ${name}\n${t.contact.fPhone}: ${phone}\n${t.contact.fInterest}: ${t.services.items[interest as ServiceId]?.name ?? interest}`;
-    window.location.href = `mailto:${siteConfig.contact.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setStatus("mailed");
+    setState(r.ok ? "sent" : r.queued ? "queued" : "failed");
   };
-  const done = status === "sent" || status === "mailed";
+  const done = state === "sent" || state === "queued";
   return (
     <form className="card stack gap-16" onSubmit={submit} onFocus={onStart}>
-      {/* Honeypot: hidden from people, filled in by bots. */}
-      <input name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", width: 1, height: 1, opacity: 0, overflow: "hidden", clipPath: "inset(50%)", pointerEvents: "none" }} />
       <div className="stack gap-4">
         <h2 className="display d-sm">{t.contact.leadTitle}</h2>
         <p className="small muted">{t.contact.leadSub}</p>
       </div>
-      <div className="grid-2">
-        <div className="field">
-          <label htmlFor="lead-name">{t.contact.fName}</label>
-          <input id="lead-name" className="input" name="name" autoComplete="name" defaultValue={profile.name} required />
-        </div>
-        <div className="field">
-          <label htmlFor="lead-phone">{t.contact.fPhone}</label>
-          <input id="lead-phone" className="input" name="phone" defaultValue={profile.phone} type="tel" inputMode="tel" autoComplete="tel" required dir="ltr" />
-        </div>
-      </div>
+      <ContactFields id="lead" profile={profile} />
       <div className="stack gap-8">
         <span className="tiny">{t.contact.fInterest}</span>
         <div className="row gap-8" style={{ flexWrap: "wrap" }}>
@@ -264,15 +242,30 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
           ))}
         </div>
       </div>
+      <div className="stack gap-8">
+        <span className="tiny">{t.form.prefTime}</span>
+        <div className="row gap-8" style={{ flexWrap: "wrap" }}>
+          {PREF_TIMES.map((p) => (
+            <button type="button" key={p} className="pill pill--blush" aria-pressed={prefTime === p} onClick={() => setPrefTime(prefTime === p ? undefined : p)}>
+              {t.form.times[p as keyof typeof t.form.times]}
+            </button>
+          ))}
+        </div>
+      </div>
+      <HeardField id="lead" profile={profile} />
+      <ConsentField profile={profile} />
       <div ref={turnstile.ref} />
       {error && (
         <p className="small" role="alert" style={{ color: "var(--accent)" }}>
           {error === "phone" ? t.contact.errPhone : t.contact.errBot}
         </p>
       )}
-      <button className={`btn ${done ? "btn--secondary" : "btn--blush"}`} disabled={status !== "idle"} aria-live="polite">
-        {status === "sent" ? t.contact.sentDirect : status === "mailed" ? t.contact.sent : status === "sending" ? t.contact.sending : t.contact.send}
+      <button className={`btn ${done ? "btn--secondary" : "btn--blush"}`} disabled={done || state === "sending"} aria-live="polite">
+        {state === "sending" ? t.form.sending : done ? t.contact.sent : t.contact.send}
       </button>
+      <p className="small" aria-live="polite" style={{ margin: 0 }}>
+        {state === "queued" ? t.form.saved : state === "failed" ? t.form.failed : ""}
+      </p>
     </form>
   );
 }
