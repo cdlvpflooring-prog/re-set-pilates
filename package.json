@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "vite --host",
     "build": "tsc --noEmit && tsc -p worker && vite build",
-    "preview": "vite preview --host"
+    "preview": "vite preview --host",
+    "check:worker": "tsc -p worker",
+    "test:worker": "bun test worker/",
+    "types:worker": "wrangler types worker/worker-configuration.d.ts"
   },
   "dependencies": {
     "motion": "^11.15.0",
@@ -19,7 +22,8 @@
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "typescript": "^5.6.3",
-    "vite": "^5.4.11"
+    "vite": "^5.4.11",
+    "wrangler": "^4.150.0"
   },
   "engines": {
     "node": ">=20"

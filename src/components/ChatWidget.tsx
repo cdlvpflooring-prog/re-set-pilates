@@ -6,6 +6,7 @@ import { isTodo, siteConfig } from "../config/site";
 import { founder } from "../config/team";
 import { answer, quickTopics, type ChatReply } from "../content/chat";
 import { track } from "../lib/analytics";
+import { relay } from "../lib/relay";
 import { useI18n } from "../lib/i18n";
 
 interface Msg extends ChatReply {
@@ -81,11 +82,13 @@ export function ChatWidget() {
   const ask = (q: string) => {
     const text = q.trim();
     if (!text) return;
-    track("chat_question", { q: text.slice(0, 80) });
+    // Analytics gets the topic only, never the question text (questions can be about health).
     setMsgs((m) => [...m, { id: nextId.current++, from: "me", text }]);
     setDraft("");
     setTyping(true);
     const reply = answer(text, lang);
+    track("chat_question", { topic: reply.intent ?? "handoff" });
+    relay("chat", { lang, question: text, intent: reply.intent, handoff: !!reply.handoff });
     setTimeout(
       () => {
         setTyping(false);
