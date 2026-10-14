@@ -78,7 +78,7 @@ export function withPreview(res: Response, url: URL): Response {
     index ? "" : `<meta name="robots" content="noindex">`,
   ].join("\n    ");
 
-  return new HTMLRewriter()
+  const out = new HTMLRewriter()
     .on("html", {
       element(el) {
         el.setAttribute("lang", lang);
@@ -89,6 +89,23 @@ export function withPreview(res: Response, url: URL): Response {
     .on('meta[name="description"]', { element: (el) => el.setAttribute("content", meta.desc) })
     .on("head", { element: (el) => el.append(tags, { html: true }) })
     .transform(res);
+  return withScriptNonce(out);
+}
+
+/**
+ * Per-request CSP nonce. Cloudflare adds a small inline bootstrap to HTML pages (bot and challenge
+ * signals) and copies the nonce from the Content-Security-Policy header onto it, so the strict policy
+ * in public/_headers keeps blocking every other inline script while that one is allowed to run.
+ */
+function withScriptNonce(res: Response): Response {
+  const csp = res.headers.get("content-security-policy");
+  if (!csp || !csp.includes("script-src 'self'")) return res;
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  const nonce = btoa(String.fromCharCode(...bytes));
+  const r = new Response(res.body, res);
+  r.headers.set("content-security-policy", csp.replace("script-src 'self'", `script-src 'self' 'nonce-${nonce}'`));
+  return r;
 }
 
 // HTMLRewriter is built into the Workers runtime; these are the few members used above.

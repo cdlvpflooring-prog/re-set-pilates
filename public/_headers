@@ -1,4 +1,6 @@
 # Security headers for every page and file.
+# HTML pages also get a per-request script nonce from the Worker (worker/preview.ts), which lets
+# Cloudflare's own injected bootstrap run without opening script-src to 'unsafe-inline'.
 # CSP allows only what the site uses: our own files, Google Fonts, the Google Maps embed,
 # and Cloudflare Web Analytics. Add a host here before the site starts loading from it.
 /*
