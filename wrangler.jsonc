@@ -7,7 +7,7 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "re-set-pilates",
   "main": "worker/index.ts",
-  "compatibility_date": "2026-10-14",
+  "compatibility_date": "2026-10-13",
   "upload_source_maps": true,
   "assets": {
     "directory": "./dist",
