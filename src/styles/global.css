@@ -1762,3 +1762,25 @@ html[lang="he"] .hero--sport .btn--outline { font-size: 17.5px; }
 .avatar--brand .wordmark { font-size: 18px; }
 .avatar--brand .wordmark i { color: var(--b-peach, #d4e5f1); }
 
+/* ───────── v3.1 · "Our classes" cards: photo edge to edge, chip on the photo, text and CTA start-aligned below ───────── */
+#classes .flow-row.ccard { display: grid; gap: 0; padding: 0; overflow: hidden; justify-items: stretch; text-align: start; }
+.ccard__media { position: relative; display: block; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-bottom: 2px solid #1f1612; background: #fff; }
+.ccard__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--ease-out); }
+.ccard__chip {
+  position: absolute; inset-inline-start: 14px; bottom: 12px; padding: 6px 12px; border-radius: 999px;
+  background: rgba(255, 253, 250, 0.94); color: #1f1612; border: 1.5px solid #1f1612;
+  font-family: "Inter", "Heebo", sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+html[lang="he"] .ccard__chip { text-transform: none; letter-spacing: 0; font-size: 13px; }
+.ccard__body { display: grid; gap: 10px; padding: 18px 18px 20px; justify-items: start; }
+#classes .ccard__title { text-align: start; margin: 0; line-height: 1.05; }
+.ccard__blurb { font-size: 16px; line-height: 1.45; color: rgba(31, 22, 18, 0.78); max-width: 38ch; text-align: start; }
+.ccard__cta {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 4px; min-height: 44px; padding: 0 18px; border-radius: 999px;
+  border: 2px solid #1f1612; background: transparent; color: #1f1612; font-family: "Inter", "Heebo", sans-serif; font-size: 14.5px; font-weight: 700;
+}
+.ccard__cta--book { background: #1f1612; color: #fffdfa; }
+.ccard__cta .chev { width: 8px; height: 8px; border-width: 2px; }
+@media (hover: hover) and (pointer: fine) { #classes .flow-row.ccard:hover { padding-inline: 0; } #classes .ccard:hover .ccard__media img { transform: scale(1.04); } }
+@media (min-width: 900px) { #classes .reveal:nth-child(5) .ccard__media { aspect-ratio: 21 / 9; } }
+

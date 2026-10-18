@@ -181,17 +181,20 @@ export default function Home() {
                 <Reveal key={s.id}>
                   <Link
                     to={s.bookable ? href(`schedule?service=${s.id}`) : serviceTarget(s, href)}
-                    className="flow-row"
+                    className="flow-row ccard"
                     onClick={() => track("service_view", { service: s.id })}
                   >
-                    <span className="thumb thumb--card" aria-hidden>
+                    <span className="ccard__media" aria-hidden>
                       <img src={s.image} alt="" style={{ objectPosition: s.pos }} loading="lazy" />
+                      <span className="ccard__chip">{sc.meta}</span>
                     </span>
-                    <span className="display d-md flow-row__title">{sc.name}</span>
-                    <span className="flow-row__desc">{sc.desc}</span>
-                    <span className="flow-row__meta small muted">
-                      {!s.bookable && <span>{t.common.byRequest}</span>}
-                      <span>{sc.meta}</span>
+                    <span className="ccard__body">
+                      <span className="display d-md ccard__title">{sc.name}</span>
+                      <span className="ccard__blurb">{sc.blurb}</span>
+                      <span className={`ccard__cta ${s.bookable ? "ccard__cta--book" : ""}`}>
+                        {s.bookable ? t.nav.bookTitle : t.common.requestSession}
+                        <span className="chev" aria-hidden />
+                      </span>
                     </span>
                   </Link>
                 </Reveal>
