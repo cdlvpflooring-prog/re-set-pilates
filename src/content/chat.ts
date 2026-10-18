@@ -30,6 +30,7 @@ const H = siteConfig.policies.cancelHours;
 
 const monthly = (he: boolean) =>
   pricing.memberships
+    .filter((p) => !p.track)
     .map((p) => `${p.perWeek === "unlimited" ? (he ? "ללא הגבלה" : "Unlimited") : he ? `${p.perWeek} בשבוע` : `${p.perWeek}× a week`}: ₪${price(p)}`)
     .join("\n");
 const passes = (he: boolean) =>
@@ -87,8 +88,8 @@ export const intents: Intent[] = [
     keys: ["type", "kind", "what classes", "which classes", "reformer", "mat ", "difference", "what do you offer", "offer", "סוג", "סוגי", "אילו שיעורים", "איזה שיעורים", "רפורמר", "מזרן", "מכשירים", "ההבדל", "מה יש"],
     reply: (he) => ({
       text: he
-        ? "יש לנו:\n• רפורמר בקבוצות של עד 5 (50 דק׳)\n• פילאטיס מזרן בקבוצה קטנה\n• אימון פרטי 1:1\n• אימון זוגי\n• קבוצת נשים בלבד, בתיאום\nרפורמר הוא מיטה עם קפיצים שמוסיפים התנגדות או תמיכה, ומזרן מתמקד בליבה ובגמישות."
-        : "We offer:\n• Reformer in groups of up to 5 (50 min)\n• Mat Pilates in a small group\n• Private 1:1\n• Duo training\n• Women-only groups, by request\nThe Reformer uses springs for resistance or support; Mat focuses on core and mobility.",
+        ? "יש לנו:\n• רפורמר בקבוצות של עד 5 (50 דק׳)\n• פילאטיס מזרן בקבוצה קטנה\n• אימון פרטי 1:1\n• אימון זוגי\n• פילאטיס לנערות 12–17, פעם בשבוע\n• קבוצות סגורות ואירועים: סוגרים את הסטודיו בשבילכן\n• קבוצת נשים בלבד, בתיאום\nרפורמר הוא מיטה עם קפיצים שמוסיפים התנגדות או תמיכה, ומזרן מתמקד בליבה ובגמישות. המנויים לרפורמר ולמזרן באותו מחיר."
+        : "We offer:\n• Reformer in groups of up to 5 (50 min)\n• Mat Pilates in a small group\n• Private 1:1\n• Duo training\n• Teen Pilates (girls 12–17), once a week\n• Closed groups & events: the studio is yours\n• Women-only groups, by request\nThe Reformer uses springs for resistance or support; Mat focuses on core and mobility. Reformer and Mat plans cost the same.",
       actions: [{ label: he ? "לכל השירותים" : "All services", to: "services" }, book(he)],
     }),
   },
@@ -100,6 +101,27 @@ export const intents: Intent[] = [
         ? "אימון פרטי (1:1) ואימון זוגי מתואמים מראש, 50 דקות, ונבנים סביבך. השאירי פרטים או שלחי וואטסאפ ונמצא שעה שמתאימה."
         : "Private (1:1) and duo sessions are booked by appointment, 50 minutes, built around you. Leave your details or message us and we'll find a time.",
       actions: [{ label: he ? "לתיאום" : "Request a session", to: "contact?interest=private" }],
+      handoff: true,
+    }),
+  },
+  {
+    id: "teens",
+    keys: ["teen", "teens", "girl", "daughter", "12", "13", "14", "15", "16", "17", "נערות", "נערה", "ילדה", "בת שלי", "הבת", "לנוער"],
+    reply: (he) => ({
+      text: he
+        ? "פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, פעם בשבוע, 50 דקות. 180 ₪ לחודש (4 אימונים). חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי."
+        : "Teen Pilates for girls aged 12–17: a fixed group of up to 5, once a week, 50 minutes. ₪180 a month (4 sessions). Strength, posture, mobility and confidence.",
+      actions: [{ label: he ? "לפרטים ולהרשמה" : "Details & sign up", to: "services/teens" }],
+    }),
+  },
+  {
+    id: "groups",
+    keys: ["event", "party", "birthday", "bachelorette", "hen", "team", "group", "close the studio", "אירוע", "מסיבה", "יום הולדת", "רווקות", "צוות", "גיבוש", "קבוצה סגורה", "קבוצה פרטית", "לסגור את הסטודיו"],
+    reply: (he) => ({
+      text: he
+        ? "סוגרים את הסטודיו רק בשבילכן, עד 5 משתתפות:\n• קבוצה פרטית: אימון מכשירים של 50 דק׳, 350 ₪ לקבוצה\n• חבילת אירוע: 90 דק׳ עם זמן חופשי, מתיחות, 50 דק׳ פילאטיס מכשירים וכיבוד מפנק, 750 ₪ לקבוצה\nבתיאום מראש. שלחי לנו את התאריך ונשריין."
+        : "We close the studio just for you, up to 5 people:\n• Private group: a 50-min equipment session, ₪350 per group\n• Event package: 90 min with free time, stretching, 50 min of equipment Pilates and light refreshments, ₪750 per group\nBy appointment. Send us your date and we'll hold it.",
+      actions: [{ label: he ? "לחבילות" : "See the packages", to: "services/closed-groups" }, { label: he ? "לשריין תאריך" : "Book a date", to: "contact?interest=groups" }],
       handoff: true,
     }),
   },

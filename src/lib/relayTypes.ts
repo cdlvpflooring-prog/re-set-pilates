@@ -46,7 +46,8 @@ interface Base {
 
 export interface LeadMsg extends Base {
   contact: Contact;
-  interest: string; // service id: reformer | mat | private | duo | women
+  interest: string; // service id: reformer | mat | private | duo | women | teens | groups
+  note?: string; // free text for the lead's "Message", e.g. the package a group asked about
   prefTime?: PrefTime;
   heard?: HeardFrom;
   consent: boolean;
@@ -56,6 +57,7 @@ export interface LeadMsg extends Base {
 export interface CheckoutMsg extends Base {
   contact: Contact;
   planId: string; // Plans & Prices > Website ID
+  kind?: "reformer" | "mat"; // which class the plan is for (same price); teens plans send none
   method: PayMethod;
   heard?: HeardFrom;
   consent: boolean;

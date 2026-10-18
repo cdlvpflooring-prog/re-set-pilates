@@ -38,6 +38,8 @@ Everything below works on screen as a demo. This is what each flow still needs b
 ## Before going live
 - Live at https://resetpilates.org (Cloudflare, auto-published from `main`). Open items: `CLOUDFLARE-PLAN.md` section 1.
 - Turn off demo mode (`flags.demoMode`) and confirm launch pricing on/off.
+- New offers (Oct 2026 flyers): add a "Teens" plan in Airtable *Plans & Prices* with Website ID `teens`, regular price 180, monthly, validity 1 month, or the teens checkout returns "unknown plan". Reformer and Mat share one price list; the chosen class is written into the membership name, e.g. "2× per week (Mat)". Group packages (private group 350, event 750) are request-only and arrive as leads with interest "Event" and the package in the message. Arbox links for `teens` / `groups` are still TODO in `src/config/arbox.ts`.
+- Photos for Teens and Closed groups are stand-ins (`ex-rest`, `studio`) until the shoot.
 - Google Analytics ID (or Cloudflare Web Analytics). Sitemap and `robots.txt` are set for `resetpilates.org`.
 - Check on a real iPhone and Android phone, in Hebrew and English.
 

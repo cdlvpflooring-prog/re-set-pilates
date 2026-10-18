@@ -10,6 +10,8 @@ export const arbox = {
     private: TODO,
     duo: TODO,
     women: TODO,
+    teens: TODO,
+    groups: TODO,
   } as Record<string, string>,
   memberships: {
     m1x: TODO,
@@ -20,6 +22,7 @@ export const arbox = {
     p5: TODO,
     p10: TODO,
     p15: TODO,
+    teens: TODO,
   } as Record<string, string>,
 };
 

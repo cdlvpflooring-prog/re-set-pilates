@@ -62,6 +62,26 @@ const glyphs: Record<ServiceId, ReactNode> = {
       <circle cx="60" cy="70" r="4" {...P} />
     </>
   ),
+  // Teens: two small figures, side by side
+  teens: (
+    <>
+      <circle cx="44" cy="46" r="10" {...P} />
+      <circle cx="76" cy="46" r="10" {...P} />
+      <path d="M26 92q0-22 18-22t18 22" {...P} />
+      <path d="M58 92q0-22 18-22t18 22" {...P} />
+    </>
+  ),
+  // Closed groups: a ring of five
+  groups: (
+    <>
+      <circle cx="60" cy="60" r="36" {...P} />
+      <circle cx="60" cy="30" r="6" {...P} />
+      <circle cx="88" cy="50" r="6" {...P} />
+      <circle cx="78" cy="84" r="6" {...P} />
+      <circle cx="42" cy="84" r="6" {...P} />
+      <circle cx="32" cy="50" r="6" {...P} />
+    </>
+  ),
 };
 
 export function ServiceGlyph({ id }: { id: ServiceId }) {
@@ -72,7 +92,7 @@ export function ServiceGlyph({ id }: { id: ServiceId }) {
   );
 }
 
-const tones: Record<ServiceId, string> = { reformer: "", mat: "arch--sand", private: "arch--blush", duo: "arch--paper", women: "arch--blush" };
+const tones: Record<ServiceId, string> = { reformer: "", mat: "arch--sand", private: "arch--blush", duo: "arch--paper", women: "arch--blush", teens: "arch--sand", groups: "arch--paper" };
 
 export function ServiceArch({ id, image, pos }: { id: ServiceId; image?: string; pos?: string }) {
   return (

@@ -1,4 +1,4 @@
-export type ServiceId = "reformer" | "mat" | "private" | "duo" | "women";
+export type ServiceId = "reformer" | "mat" | "private" | "duo" | "women" | "teens" | "groups";
 
 export interface ServiceConfig {
   id: ServiceId;
@@ -19,6 +19,10 @@ export const services: ServiceConfig[] = [
   { id: "private", slug: "private-1to1", image: "/assets/ex-private.webp", pos: "50% 45%", thumb: "/assets/ex-private-sm.webp", thumbPos: "60% 40%", bookable: false, minutes: 50, approved: true },
   { id: "duo", slug: "duo", image: "/assets/ex-duo.webp", pos: "50% 40%", thumb: "/assets/ex-duo-sm.webp", thumbPos: "50% 35%", bookable: false, minutes: 50, approved: true },
   { id: "women", slug: "women-only", image: "/assets/ex-women.webp", pos: "50% 40%", thumb: "/assets/ex-women-sm.webp", thumbPos: "70% 40%", bookable: false, minutes: 50, approved: false },
+  // Teens (girls 12-17): a fixed weekly group, sold as its own monthly plan (pricing.ts: "teens"). Photo is a stand-in until the shoot.
+  { id: "teens", slug: "teens", image: "/assets/ex-rest.webp", pos: "50% 40%", thumb: "/assets/ex-tab-reformer-sm.webp", thumbPos: "50% 60%", bookable: false, capacity: 5, minutes: 50, approved: true },
+  // Closed groups: the studio closes for your group. Two packages (packages.ts): private group and event.
+  { id: "groups", slug: "closed-groups", image: "/assets/studio.webp", pos: "50% 60%", thumb: "/assets/ex-tab-reformer-sm.webp", thumbPos: "50% 60%", bookable: false, capacity: 5, minutes: 50, approved: true },
 ];
 
 export const serviceById = (id: string) => services.find((s) => s.id === id);

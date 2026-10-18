@@ -79,7 +79,7 @@ export default function Profile() {
                 </span>
               </div>
               <div className="stack gap-8">
-                <span className="mcard__name">{planName(plan, t)}</span>
+                <span className="mcard__name">{planName(plan, t, store.planKind)}</span>
                 <span className="mcard__usage">
                   {usage.cap === null ? (
                     <>

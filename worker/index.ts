@@ -139,7 +139,7 @@ function addMonths(isoDate: string, months: number): string {
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DOWS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const SERVICE_NAME = { reformer: "Reformer", mat: "Mat" } as const;
-const INTEREST: Record<string, string> = { reformer: "Reformer", mat: "Mat", private: "Private 1:1", duo: "Duo", women: "Women-only" };
+const INTEREST: Record<string, string> = { reformer: "Reformer", mat: "Mat", private: "Private 1:1", duo: "Duo", women: "Women-only", teens: "Teens", groups: "Event" };
 const fullName = (c: Contact) => `${c.firstName} ${c.lastName}`;
 const linkIds = (v: unknown) => (Array.isArray(v) ? (v as string[]) : []);
 
@@ -331,6 +331,7 @@ const handlers: Record<RelayEvent, Handler> = {
       ...(c.email ? { [L.email]: c.email } : {}),
       [L.channel]: "Website form",
       [L.interested]: [interest],
+      ...(m.note ? { [L.message]: text(m.note, 200) } : {}),
       ...(prefTime ? { [L.prefTime]: prefTime } : {}),
       [L.page]: [text(m.page, 120), attributionNote(a)].filter(Boolean).join(" · "),
       [L.status]: "New",
@@ -349,6 +350,8 @@ const handlers: Record<RelayEvent, Handler> = {
     const method = oneOf(m.method, ["arbox", "bit", "card"] as const);
     if (!method) throw new BadRequest("bad method");
     const p = await planByWebsiteId(at, text(m.planId, 12, true));
+    const kind = oneOf(m.kind, ["reformer", "mat"] as const); // Reformer and Mat plans share one price list
+    const kindLabel = kind ? { reformer: "Reformer", mat: "Mat" }[kind] : "";
     const today = todayIL();
     const member = await upsertMember(at, c, {
       lang: lang(m.lang),
@@ -362,7 +365,7 @@ const handlers: Record<RelayEvent, Handler> = {
     const [y, mo] = today.split("-").map(Number);
     const membership = await at.create(T.memberships, {
       // Status stays empty until Orit confirms the payment and sets it to Active.
-      [S.name]: `${fullName(c)} · ${p.name} · ${MONTHS[mo - 1]} ${y}`,
+      [S.name]: `${fullName(c)} · ${p.name}${kindLabel ? ` (${kindLabel})` : ""} · ${MONTHS[mo - 1]} ${y}`,
       [S.member]: [member.id],
       [S.plan]: [p.plan.id],
       [S.start]: today,

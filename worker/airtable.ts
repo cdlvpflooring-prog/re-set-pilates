@@ -177,7 +177,8 @@ export class Airtable {
   }
 
   async create(table: string, fields: Fields): Promise<AirRecord> {
-    const r = (await this.call("POST", `${table}?returnFieldsByFieldId=true`, { records: [{ fields }] })) as { records: AirRecord[] };
+    // typecast: a select value Airtable has not seen yet (e.g. a new "Interested in" option) is added instead of rejected
+    const r = (await this.call("POST", `${table}?returnFieldsByFieldId=true`, { records: [{ fields }], typecast: true })) as { records: AirRecord[] };
     return r.records[0];
   }
 
