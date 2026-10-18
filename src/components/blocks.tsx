@@ -12,6 +12,7 @@ import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
 import { PREF_TIMES, type PrefTime } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
+import { loadTurnstile } from "../lib/turnstile";
 import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "./forms";
 import { MaskImg, Price, Segmented } from "./ui";
 
@@ -270,28 +271,24 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
   );
 }
 
-declare global {
-  interface Window {
-    turnstile?: { render(el: HTMLElement, opts: Record<string, unknown>): string };
-  }
-}
-
 /** Cloudflare Turnstile bot check. Loads only once the visitor starts the form, and only when a site key is set. */
 function useTurnstile(active: boolean) {
   const { lang } = useI18n();
   const [token, setToken] = useState("");
   const [el, setEl] = useState<HTMLDivElement | null>(null);
-  const key = siteConfig.turnstileSiteKey;
   useEffect(() => {
-    if (!active || !key || !el) return;
-    const render = () => window.turnstile?.render(el, { sitekey: key, language: lang, size: "flexible", theme: "light", callback: setToken, "expired-callback": () => setToken("") });
-    if (window.turnstile) return void render();
-    const s = document.createElement("script");
-    s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-    s.async = true;
-    s.onload = render;
-    document.head.appendChild(s);
-  }, [active, key, el, lang]);
+    if (!active || !el) return;
+    let id = "";
+    let gone = false;
+    loadTurnstile().then((api) => {
+      if (!api || gone) return;
+      id = api.render(el, { sitekey: siteConfig.turnstileSiteKey, language: lang, size: "flexible", theme: "light", callback: setToken, "expired-callback": () => setToken("") });
+    });
+    return () => {
+      gone = true;
+      if (id) window.turnstile?.remove(id);
+    };
+  }, [active, el, lang]);
   return { ref: setEl, token };
 }
 

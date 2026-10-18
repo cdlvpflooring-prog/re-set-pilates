@@ -31,6 +31,7 @@ interface Base {
   page?: string;
   attribution?: Attribution;
   website?: string; // spam trap; real visitors leave it empty
+  retry?: string; // signed pass from a failed attempt (see the outbox in relay.ts); replaces the Turnstile token
 }
 
 export interface LeadMsg extends Base {
@@ -123,6 +124,7 @@ export interface RelayReply {
   id?: string;
   code?: string; // gift card code
   error?: string;
+  retry?: string; // on a 5xx after the bot check passed: pass for resending the same message later
   airtable?: boolean; // /api/health only
   turnstile?: boolean;
 }

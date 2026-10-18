@@ -1,11 +1,21 @@
 // Sends form data to the studio's relay (/api/*, a Cloudflare Worker that writes to Airtable).
 // If the phone is offline or the relay is down, the message waits in an outbox and is retried on the next visit.
+// A Turnstile token is single-use, so a queued lead carries a signed retry pass from the relay instead; a lead
+// queued while offline (no pass) gets a fresh token when it is resent.
 import type { Attribution, RelayEvent, RelayMap, RelayReply } from "./relayTypes";
+import { freshTurnstileToken } from "./turnstile";
 
 const OUTBOX = "reset.outbox.v1";
 const FIRST_TOUCH = "reset.attribution.v1";
 
-type Queued = { event: RelayEvent; body: unknown; at: number };
+type Queued = { event: RelayEvent; body: Record<string, unknown>; at: number };
+
+/** A reply the relay sent with a failing status (5xx). */
+class RelayError extends Error {
+  constructor(public reply: RelayReply) {
+    super(reply.error ?? "relay");
+  }
+}
 
 function readOutbox(): Queued[] {
   try {
@@ -31,7 +41,7 @@ async function post<E extends RelayEvent>(event: E, body: RelayMap[E] | unknown)
   });
   const reply = (await res.json().catch(() => ({ ok: false }))) as RelayReply;
   // 4xx means the message itself is wrong; retrying will not help.
-  if (!res.ok && res.status >= 500) throw new Error(reply.error ?? `relay ${res.status}`);
+  if (!res.ok && res.status >= 500) throw new RelayError(reply);
   return reply;
 }
 
@@ -43,9 +53,12 @@ export async function relay<E extends RelayEvent>(event: E, body: Omit<RelayMap[
   const full = { ...body, page: location.pathname, attribution: attribution() };
   try {
     return await post(event, full);
-  } catch {
+  } catch (e) {
     // Cancels and quiz contact details depend on ids from earlier replies; they are still worth retrying.
-    writeOutbox([...readOutbox(), { event, body: full, at: Date.now() }]);
+    // The used Turnstile token is dropped; the relay's retry pass (if it sent one) takes its place.
+    const { turnstile: _used, ...rest } = full as Record<string, unknown>;
+    const retry = e instanceof RelayError ? e.reply.retry : undefined;
+    writeOutbox([...readOutbox(), { event, body: { ...rest, ...(retry ? { retry } : {}) }, at: Date.now() }]);
     return { ok: false, queued: true };
   }
 }
@@ -56,8 +69,20 @@ export async function flushOutbox() {
   if (!items.length) return;
   const left: Queued[] = [];
   for (const i of items) {
+    // A lead without a retry pass (saved while offline) needs a fresh bot-check token.
+    let body = i.body;
+    if (i.event === "lead" && !body.retry && !body.turnstile) {
+      const turnstile = await freshTurnstileToken(String(body.lang ?? "he"));
+      if (!turnstile) {
+        left.push(i); // could not complete the check now; keep it for the next visit
+        continue;
+      }
+      body = { ...body, turnstile };
+    }
     try {
-      await post(i.event, i.body);
+      const reply = await post(i.event, body);
+      // The bot check can be retried later; any other 4xx means the message itself is wrong.
+      if (!reply.ok && reply.error === "turnstile") left.push(i);
     } catch {
       left.push(i);
     }
