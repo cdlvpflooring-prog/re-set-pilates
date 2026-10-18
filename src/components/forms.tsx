@@ -1,7 +1,7 @@
 // Shared form fields: name, phone, email, "How did you hear about us?", marketing opt-in and a spam trap.
 // Values are read back with readContact()/readExtras() so every form sends the same shape to the relay.
 import { useI18n } from "../lib/i18n";
-import { HEARD_FROM, type Contact, type HeardFrom } from "../lib/relayTypes";
+import { HEARD_FROM, normalizePhone, type Contact, type HeardFrom } from "../lib/relayTypes";
 import type { Profile } from "../lib/store";
 
 export function ContactFields({ id, profile, email = "optional" }: { id: string; profile: Profile; email?: "optional" | "none" }) {
@@ -31,8 +31,9 @@ export function ContactFields({ id, profile, email = "optional" }: { id: string;
             dir="ltr"
             defaultValue={profile.phone}
             required
-            minLength={9}
             maxLength={16}
+            // Same rule as the relay: an Israeli number (05X…, 0X…, or +972…).
+            onInput={(e) => e.currentTarget.setCustomValidity(normalizePhone(e.currentTarget.value) ? "" : t.form.phoneInvalid)}
           />
         </div>
         {email !== "none" && (

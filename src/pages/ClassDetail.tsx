@@ -84,7 +84,9 @@ export default function ClassDetail() {
     if (!local) return;
     if (arboxUrl) window.open(arboxUrl, "_blank", "noopener");
     const contact = whoFrom(e.currentTarget as HTMLFormElement);
-    relay("booking", { lang, contact, slot: slotRef, bed: isReformer ? bed : null }).then((r) => r.id && store.setRemoteId(local.id, r.id));
+    relay("booking", { lang, contact, slot: slotRef, bed: isReformer ? bed : null }, { ref: local.id }).then(
+      (r) => r.id && store.setRemoteId(local.id, r.id),
+    );
     track("booking_confirmed", { service: slot.service });
     setConfirmed(true);
   };

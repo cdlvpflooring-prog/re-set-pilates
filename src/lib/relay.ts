@@ -8,9 +8,17 @@ import { freshTurnstileToken } from "./turnstile";
 const OUTBOX = "reset.outbox.v1";
 const FIRST_TOUCH = "reset.attribution.v1";
 
-type Queued = { event: RelayEvent; body: Record<string, unknown>; at: number };
+/** `key` identifies the entry in the outbox; `ref` is the caller's own id (e.g. the local booking id). */
+type Queued = { event: RelayEvent; body: Record<string, unknown>; at: number; key?: string; ref?: string };
 
-/** A reply the relay sent with a failing status (5xx). */
+/** Fired on window when a queued message finally reaches the relay: detail = { event, ref, reply }. */
+export const RELAY_REPLY = "reset:relay-reply";
+export type RelayReplyDetail = { event: RelayEvent; ref?: string; reply: RelayReply };
+
+const keyOf = (i: Queued) => i.key ?? `${i.at}:${i.event}`;
+const newKey = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random()}`);
+
+/** A reply worth retrying later: the relay failed (5xx) or asked to slow down (429). */
 class RelayError extends Error {
   constructor(public reply: RelayReply) {
     super(reply.error ?? "relay");
@@ -40,8 +48,8 @@ async function post<E extends RelayEvent>(event: E, body: RelayMap[E] | unknown)
     keepalive: true,
   });
   const reply = (await res.json().catch(() => ({ ok: false }))) as RelayReply;
-  // 4xx means the message itself is wrong; retrying will not help.
-  if (!res.ok && res.status >= 500) throw new RelayError(reply);
+  // Other 4xx means the message itself is wrong; retrying will not help.
+  if (!res.ok && (res.status >= 500 || res.status === 429)) throw new RelayError(reply);
   return reply;
 }
 
@@ -49,7 +57,11 @@ async function post<E extends RelayEvent>(event: E, body: RelayMap[E] | unknown)
  * Send one event. Resolves with the relay's reply, or `{ ok: false, queued: true }` when it
  * could not reach the relay and saved the message for later.
  */
-export async function relay<E extends RelayEvent>(event: E, body: Omit<RelayMap[E], "attribution" | "page">): Promise<RelayReply & { queued?: boolean }> {
+export async function relay<E extends RelayEvent>(
+  event: E,
+  body: Omit<RelayMap[E], "attribution" | "page">,
+  opts: { ref?: string } = {},
+): Promise<RelayReply & { queued?: boolean }> {
   const full = { ...body, page: location.pathname, attribution: attribution() };
   try {
     return await post(event, full);
@@ -58,36 +70,57 @@ export async function relay<E extends RelayEvent>(event: E, body: Omit<RelayMap[
     // The used Turnstile token is dropped; the relay's retry pass (if it sent one) takes its place.
     const { turnstile: _used, ...rest } = full as Record<string, unknown>;
     const retry = e instanceof RelayError ? e.reply.retry : undefined;
-    writeOutbox([...readOutbox(), { event, body: { ...rest, ...(retry ? { retry } : {}) }, at: Date.now() }]);
+    writeOutbox([...readOutbox(), { event, body: { ...rest, ...(retry ? { retry } : {}) }, at: Date.now(), key: newKey(), ref: opts.ref }]);
     return { ok: false, queued: true };
   }
 }
 
-/** Retry anything left in the outbox (called once at start-up). Drops messages older than two weeks. */
-export async function flushOutbox() {
-  const items = readOutbox().filter((i) => Date.now() - i.at < 14 * 864e5);
-  if (!items.length) return;
-  const left: Queued[] = [];
-  for (const i of items) {
+/** Remove a message that has not been sent yet (e.g. a booking cancelled while still offline). */
+export function dropQueued(ref: string): boolean {
+  const items = readOutbox();
+  const left = items.filter((i) => i.ref !== ref);
+  if (left.length !== items.length) writeOutbox(left);
+  return left.length !== items.length;
+}
+
+let flushing: Promise<void> | null = null;
+
+/**
+ * Retry anything left in the outbox (at start-up and when the phone comes back online).
+ * Only one flush runs at a time, and only the entries it handled are removed, so a message
+ * queued while the flush is running is kept. Drops messages older than two weeks.
+ */
+export function flushOutbox(): Promise<void> {
+  flushing ??= flush().finally(() => (flushing = null));
+  return flushing;
+}
+
+async function flush() {
+  const handled = new Set<string>();
+  for (const i of readOutbox()) {
+    if (Date.now() - i.at >= 14 * 864e5) {
+      handled.add(keyOf(i));
+      continue;
+    }
     // A lead without a retry pass (saved while offline) needs a fresh bot-check token.
     let body = i.body;
     if (i.event === "lead" && !body.retry && !body.turnstile) {
       const turnstile = await freshTurnstileToken(String(body.lang ?? "he"));
-      if (!turnstile) {
-        left.push(i); // could not complete the check now; keep it for the next visit
-        continue;
-      }
+      if (!turnstile) continue; // could not complete the check now; keep it for the next visit
       body = { ...body, turnstile };
     }
     try {
       const reply = await post(i.event, body);
       // The bot check can be retried later; any other 4xx means the message itself is wrong.
-      if (!reply.ok && reply.error === "turnstile") left.push(i);
+      if (!reply.ok && reply.error === "turnstile") continue;
+      handled.add(keyOf(i));
+      if (reply.ok) dispatchEvent(new CustomEvent<RelayReplyDetail>(RELAY_REPLY, { detail: { event: i.event, ref: i.ref, reply } }));
     } catch {
-      left.push(i);
+      /* still failing; keep it */
     }
   }
-  writeOutbox(left);
+  // Re-read: entries queued (or dropped) while this flush was sending are left as they are.
+  writeOutbox(readOutbox().filter((i) => !handled.has(keyOf(i))));
 }
 
 /** Remember where this visitor first came from (campaign links, referrer). Call once at start-up. */

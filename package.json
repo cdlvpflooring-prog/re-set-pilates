@@ -9,6 +9,7 @@
     "preview": "vite preview --host",
     "check:worker": "tsc -p worker",
     "test:worker": "bun test worker/",
+    "test": "bun test worker/ src/",
     "types:worker": "wrangler types worker/worker-configuration.d.ts"
   },
   "dependencies": {

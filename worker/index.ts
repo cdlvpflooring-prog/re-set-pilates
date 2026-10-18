@@ -22,7 +22,7 @@ import type {
   SlotRef,
   WaitlistMsg,
 } from "../src/lib/relayTypes";
-import { HEARD_FROM, PREF_TIMES } from "../src/lib/relayTypes";
+import { HEARD_FROM, PREF_TIMES, normalizePhone } from "../src/lib/relayTypes";
 import { Airtable, AirtableError, F, T, q, type AirRecord, type Fields } from "./airtable";
 
 declare global {
@@ -32,7 +32,7 @@ declare global {
 }
 
 const TZ = "Asia/Jerusalem";
-const CANCEL_HOURS = 24; // matches siteConfig.policies.cancelHours
+const CANCEL_HOURS = siteConfig.policies.cancelHours; // same policy the site shows
 const MAX_BODY = 8 * 1024;
 
 class BadRequest extends Error {}
@@ -89,9 +89,8 @@ function oneOf<T extends string>(v: unknown, allowed: readonly T[]): T | undefin
 
 /** Israeli phone → local digits ("0501234567"). Throws when it can't be a phone number. */
 function phoneDigits(raw: unknown): string {
-  let d = String(raw ?? "").replace(/\D/g, "");
-  if (d.startsWith("972")) d = `0${d.slice(3)}`;
-  if (!/^0\d{8,9}$/.test(d)) throw new BadRequest("bad phone");
+  const d = normalizePhone(String(raw ?? ""));
+  if (!d) throw new BadRequest("bad phone");
   return d;
 }
 const phonePretty = (d: string) => (d.length === 10 ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}` : `${d.slice(0, 2)}-${d.slice(2, 5)}-${d.slice(5)}`);
@@ -224,7 +223,8 @@ async function upsertMember(at: Airtable, c: Contact, o: MemberOpts): Promise<Ai
   fill(M.firstName, c.firstName);
   fill(M.lastName, c.lastName);
   fill(M.email, c.email);
-  if (o.heard && !f[M.source]) patch[M.source] = o.heard;
+  // An explicit "How did you hear about us?" answer replaces the automatic guess ("Website").
+  if (o.heard && (!f[M.source] || f[M.source] === "Website")) patch[M.source] = o.heard;
   if (o.consent && !f[M.consent]) Object.assign(patch, consent);
   if (o.interests?.length) {
     const have = (f[M.interests] as string[] | undefined) ?? [];
@@ -311,14 +311,18 @@ const handlers: Record<RelayEvent, Handler> = {
     const heard = oneOf(m.heard, HEARD_FROM);
     const interest = INTEREST[text(m.interest, 20)] ?? "Reformer";
     const prefTime = oneOf(m.prefTime, PREF_TIMES);
-    const member = await upsertMember(at, c, {
-      lang: lang(m.lang),
-      heard,
-      attribution: a,
-      consent: m.consent === true,
-      interests: [interest],
-      extra: prefTime ? { [F.members.prefTimes]: [prefTime] } : undefined,
-    });
+    // Independent lookups: run together to save an Airtable round-trip.
+    const [member, campaign] = await Promise.all([
+      upsertMember(at, c, {
+        lang: lang(m.lang),
+        heard,
+        attribution: a,
+        consent: m.consent === true,
+        interests: [interest],
+        extra: prefTime ? { [F.members.prefTimes]: [prefTime] } : undefined,
+      }),
+      campaignFor(at, a),
+    ]);
     const L = F.leads;
     const lead = await at.create(T.leads, {
       [L.name]: `${fullName(c)} · website form · ${todayIL()}`,
@@ -331,7 +335,7 @@ const handlers: Record<RelayEvent, Handler> = {
       [L.page]: [text(m.page, 120), attributionNote(a)].filter(Boolean).join(" · "),
       [L.status]: "New",
       [L.member]: [member.id],
-      [L.campaign]: await campaignFor(at, a),
+      [L.campaign]: campaign,
       ...(heard ? { [L.heard]: heard } : {}),
       [L.consent]: m.consent === true,
     });
@@ -504,13 +508,16 @@ const handlers: Record<RelayEvent, Handler> = {
     const interest = rec === "Private" ? "Private 1:1" : rec;
     const exp = { None: "New to Pilates", Some: "Some classes", Regular: "Regular" }[String(quiz.fields[Q.experience] ?? "")];
     const a = attribution(m.attribution);
-    const member = await upsertMember(at, c, {
-      lang: lang(m.lang),
-      attribution: a,
-      consent: m.consent === true,
-      interests: [interest],
-      extra: exp ? { [F.members.experience]: exp } : undefined,
-    });
+    const [member, campaign] = await Promise.all([
+      upsertMember(at, c, {
+        lang: lang(m.lang),
+        attribution: a,
+        consent: m.consent === true,
+        interests: [interest],
+        extra: exp ? { [F.members.experience]: exp } : undefined,
+      }),
+      campaignFor(at, a),
+    ]);
     await at.update(T.quiz, id, { [Q.member]: [member.id] });
     const L = F.leads;
     await at.create(T.leads, {
@@ -524,7 +531,7 @@ const handlers: Record<RelayEvent, Handler> = {
       [L.page]: ["/quiz", attributionNote(a)].filter(Boolean).join(" · "),
       [L.status]: "New",
       [L.member]: [member.id],
-      [L.campaign]: await campaignFor(at, a),
+      [L.campaign]: campaign,
       [L.consent]: m.consent === true,
     });
     return { ok: true, id };
@@ -596,7 +603,10 @@ function sameOrigin(req: Request): boolean {
   if (!origin) return false;
   const o = new URL(origin);
   const u = new URL(req.url);
-  return o.host === u.host || o.hostname === "localhost" || o.hostname === "127.0.0.1";
+  if (o.host === u.host) return true;
+  // Local origins are only trusted when the Worker itself is running locally (wrangler dev / vite proxy).
+  const local = (h: string) => h === "localhost" || h === "127.0.0.1";
+  return local(u.hostname) && local(o.hostname);
 }
 
 export default {

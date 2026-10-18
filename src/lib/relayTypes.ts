@@ -9,6 +9,16 @@ export type PayMethod = "arbox" | "bit" | "card";
 export const HEARD_FROM: HeardFrom[] = ["Instagram", "TikTok", "Facebook", "Google", "Referral", "Walk-in", "Other"];
 export const PREF_TIMES: PrefTime[] = ["Morning", "Midday", "Evening"];
 
+/**
+ * Israeli phone number → local digits ("0501234567"), or null when it can't be one.
+ * Shared so the form rejects exactly what the relay would reject.
+ */
+export function normalizePhone(raw: string): string | null {
+  let d = raw.replace(/\D/g, "");
+  if (d.startsWith("972")) d = `0${d.slice(3)}`;
+  return /^0\d{8,9}$/.test(d) ? d : null;
+}
+
 /** Who the person is. Phone is the key used to find them again in Airtable. */
 export interface Contact {
   firstName: string;

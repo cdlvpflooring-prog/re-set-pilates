@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { planById } from "../config/pricing";
 import { fromISO, slotStart, type ClassSlot } from "./booking";
 import { planUsage } from "./plan";
+import { RELAY_REPLY, relay, type RelayReplyDetail } from "./relay";
 
 export interface Booking {
   id: string;
@@ -150,6 +151,20 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [],
   );
   const markWelcomeSeen = useCallback(() => setS((p) => (p.seenWelcome ? p : { ...p, seenWelcome: true })), []);
+
+  // A booking that waited in the outbox gets its Airtable id when it is finally sent.
+  // If the visitor cancelled it in the meantime, cancel it in Airtable right away.
+  useEffect(() => {
+    const onReply = (e: Event) => {
+      const { event, ref, reply } = (e as CustomEvent<RelayReplyDetail>).detail;
+      if (event !== "booking" || !ref || !reply.id) return;
+      const cur = latest.current;
+      if (cur.bookings.some((b) => b.id === ref)) setRemoteId(ref, reply.id);
+      else relay("cancel", { lang: document.documentElement.lang === "en" ? "en" : "he", bookingId: reply.id, phone: cur.profile.phone });
+    };
+    addEventListener(RELAY_REPLY, onReply);
+    return () => removeEventListener(RELAY_REPLY, onReply);
+  }, [setRemoteId]);
   // Sign out = wipe this device's saved state (bookings, plan, profile and the progress profile) and reload as a new visitor.
   const signOut = useCallback(() => {
     try {
