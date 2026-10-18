@@ -1736,3 +1736,14 @@ html[lang="he"] .hero--sport .btn--gold { text-transform: none; letter-spacing: 
 .nextstep__title::before, .nextstep__title::after { content: none; }
 .nextstep--progress .chev { inset-inline-end: 20px; width: 14px; height: 14px; border-width: 3px; }
 
+/* ───────── v2.9 · "Our classes" cards: big soft-corner picture on top, text centred underneath ───────── */
+#classes .flow-row { justify-items: center; text-align: center; gap: 12px; padding: 18px 18px 22px; }
+.thumb--card {
+  width: 100%; max-width: 300px; height: auto; aspect-ratio: 1; border-radius: 22px;
+  box-shadow: none; border: 2px solid #1f1612; background: #fff;
+}
+#classes .flow-row__title { margin-top: 4px; text-align: center; }
+#classes .flow-row__desc { max-width: 34ch; text-align: center; }
+.flow-row__meta { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 14px; font-weight: 600; color: rgba(31, 22, 18, 0.72); }
+@media (min-width: 900px) { #classes .reveal:nth-child(5) .thumb--card { max-width: 360px; aspect-ratio: 16 / 10; } }
+

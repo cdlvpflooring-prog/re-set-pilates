@@ -184,17 +184,12 @@ export default function Home() {
                     className="flow-row"
                     onClick={() => track("service_view", { service: s.id })}
                   >
-                    <span className="row between gap-16">
-                      <span className="row gap-12">
-                        <span className="thumb" aria-hidden>
-                          <img src={s.thumb} alt="" style={{ objectPosition: s.thumbPos }} loading="lazy" />
-                        </span>
-                        <span className="display d-md">{sc.name}</span>
-                      </span>
-                      <span className="arrow-ne" aria-hidden />
+                    <span className="thumb thumb--card" aria-hidden>
+                      <img src={s.image} alt="" style={{ objectPosition: s.pos }} loading="lazy" />
                     </span>
+                    <span className="display d-md flow-row__title">{sc.name}</span>
                     <span className="flow-row__desc">{sc.desc}</span>
-                    <span className="row gap-16 small muted">
+                    <span className="flow-row__meta small muted">
                       {!s.bookable && <span>{t.common.byRequest}</span>}
                       <span>{sc.meta}</span>
                     </span>
