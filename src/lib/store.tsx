@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { planById } from "../config/pricing";
+import { planById, type ClassKind } from "../config/pricing";
 import { fromISO, slotStart, type ClassSlot } from "./booking";
 import { planUsage } from "./plan";
 import { RELAY_REPLY, relay, type RelayReplyDetail } from "./relay";
@@ -30,6 +30,7 @@ export interface Profile {
 
 interface Persisted {
   planId: string | null; // active membership/pass id; null => visitor
+  planKind?: ClassKind | null; // Reformer or Mat, chosen at checkout (teens plans have none)
   memberSince: string | null;
   planStart: string | null; // when the current plan was bought; pass balances and validity count from here
   bookings: Booking[];
@@ -49,7 +50,7 @@ interface Store extends Persisted {
   cancel: (bookingId: string, late?: boolean) => void;
   joinWaitlist: (slotId: string) => void;
   leaveWaitlist: (slotId: string) => void;
-  setPlan: (planId: string | null) => void;
+  setPlan: (planId: string | null, kind?: ClassKind | null) => void;
   setReminders: (on: boolean) => void;
   markWelcomeSeen: () => void;
   saveProfile: (p: Partial<Profile>) => void;
@@ -135,11 +136,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const joinWaitlist = useCallback((id: string) => setS((p) => ({ ...p, waitlist: [...new Set([...p.waitlist, id])] })), []);
   const leaveWaitlist = useCallback((id: string) => setS((p) => ({ ...p, waitlist: p.waitlist.filter((w) => w !== id) })), []);
   const setPlan = useCallback(
-    (planId: string | null) =>
+    (planId: string | null, kind: ClassKind | null = null) =>
       setS((p) => {
         // Every purchase starts a fresh plan period; "member since" keeps the first one
         const now = new Date().toISOString();
-        return { ...p, planId, planStart: planId ? now : null, memberSince: planId ? (p.memberSince ?? now) : null };
+        return { ...p, planId, planKind: planId ? kind : null, planStart: planId ? now : null, memberSince: planId ? (p.memberSince ?? now) : null };
       }),
     [],
   );

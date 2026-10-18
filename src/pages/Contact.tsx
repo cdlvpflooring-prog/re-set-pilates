@@ -1,5 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { LeadForm, MapEmbed, PageHead } from "../components/blocks";
+import { packageById } from "../config/packages";
+import type { Content } from "../content/en";
 import { Verified } from "../components/ui";
 import { addressLine, isTodo, mapsLink, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
@@ -97,7 +99,7 @@ export default function Contact() {
             </div>
           </div>
           <div className="stack gap-16">
-            <LeadForm initialInterest={params.get("interest") ?? undefined} />
+            <LeadForm initialInterest={params.get("interest") ?? undefined} note={packageNote(params.get("package"), t)} />
             <a
               className="btn btn--secondary btn--block btn--arrow"
               href={isTodo(siteConfig.social.googleReview) ? undefined : siteConfig.social.googleReview}
@@ -113,4 +115,10 @@ export default function Contact() {
       </div>
     </div>
   );
+}
+
+/** "Event package · ₪750" when the visitor arrived from a package card; written to the lead's message. */
+function packageNote(id: string | null, t: Content) {
+  const pkg = id ? packageById(id) : undefined;
+  return pkg ? `${t.services.packages[pkg.id].name} · ₪${pkg.price}` : undefined;
 }

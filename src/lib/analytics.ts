@@ -2,6 +2,8 @@
 export type AnalyticsEvent =
   | "book_reformer_click"
   | "membership_click"
+  | "plan_kind_select" // Reformer / Mat switch on the price list
+  | "package_request" // "Book your date" on a closed-group package
   | "service_view"
   | "schedule_view"
   | "contact_click"

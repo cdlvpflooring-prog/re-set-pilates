@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageHead, PricingList, effectivePrice, planName, pricesVisible } from "../components/blocks";
 import { Check, Price } from "../components/ui";
-import { planById } from "../config/pricing";
+import { isClassKind, planById } from "../config/pricing";
 import { isTodo, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
@@ -14,13 +14,14 @@ import { ConsentField, ContactFields, HeardField, profileFrom, readContact, read
 export function Pricing() {
   const { t, href } = useI18n();
   const [params] = useSearchParams();
+  const kindParam = params.get("kind");
   useSeo(t.meta.pricing);
   return (
     <div className="page tone-dark">
       <PageHead title={t.pricing.title} sub={t.pricing.sub} />
       <div className="wrap wrap--narrow pbody">
         <div className="screen stack gap-32">
-          <PricingList next={params.get("next") ?? undefined} />
+          <PricingList next={params.get("next") ?? undefined} initialKind={isClassKind(kindParam) ? kindParam : undefined} />
           <div className="row gap-12" style={{ flexWrap: "wrap" }}>
             <Link to={href("schedule")} className="btn btn--primary" onClick={() => track("book_reformer_click", { source: "pricing" })}>
               {t.common.book}
@@ -46,6 +47,9 @@ export function Checkout() {
   const [failed, setFailed] = useState(false);
   const plan = planById(planId);
   const next = params.get("next");
+  // Reformer or Mat (same price). Teens plans carry no kind; a general plan defaults to Reformer.
+  const kindParam = params.get("kind");
+  const kind = plan?.track ? null : isClassKind(kindParam) ? kindParam : "reformer";
 
   if (!plan || !pricesVisible(plan))
     return (
@@ -79,7 +83,7 @@ export function Checkout() {
     setSending(true);
     setFailed(false);
     // Saved in Airtable as a Pending payment until Orit confirms it. A queued order (offline) counts as saved.
-    const r = await relay("checkout", { lang, contact, planId: plan.id, method: method.id, heard: x.heard, consent: x.consent, termsAccepted: true, website: x.website });
+    const r = await relay("checkout", { lang, contact, planId: plan.id, kind: kind ?? undefined, method: method.id, heard: x.heard, consent: x.consent, termsAccepted: true, website: x.website });
     if (!r.ok && !r.queued) {
       payTab?.close();
       setSending(false);
@@ -88,7 +92,7 @@ export function Checkout() {
     }
     if (payTab) payTab.location.href = url;
     store.saveProfile(profileFrom(contact, x));
-    store.setPlan(plan.id);
+    store.setPlan(plan.id, kind);
     setSending(false);
     setDone(true);
   };
@@ -111,9 +115,11 @@ export function Checkout() {
             <div className="member-card row between gap-16">
               <span className="stack gap-4">
                 <span className="eyebrow">{t.checkout.summary}</span>
-                <span className="display d-sm">{planName(plan, t)}</span>
+                <span className="display d-sm">{planName(plan, t, kind)}</span>
                 <span className="tiny">
-                  {plan.billingType === "monthly"
+                  {plan.track === "teens"
+                    ? t.pricing.teensNote
+                    : plan.billingType === "monthly"
                     ? t.pricing.validMonth
                     : launch && plan.bonusSessions
                       ? t.pricing.bonus

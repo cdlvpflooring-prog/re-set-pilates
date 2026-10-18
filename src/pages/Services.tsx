@@ -1,5 +1,6 @@
 import { Link, useParams } from "react-router-dom";
-import { PageHead, serviceTarget } from "../components/blocks";
+import { PageHead, Packages, TeensPlan, pricesVisible, serviceTarget } from "../components/blocks";
+import { teensPlan } from "../config/pricing";
 import { MaskImg, Reveal } from "../components/ui";
 import { serviceBySlug, services } from "../config/services";
 import { track } from "../lib/analytics";
@@ -108,6 +109,18 @@ export function ServiceDetail() {
               </div>
             )}
           </Reveal>
+          {s.id === "teens" && teensPlan && pricesVisible(teensPlan) && (
+            <Reveal className="stack gap-12">
+              <h2 className="display d-sm">{t.pricing.title}</h2>
+              <TeensPlan plan={teensPlan} brief />
+            </Reveal>
+          )}
+          {s.id === "groups" && (
+            <Reveal className="stack gap-12">
+              <h2 className="display d-sm">{t.services.packagesTitle}</h2>
+              <Packages />
+            </Reveal>
+          )}
           <Reveal className="row gap-12" style={{ flexWrap: "wrap" }}>
             <Link to={serviceTarget(s, href)} className={`btn ${s.bookable ? "btn--primary" : "btn--blue"}`} onClick={() => s.id === "reformer" && track("book_reformer_click", { source: "service" })}>
               {s.bookable ? t.common.seeSchedule : t.common.requestSession}

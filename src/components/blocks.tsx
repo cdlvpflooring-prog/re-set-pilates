@@ -1,7 +1,8 @@
 import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { pricing, type PricingItem } from "../config/pricing";
+import { generalPlans, pricing, teensPlan, type ClassKind, type PricingItem } from "../config/pricing";
+import { packages } from "../config/packages";
 import { services, type ServiceConfig, type ServiceId } from "../config/services";
 import { isTodo, mapsEmbedSrc, siteConfig } from "../config/site";
 import { instructors, reviews, type Person } from "../config/team";
@@ -57,12 +58,16 @@ export function PersonCard({ p, sample = false }: { p: Person; sample?: boolean 
   );
 }
 
-export const planName = (p: PricingItem, t: Content) =>
-  p.billingType === "monthly"
-    ? p.perWeek === "unlimited"
-      ? t.pricing.unlimited
-      : `${p.perWeek}× ${t.pricing.perWeek}`
-    : `${p.sessions} ${t.pricing.sessions}`;
+export const planName = (p: PricingItem, t: Content, kind?: ClassKind | null) => {
+  if (p.track === "teens") return t.pricing.teensPlan;
+  const base =
+    p.billingType === "monthly"
+      ? p.perWeek === "unlimited"
+        ? t.pricing.unlimited
+        : `${p.perWeek}× ${t.pricing.perWeek}`
+      : `${p.sessions} ${t.pricing.sessions}`;
+  return kind ? `${base} · ${t.pricing.kinds[kind]}` : base;
+};
 
 export const pricesVisible = (p: PricingItem) => p.active && (p.approved || siteConfig.flags.showUnapprovedPrices);
 export const effectivePrice = (p: PricingItem) =>
@@ -128,56 +133,135 @@ export function SlotRow({ slot, index = 0 }: { slot: ClassSlot; index?: number }
   );
 }
 
-export function PricingList({ next, limit }: { next?: string; limit?: boolean }) {
+type PriceTab = "monthly" | "passes" | "teens" | "groups";
+
+/**
+ * The price list: Monthly / Passes (Reformer or Mat, same prices — the switch picks which class the plan is for
+ * and travels to checkout), plus the Teens plan and the closed-group packages on their own tabs.
+ */
+export function PricingList({ next, limit, initialKind }: { next?: string; limit?: boolean; initialKind?: ClassKind }) {
   const { t, href } = useI18n();
-  const [tab, setTab] = useState<"monthly" | "passes">("monthly");
+  const [tab, setTab] = useState<PriceTab>("monthly");
+  const [kind, setKind] = useState<ClassKind>(initialKind ?? "reformer");
   const launch = siteConfig.flags.launchPricing;
-  let rows = (tab === "monthly" ? pricing.memberships : pricing.passes).filter(pricesVisible);
+  const teens = teensPlan && pricesVisible(teensPlan) ? teensPlan : undefined;
+  const groups = packages.filter((p) => p.approved);
+  let rows = generalPlans(tab === "passes" ? pricing.passes : pricing.memberships).filter(pricesVisible);
   if (limit) rows = rows.filter((r) => r.popular || r.perWeek === 1 || r.perWeek === "unlimited" || r.sessions === 5);
   const anyUnapproved = rows.some((r) => !r.approved);
+  const query = (extra: Record<string, string | undefined>) => {
+    const q = new URLSearchParams();
+    for (const [k, v] of Object.entries(extra)) if (v) q.set(k, v);
+    const str = q.toString();
+    return str ? `?${str}` : "";
+  };
 
   if (![...pricing.memberships, ...pricing.passes].some(pricesVisible)) {
     return <p className="card muted">{t.pricing.hidden}</p>;
   }
+  const tabs: { id: PriceTab; label: string }[] = [
+    { id: "monthly", label: t.pricing.monthly },
+    { id: "passes", label: t.pricing.passes },
+    ...(teens ? [{ id: "teens" as const, label: t.pricing.teens }] : []),
+    ...(groups.length ? [{ id: "groups" as const, label: t.pricing.groups }] : []),
+  ];
   return (
     <div className="stack gap-16">
-      <div>
-        <Segmented
-          value={tab}
-          onChange={setTab}
-          options={[
-            { id: "monthly", label: t.pricing.monthly },
-            { id: "passes", label: t.pricing.passes },
-          ]}
-        />
+      <div className={tabs.length > 2 ? "seg-wrap" : undefined}>
+        <Segmented value={tab} onChange={setTab} options={tabs} />
       </div>
-      {launch && <div className="notice">{t.common.announcement}</div>}
-      <div className="stack gap-12 list-in" key={tab}>
-        {rows.map((p, i) => (
-          <Link
-            key={p.id}
-            to={href(`checkout/${p.id}${next ? `?next=${next}` : ""}`)}
-            className={`price-row ${p.popular ? "is-pop" : ""}`}
-            style={{ "--i": i } as CSSProperties}
-            onClick={() => track("membership_click", { plan: p.id })}
-          >
-            <span className="stack gap-4" style={{ flex: 1 }}>
-              <span className="row gap-8 key">
-                {planName(p, t)}
-                {p.popular && <span className="badge">{t.pricing.popular}</span>}
+
+      {(tab === "monthly" || tab === "passes") && (
+        <>
+          <div className="row gap-12" style={{ flexWrap: "wrap", alignItems: "center" }}>
+            <span className="tiny">{t.pricing.kindLabel}</span>
+            <Segmented
+              value={kind}
+              onChange={(k) => {
+                setKind(k);
+                track("plan_kind_select", { kind: k });
+              }}
+              options={[
+                { id: "reformer", label: t.pricing.kinds.reformer },
+                { id: "mat", label: t.pricing.kinds.mat },
+              ]}
+            />
+          </div>
+          {launch && <div className="notice">{t.common.announcement}</div>}
+          <div className="stack gap-12 list-in" key={`${tab}-${kind}`}>
+            {rows.map((p, i) => (
+              <Link
+                key={p.id}
+                to={href(`checkout/${p.id}${query({ kind, next })}`)}
+                className={`price-row ${p.popular ? "is-pop" : ""}`}
+                style={{ "--i": i } as CSSProperties}
+                onClick={() => track("membership_click", { plan: p.id, kind })}
+              >
+                <span className="stack gap-4" style={{ flex: 1 }}>
+                  <span className="row gap-8 key">
+                    {planName(p, t)}
+                    {p.popular && <span className="badge">{t.pricing.popular}</span>}
+                  </span>
+                  <span className="tiny">
+                    {t.pricing.kinds[kind]} ·{" "}
+                    {p.billingType === "monthly"
+                      ? t.pricing.validMonth
+                      : `₪${Math.round(p.price / p.sessions!)} ${t.pricing.perSession}${launch && p.bonusSessions ? ` · ${t.pricing.bonus}` : ""}`}
+                  </span>
+                </span>
+                <Price amount={effectivePrice(p)} was={launch && p.launchPrice ? p.price : null} />
+              </Link>
+            ))}
+          </div>
+          <p className="tiny">{t.pricing.validity}</p>
+          {anyUnapproved && (
+            <p className="small" style={{ color: "var(--accent)" }}>
+              ● {t.pricing.pendingApproval}
+            </p>
+          )}
+        </>
+      )}
+
+      {tab === "teens" && teens && <TeensPlan plan={teens} next={next} />}
+
+      {tab === "groups" && <Packages />}
+    </div>
+  );
+}
+
+/** The girls' weekly group: one monthly plan, bought like any other. */
+export function TeensPlan({ plan, next, brief }: { plan: PricingItem; next?: string; brief?: boolean }) {
+  const { t, href } = useI18n();
+  const c = t.services.items.teens;
+  return (
+    <div className="stack gap-12 list-in">
+      <Link
+        to={href(`checkout/${plan.id}${next ? `?next=${next}` : ""}`)}
+        className="price-row is-pop"
+        onClick={() => track("membership_click", { plan: plan.id })}
+      >
+        <span className="stack gap-4" style={{ flex: 1 }}>
+          <span className="row gap-8 key">{planName(plan, t)}</span>
+          <span className="tiny">{t.pricing.teensNote}</span>
+        </span>
+        <span className="stack" style={{ alignItems: "flex-end", gap: 2 }}>
+          <Price amount={effectivePrice(plan)} />
+          <span className="tiny">{t.pricing.perMonth}</span>
+        </span>
+      </Link>
+      {!brief && (
+        <>
+          <div className="row gap-8" style={{ flexWrap: "wrap" }}>
+            {c.tags.map((tag) => (
+              <span key={tag} className="tag">
+                {tag}
               </span>
-              <span className="tiny">
-                {p.billingType === "monthly"
-                  ? t.pricing.validMonth
-                  : `₪${Math.round(p.price / p.sessions!)} ${t.pricing.perSession}${launch && p.bonusSessions ? ` · ${t.pricing.bonus}` : ""}`}
-              </span>
-            </span>
-            <Price amount={effectivePrice(p)} was={launch && p.launchPrice ? p.price : null} />
-          </Link>
-        ))}
-      </div>
-      <p className="tiny">{t.pricing.validity}</p>
-      {anyUnapproved && (
+            ))}
+          </div>
+          <p className="tiny">{c.desc}</p>
+        </>
+      )}
+      {!plan.approved && (
         <p className="small" style={{ color: "var(--accent)" }}>
           ● {t.pricing.pendingApproval}
         </p>
@@ -186,7 +270,66 @@ export function PricingList({ next, limit }: { next?: string; limit?: boolean })
   );
 }
 
-export function LeadForm({ initialInterest }: { initialInterest?: string }) {
+/** Closed-group packages (private group, event): priced per group, booked by request. */
+export function Packages() {
+  const { t, href } = useI18n();
+  return (
+    <div className="stack gap-12 list-in">
+      {packages
+        .filter((p) => p.approved)
+        .map((p, i) => {
+          const c = t.services.packages[p.id];
+          return (
+            <article key={p.id} className="card pkg stack gap-12" style={{ "--i": i } as CSSProperties}>
+              <div className="row between gap-12" style={{ alignItems: "flex-start" }}>
+                <span className="stack gap-4">
+                  <span className="eyebrow">{c.tagline}</span>
+                  <span className="display d-sm">{c.name}</span>
+                </span>
+                <span className="stack" style={{ alignItems: "flex-end", gap: 2 }}>
+                  <Price amount={p.price} />
+                  <span className="tiny">{t.services.perGroup}</span>
+                </span>
+              </div>
+              <div className="row gap-8" style={{ flexWrap: "wrap" }}>
+                <span className="tag">
+                  {t.services.upTo} {p.capacity} {t.services.participants}
+                </span>
+                <span className="tag">
+                  {p.minutes} {t.common.min}
+                </span>
+                <span className="tag">{t.services.byArrangement}</span>
+              </div>
+              <p className="small muted" style={{ margin: 0 }}>
+                {c.desc}
+              </p>
+              {c.includes.length > 0 && (
+                <div className="stack gap-6">
+                  <span className="tiny" style={{ fontWeight: 700 }}>
+                    {t.services.includes}
+                  </span>
+                  <ul className="pkg__list">
+                    {c.includes.map((line) => (
+                      <li key={line}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <Link
+                to={href(`contact?interest=groups&package=${p.id}`)}
+                className="btn btn--blue btn--block"
+                onClick={() => track("package_request", { package: p.id })}
+              >
+                {t.services.requestDate}
+              </Link>
+            </article>
+          );
+        })}
+    </div>
+  );
+}
+
+export function LeadForm({ initialInterest, note }: { initialInterest?: string; note?: string }) {
   const { t, lang } = useI18n();
   const { profile, saveProfile } = useStore();
   const [interest, setInterest] = useState<string>(initialInterest ?? "reformer");
@@ -209,7 +352,7 @@ export function LeadForm({ initialInterest }: { initialInterest?: string }) {
     setState("sending");
     track("lead_form_submit", { interest });
     setError(null);
-    const r = await relay("lead", { lang, contact, interest, prefTime, heard: x.heard, consent: x.consent, website: x.website, turnstile: turnstile.token });
+    const r = await relay("lead", { lang, contact, interest, note, prefTime, heard: x.heard, consent: x.consent, website: x.website, turnstile: turnstile.token });
     if (r.ok || r.queued) saveProfile(profileFrom(contact, x));
     // The visitor can fix these two; anything else is an infrastructure failure.
     if (!r.ok && !r.queued && (r.error === "turnstile" || r.error?.startsWith("bad ") || r.error === "missing field")) {

@@ -1,0 +1,18 @@
+// Closed-group packages: the studio closes for one group, by appointment (never bookable in the schedule).
+// Prices from the owner's flyers (Oct 2026). Copy lives in content/*.ts under services.packages.
+export type PackageId = "group" | "event";
+
+export interface PackageConfig {
+  id: PackageId;
+  price: number; // per group, ILS
+  minutes: number;
+  capacity: number; // up to
+  approved: boolean;
+}
+
+export const packages: PackageConfig[] = [
+  { id: "group", price: 350, minutes: 50, capacity: 5, approved: true },
+  { id: "event", price: 750, minutes: 90, capacity: 5, approved: true },
+];
+
+export const packageById = (id: string) => packages.find((p) => p.id === id);

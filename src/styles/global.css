@@ -1784,3 +1784,12 @@ html[lang="he"] .ccard__chip { text-transform: none; letter-spacing: 0; font-siz
 @media (hover: hover) and (pointer: fine) { #classes .flow-row.ccard:hover { padding-inline: 0; } #classes .ccard:hover .ccard__media img { transform: scale(1.04); } }
 @media (min-width: 900px) { #classes .reveal:nth-child(5) .ccard__media { aspect-ratio: 21 / 9; } }
 
+
+/* ───────── Packages & pricing tabs (teens, closed groups) ───────── */
+/* Four tabs (Monthly / Passes / Teens / Groups) need the whole width on phones */
+.seg-wrap .seg { display: grid; width: 100%; }
+.seg-wrap .seg button { padding: 0 8px; white-space: nowrap; }
+@media (min-width: 600px) { .seg-wrap .seg { display: inline-grid; width: auto; } .seg-wrap .seg button { padding: 0 22px; } }
+.pkg { padding: 18px; }
+.pkg__list { margin: 0; padding-inline-start: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.45; color: var(--fg-2); }
+.pkg__list li::marker { color: var(--accent); }

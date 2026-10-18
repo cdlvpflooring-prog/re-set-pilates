@@ -1,8 +1,15 @@
 import { arbox } from "./arbox";
 
+/** Which class a membership or pass is for. Reformer and Mat cost the same; the buyer picks one at checkout. */
+export type ClassKind = "reformer" | "mat";
+export const classKinds: ClassKind[] = ["reformer", "mat"];
+export const isClassKind = (v: unknown): v is ClassKind => v === "reformer" || v === "mat";
+
 export interface PricingItem {
   id: string;
   billingType: "monthly" | "pass";
+  /** "teens": the girls' weekly group plan — sold on its own tab, not in the general list, and not tied to a class kind. */
+  track?: "teens";
   perWeek?: number | "unlimited";
   sessions?: number;
   price: number;
@@ -24,6 +31,8 @@ export const pricing: { memberships: PricingItem[]; passes: PricingItem[] } = {
     { id: "m3x", tone: "sand", billingType: "monthly", perWeek: 3, price: 630, launchPrice: 590, currency: "ILS", validityMonths: 1, popular: true, arboxUrl: arbox.memberships.m3x, active: true, approved: true },
     { id: "m4x", tone: "ink", billingType: "monthly", perWeek: 4, price: 800, launchPrice: 750, currency: "ILS", validityMonths: 1, arboxUrl: arbox.memberships.m4x, active: true, approved: true },
     { id: "munl", tone: "ink", billingType: "monthly", perWeek: "unlimited", price: 990, launchPrice: 920, currency: "ILS", validityMonths: 1, arboxUrl: arbox.memberships.munl, active: true, approved: true },
+    // Teens (girls 12-17): once a week, 4 sessions a month, up to 5 girls. No launch overlay (flyer price).
+    { id: "teens", track: "teens", tone: "cream", billingType: "monthly", perWeek: 1, price: 180, currency: "ILS", validityMonths: 1, arboxUrl: arbox.memberships.teens, active: true, approved: true },
   ],
   passes: [
     { id: "p5", tone: "cream", billingType: "pass", sessions: 5, price: 300, bonusSessions: 1, currency: "ILS", validityMonths: 2, arboxUrl: arbox.memberships.p5, active: true, approved: true },
@@ -34,3 +43,6 @@ export const pricing: { memberships: PricingItem[]; passes: PricingItem[] } = {
 
 export const allPlans = [...pricing.memberships, ...pricing.passes];
 export const planById = (id: string) => allPlans.find((p) => p.id === id);
+/** The general Reformer/Mat list (teens has its own tab). */
+export const generalPlans = (list: PricingItem[]) => list.filter((p) => !p.track);
+export const teensPlan = pricing.memberships.find((p) => p.track === "teens");
