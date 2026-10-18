@@ -155,7 +155,7 @@ export const en = {
       reformer: {
         name: "Reformer · Small Groups",
         short: "Reformer",
-        meta: "5 beds · 50 min",
+        meta: "5 Reformers · 50 min",
         desc: "Reformer training in a group of up to five. Spring resistance lets you work deep and precise, adapted to every level.",
         who: "Anyone who wants strength, length and control, from first-timers to experienced movers.",
         format: "Small group, one instructor, morning and evening classes.",
