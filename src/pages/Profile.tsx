@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { planName } from "../components/blocks";
+import { ContactFields, readContact } from "../components/forms";
 import { LangToggle, Wordmark } from "../components/Shell";
-import { Switch } from "../components/ui";
+import { Sheet, Switch } from "../components/ui";
 import { planById } from "../config/pricing";
-import { siteConfig } from "../config/site";
+import { addressLine, siteConfig } from "../config/site";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
 import { planEnd, planUsage } from "../lib/plan";
@@ -15,6 +16,17 @@ export default function Profile() {
   useSeo(t.meta.profile);
   const store = useStore();
   const [hint, setHint] = useState(false);
+  const [signIn, setSignIn] = useState(false);
+  // "Signed in" on this prototype = we know who you are (details saved on this device) or you hold a plan.
+  const raw = store.profile.firstName.trim();
+  const known = raw ? raw[0].toUpperCase() + raw.slice(1) : "";
+  const signedIn = store.isMember || !!known;
+  const submitSignIn = (e: FormEvent) => {
+    e.preventDefault();
+    const c = readContact(new FormData(e.currentTarget as HTMLFormElement));
+    store.saveProfile({ firstName: c.firstName, lastName: c.lastName, phone: c.phone, email: c.email ?? "" });
+    setSignIn(false);
+  };
   const plan = store.planId ? planById(store.planId) : undefined;
 
   // Demo usage figures from local bookings; real balances come from Arbox once connected.
@@ -27,14 +39,29 @@ export default function Profile() {
     <div className="page page--app tone-dark has-tabbar">
       <div className="wrap wrap--app stack gap-24 screen">
         <div className="row gap-16">
-          <span className="avatar">{store.isMember ? t.profile.firstName[0] : "✦"}</span>
+          <span className="avatar">{known ? known[0].toUpperCase() : store.isMember ? t.profile.firstName[0] : "✦"}</span>
           <span className="stack gap-4">
-            <h1 className="display d-md">{store.isMember ? t.profile.name : t.profile.guest}</h1>
+            <h1 className="display d-md">{known ? `${t.profile.hello} ${known}` : store.isMember ? t.profile.name : t.profile.guest}</h1>
             <span className="small muted">
               {since ? `${t.profile.memberSince} ${t.common.months[since.getMonth()]} ${since.getFullYear()}` : t.profile.guestSub}
             </span>
           </span>
         </div>
+
+        {!signedIn && (
+          <div className="card card--blue stack gap-12">
+            <h2 className="display d-sm">{t.profile.signedOut}</h2>
+            <p className="small muted">{t.profile.signedOutSub}</p>
+            <div className="row gap-8" style={{ flexWrap: "wrap" }}>
+              <button className="btn btn--primary" style={{ flex: 1 }} onClick={() => setSignIn(true)}>
+                {t.profile.signIn}
+              </button>
+              <Link to={href("pricing")} className="btn btn--secondary" style={{ flex: 1 }}>
+                {t.profile.signUp}
+              </Link>
+            </div>
+          </div>
+        )}
 
         {plan && usage ? (
           <div className="stack gap-12">
@@ -74,7 +101,7 @@ export default function Profile() {
               {t.profile.manage}
             </Link>
           </div>
-        ) : (
+        ) : signedIn ? (
           <div className="card stack gap-12">
             <h2 className="display d-sm">{t.profile.noPlan}</h2>
             <p className="small muted">{t.profile.noPlanSub}</p>
@@ -82,7 +109,7 @@ export default function Profile() {
               {t.nav.pricing}
             </Link>
           </div>
-        )}
+        ) : null}
 
         <Link to={href("progress")} className="nextstep nextstep--progress row between gap-12" aria-label={t.profile.progressTeaser}>
           <b className="nextstep__title">{t.nav.progress}</b>
@@ -130,18 +157,29 @@ export default function Profile() {
             {t.profile.demo}
           </button>
         )}
-        <div className="card stack gap-8">
-          <button
-            className="btn btn--secondary"
-            onClick={() => {
-              if (confirm(t.profile.signOutConfirm)) store.signOut();
-            }}
-          >
-            {t.profile.signOut}
-          </button>
-          <p className="tiny muted center">{t.profile.signOutSub}</p>
-        </div>
-        <p className="tiny center">{isHe ? "גזית 1 · הוד השרון" : "GAZIT 1 · HOD HASHARON"}</p>
+        {signedIn && (
+          <div className="card stack gap-8">
+            <button
+              className="btn btn--secondary"
+              onClick={() => {
+                if (confirm(t.profile.signOutConfirm)) store.signOut();
+              }}
+            >
+              {t.profile.signOut}
+            </button>
+            <p className="tiny muted center">{t.profile.signOutSub}</p>
+          </div>
+        )}
+        <p className="tiny center">{addressLine(isHe)}</p>
+
+        <Sheet open={signIn} onClose={() => setSignIn(false)} label={t.profile.signInTitle}>
+          <form className="stack gap-16" onSubmit={submitSignIn}>
+            <h2 className="display d-md">{t.profile.signInTitle}</h2>
+            <p className="small muted">{t.profile.signInSub}</p>
+            <ContactFields id="signin" profile={store.profile} />
+            <button className="btn btn--primary btn--block">{t.profile.signInCta}</button>
+          </form>
+        </Sheet>
       </div>
     </div>
   );

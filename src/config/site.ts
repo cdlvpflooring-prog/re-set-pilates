@@ -80,6 +80,9 @@ export const siteConfig = {
 };
 
 /** Google Maps link: opens the Google listing once the Place ID is set, the address until then. */
+/** Public address line. The street is deliberately left out: the owner asked that it not appear on the site. */
+export const addressLine = (he: boolean) => (he ? siteConfig.contact.cityHe : siteConfig.contact.cityEn);
+
 export function mapsLink() {
   const c = siteConfig.contact;
   const q = isTodo(siteConfig.social.googleBusiness) ? c.mapsQuery : `${siteConfig.brand.name}, ${c.mapsQuery}`;

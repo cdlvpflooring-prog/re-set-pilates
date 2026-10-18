@@ -41,7 +41,7 @@ export function Services() {
                   <div className="row gap-12" style={{ flexWrap: "wrap", marginTop: 4 }}>
                     <Link
                       to={serviceTarget(s, href)}
-                      className={`btn ${s.bookable ? "btn--primary" : "btn--secondary"}`}
+                      className={`btn ${s.bookable ? "btn--primary" : "btn--blue"}`}
                       onClick={() => s.bookable && s.id === "reformer" && track("book_reformer_click", { source: "service" })}
                     >
                       {s.bookable ? t.common.seeSchedule : t.common.requestSession}
@@ -109,7 +109,7 @@ export function ServiceDetail() {
             )}
           </Reveal>
           <Reveal className="row gap-12" style={{ flexWrap: "wrap" }}>
-            <Link to={serviceTarget(s, href)} className="btn btn--primary" onClick={() => s.id === "reformer" && track("book_reformer_click", { source: "service" })}>
+            <Link to={serviceTarget(s, href)} className={`btn ${s.bookable ? "btn--primary" : "btn--blue"}`} onClick={() => s.id === "reformer" && track("book_reformer_click", { source: "service" })}>
               {s.bookable ? t.common.seeSchedule : t.common.requestSession}
             </Link>
             <Link to={href("pricing")} className="btn btn--secondary">
