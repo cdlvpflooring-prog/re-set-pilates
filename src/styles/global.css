@@ -1793,3 +1793,50 @@ html[lang="he"] .ccard__chip { text-transform: none; letter-spacing: 0; font-siz
 .pkg { padding: 18px; }
 .pkg__list { margin: 0; padding-inline-start: 18px; display: grid; gap: 6px; font-size: 14px; line-height: 1.45; color: var(--fg-2); }
 .pkg__list li::marker { color: var(--accent); }
+
+/* ───────── v3.2 · hero in the wordmark's voice: Cormorant headline, baby-blue accents, centred bold buttons, chips as one line ───────── */
+/* Headline and greeting take the lowercase re:set wordmark's serif; nothing in the hero is cream any more (it sank into the photo) */
+.hero--sport .eyebrow { color: var(--b-peach, #d4e5f1); font-weight: 700; letter-spacing: 0.14em; }
+.hero--sport .hero__title, html[lang="he"] .hero--sport .hero__title {
+  font-family: "Cormorant Garamond", "Frank Ruhl Libre", Georgia, serif; font-weight: 600; text-transform: none;
+  font-size: clamp(58px, 16vw, 76px); line-height: 0.9; letter-spacing: -0.015em; color: #fff; max-width: 9ch;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+}
+html[lang="he"] .hero--sport .hero__title { font-size: clamp(50px, 13.5vw, 66px); line-height: 1.0; letter-spacing: 0; }
+.hero--sport .hero__title::before { background: var(--b-peach, #d4e5f1); }
+.hero--sport .hero__title .line:last-child, .hero--sport .hero__title .line:last-child span { color: var(--b-peach, #d4e5f1); }
+.hero--sport .lede { color: #fff; font-weight: 500; text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35); }
+@media (min-width: 1000px) {
+  .hero--sport .hero__title { font-size: clamp(88px, 8.4vw, 120px); max-width: 10ch; }
+  html[lang="he"] .hero--sport .hero__title { font-size: clamp(72px, 7vw, 100px); }
+}
+/* Facts: no pills. One serif line, baby-blue dots between the items */
+.hero__chips { gap: 0 14px; align-items: baseline; }
+.hero__chips li, html[lang="he"] .hero__chips li {
+  padding: 0; border: 0; background: transparent; border-radius: 0;
+  font-family: "Cormorant Garamond", "Frank Ruhl Libre", Georgia, serif; font-size: 22px; font-weight: 600; letter-spacing: 0.01em; text-transform: none;
+  color: #fff; text-shadow: 0 1px 14px rgba(0, 0, 0, 0.35); display: inline-flex; align-items: baseline; gap: 14px;
+}
+.hero__chips li + li::before { content: "·"; color: var(--b-peach, #d4e5f1); font-weight: 700; font-size: 1.1em; line-height: 1; }
+html[lang="he"] .hero__chips li { font-size: 21px; }
+/* Buttons: label centred, heavier, the arrow rides right after the words */
+.hero--sport .btn--gold, .hero--sport .btn--outline { justify-content: center; gap: 12px; padding-inline: 20px; text-align: center; }
+.hero--sport .btn--gold { font-weight: 900; letter-spacing: 0.06em; font-size: 17px; min-height: 62px;
+  box-shadow: 0 14px 34px rgba(212, 229, 241, 0.42), 0 0 0 3px rgba(212, 229, 241, 0.25); }
+.hero--sport .btn--gold span[aria-hidden] { font-size: 1.25em; line-height: 0; transform: translateY(-1px); }
+html[lang="he"] .hero--sport .btn--gold { font-size: 19px; letter-spacing: 0; }
+.hero--sport .btn--outline { font-weight: 800; font-size: 16.5px; border-width: 2.5px; background: rgba(26, 20, 17, 0.35); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); color: #fff; }
+html[lang="he"] .hero--sport .btn--outline { font-size: 17.5px; }
+.hero--sport .hero__note { color: #fff; font-weight: 600; opacity: 0.92; }
+/* Greeting: full-strength baby blue over the photo (earlier eyebrow rules faded it); Hebrew headline gets its serif; lining figures in the facts line */
+.hero--sport .hero__body .eyebrow, html[lang="he"] .hero--sport .hero__body .eyebrow, .hero--sport .eyebrow.fade-up {
+  color: var(--b-peach, #d4e5f1); opacity: 1; font-weight: 800; font-size: 13px; text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45);
+}
+html[lang="he"] .hero--sport .hero__title { font-family: "Frank Ruhl Libre", "Cormorant Garamond", Georgia, serif; font-weight: 700; }
+html[lang="he"] .hero__chips li { font-family: "Frank Ruhl Libre", "Cormorant Garamond", Georgia, serif; font-weight: 700; }
+.hero__chips li { font-variant-numeric: lining-nums; }
+/* The greeting sits on the brightest part of the photo: give it the wordmark badge's dark pill so it reads on any shot */
+.hero--sport .hero__body .eyebrow, html[lang="he"] .hero--sport .hero__body .eyebrow {
+  align-self: flex-start; display: inline-block; padding: 7px 14px 8px; border-radius: 999px; margin-top: 2px;
+  background: rgba(26, 20, 17, 0.62); border: 1px solid rgba(212, 229, 241, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-shadow: none;
+}
