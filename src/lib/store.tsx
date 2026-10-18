@@ -53,9 +53,12 @@ interface Store extends Persisted {
   markWelcomeSeen: () => void;
   saveProfile: (p: Partial<Profile>) => void;
   setRemoteId: (bookingId: string, remoteId: string) => void;
+  /** Forget everything saved on this device (bookings, plan, profile, progress) and start as a new visitor. */
+  signOut: () => void;
 }
 
 const KEY = "reset.v1";
+const TRAINER_KEY = "reset.trainer.v1"; // same key as trainerStore (kept literal: that module imports this one)
 const initial: Persisted = {
   planId: null,
   memberSince: null,
@@ -147,6 +150,16 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [],
   );
   const markWelcomeSeen = useCallback(() => setS((p) => (p.seenWelcome ? p : { ...p, seenWelcome: true })), []);
+  // Sign out = wipe this device's saved state (bookings, plan, profile and the progress profile) and reload as a new visitor.
+  const signOut = useCallback(() => {
+    try {
+      localStorage.removeItem(KEY);
+      localStorage.removeItem(TRAINER_KEY);
+    } catch {
+      /* private mode: nothing saved anyway */
+    }
+    location.assign(`/${location.pathname.split("/")[1] || ""}/`);
+  }, []);
 
   // Upcoming/past depend on the clock: refresh once a minute and whenever the app comes back to the foreground.
   const [tick, setTick] = useState(0);
@@ -177,9 +190,10 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       markWelcomeSeen,
       saveProfile,
       setRemoteId,
+      signOut,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tick only forces the clock-based split to recompute
-  }, [s, tick, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile, setRemoteId]);
+  }, [s, tick, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile, setRemoteId, signOut]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

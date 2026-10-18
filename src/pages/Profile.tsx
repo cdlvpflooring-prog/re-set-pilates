@@ -84,11 +84,8 @@ export default function Profile() {
           </div>
         )}
 
-        <Link to={href("progress")} className="nextstep row between gap-12">
-          <span className="stack gap-4">
-            <span className="eyebrow">{t.nav.progress}</span>
-            <b className="key">{t.profile.progressTeaser}</b>
-          </span>
+        <Link to={href("progress")} className="nextstep nextstep--progress row between gap-12" aria-label={t.profile.progressTeaser}>
+          <b className="nextstep__title">{t.nav.progress}</b>
           <span className="chev" aria-hidden />
         </Link>
 
@@ -133,6 +130,17 @@ export default function Profile() {
             {t.profile.demo}
           </button>
         )}
+        <div className="card stack gap-8">
+          <button
+            className="btn btn--secondary"
+            onClick={() => {
+              if (confirm(t.profile.signOutConfirm)) store.signOut();
+            }}
+          >
+            {t.profile.signOut}
+          </button>
+          <p className="tiny muted center">{t.profile.signOutSub}</p>
+        </div>
         <p className="tiny center">{isHe ? "גזית 1 · הוד השרון" : "GAZIT 1 · HOD HASHARON"}</p>
       </div>
     </div>
