@@ -17,6 +17,7 @@ export const en = {
     langSwitch: "עב",
     langName: "English",
     book: "Book a Reformer Class",
+    bookMat: "Book a Mat Pilates Class",
     bookShort: "Book",
     back: "Back",
     close: "Close",
@@ -335,6 +336,9 @@ export const en = {
     name: "Maya Levi",
     firstName: "Maya",
     progressTeaser: "Your goal, streak and how you feel after class",
+    signOut: "Sign out of profile",
+    signOutSub: "Start fresh as a new visitor. Your bookings and progress on this device are cleared.",
+    signOutConfirm: "Sign out and clear everything saved on this device?",
   },
   about: {
     eyebrow: "The studio",

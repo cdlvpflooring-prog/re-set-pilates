@@ -19,6 +19,7 @@ export const he: Content = {
     langSwitch: "EN",
     langName: "עברית",
     book: "לשריון שיעור רפורמר",
+    bookMat: "לשריון שיעור פילאטיס מזרן",
     bookShort: "לשריון",
     back: "חזרה",
     close: "סגירה",
@@ -337,6 +338,9 @@ export const he: Content = {
     name: "מאיה לוי",
     firstName: "מאיה",
     progressTeaser: "היעד, הרצף ואיך הרגשת אחרי השיעור",
+    signOut: "התנתקות מהפרופיל",
+    signOutSub: "להתחיל מחדש כמבקרת חדשה. השריונים וההתקדמות השמורים במכשיר הזה יימחקו.",
+    signOutConfirm: "להתנתק ולמחוק את כל מה ששמור במכשיר הזה?",
   },
   about: {
     eyebrow: "הסטודיו",

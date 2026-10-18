@@ -32,8 +32,11 @@ export default function My() {
             </div>
             <h2 className="display d-sm">{t.my.emptyTitle}</h2>
             <p className="small muted">{t.my.emptySub}</p>
-            <Link to={href("schedule")} className="btn btn--primary">
+            <Link to={href("schedule?service=reformer")} className="btn btn--primary">
               {t.common.book}
+            </Link>
+            <Link to={href("schedule?service=mat")} className="btn btn--primary">
+              {t.common.bookMat}
             </Link>
           </div>
         ) : (

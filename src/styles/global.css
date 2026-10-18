@@ -1632,3 +1632,23 @@ html[lang="en"] #classes .flow-row .d-md { font-weight: 600; }
 .tabbar a { padding-inline: 0; }
 @media (max-width: 400px) { .tabbar a, .tabbar a.active, html[lang="he"] .tabbar a { font-size: 13px; } }
 @media (max-width: 360px) { .tabbar a, .tabbar a.active, html[lang="he"] .tabbar a { font-size: 12px; } }
+
+/* ───────── v2.5 · outlined cards, sporty progress tile, sign-out ───────── */
+/* Every card and tab carries the same 2px ink outline as the Reformer/Mat class tabs */
+.card, .card--dashed, .plan, .quote, .nextstep, .choice, #classes .flow-row, .mcard--member, .my-empty__img, .svc-card .media, .date-tile,
+.price-row, .price-row.is-pop {
+  border: 2px solid #1f1612;
+}
+.card--dashed { border-style: dashed; }
+.quote--sample { outline: 0; }
+.plan { overflow: hidden; }
+/* "My progress": one bold line on baby blue, black type, athletic tracking */
+.nextstep--progress { background: var(--b-peach, #d4e5f1); color: #1f1612; padding: 22px 22px; align-items: center; }
+.nextstep__title {
+  font-family: "Inter", "Heebo", sans-serif; font-weight: 900; font-size: clamp(26px, 7vw, 32px); line-height: 1;
+  letter-spacing: -0.02em; text-transform: uppercase; color: #1f1612;
+}
+html[lang="he"] .nextstep__title { text-transform: none; letter-spacing: 0; font-weight: 800; }
+.nextstep--progress .chev { width: 12px; height: 12px; border-width: 2.5px; color: #1f1612; }
+.nextstep--progress:active { transform: scale(0.985); }
+
