@@ -1,62 +1,45 @@
 import { Link, useParams } from "react-router-dom";
 import { PageHead, Packages, TeensPlan, pricesVisible, serviceTarget } from "../components/blocks";
 import { teensPlan } from "../config/pricing";
-import { MaskImg, Reveal } from "../components/ui";
 import { serviceBySlug, services } from "../config/services";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
 
+/** Same cards as "Our classes" on the home page (the #classes styles); each card opens the service's page. */
 export function Services() {
   const { t, href } = useI18n();
   useSeo(t.meta.services);
   return (
-    <div className="page tone-dark">
+    <div className="page tone-dark page--still">
       <PageHead title={t.services.title} sub={t.services.sub} />
-      <div className="wrap pbody">
-        <div className="stack" style={{ gap: "clamp(40px, 7vw, 96px)" }}>
-          {services.map((s) => {
-            const c = t.services.items[s.id];
-            return (
-              <article key={s.id} className="split">
-                <Link to={href(`services/${s.slug}`)} aria-label={c.name}>
-                  <MaskImg src={s.image} pos={s.pos} ratio="4 / 3" zoom>
-                    {!s.bookable && (
-                      <span className="badge badge--blush" style={{ position: "absolute", top: 14, insetInlineStart: 14 }}>
-                        {t.common.byRequest}
+      <section id="classes" className="section--tight">
+        <div className="wrap">
+          <div>
+            {services.map((s) => {
+              const c = t.services.items[s.id];
+              return (
+                <div key={s.id} className="reveal is-in">
+                  <Link to={href(`services/${s.slug}`)} className="flow-row ccard" onClick={() => track("service_view", { service: s.id })}>
+                    <span className="ccard__media" aria-hidden>
+                      <img src={s.image} alt="" style={{ objectPosition: s.pos }} loading="eager" decoding="async" />
+                      <span className="ccard__chip">{c.meta}</span>
+                    </span>
+                    <span className="ccard__body">
+                      <span className="display d-md ccard__title">{c.name}</span>
+                      <span className="ccard__blurb">{c.blurb}</span>
+                      <span className={`ccard__cta ${s.bookable ? "ccard__cta--book" : ""}`}>
+                        {t.common.learnMore}
+                        <span className="chev" aria-hidden />
                       </span>
-                    )}
-                  </MaskImg>
-                </Link>
-                <Reveal className="stack gap-16" delay={120}>
-                  <span className="eyebrow">{c.meta}</span>
-                  <h2 className="display d-md">{c.name}</h2>
-                  <p className="muted">{c.desc}</p>
-                  <div className="row gap-8" style={{ flexWrap: "wrap" }}>
-                    {c.tags.map((tag) => (
-                      <span key={tag} className="tag">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="row gap-12" style={{ flexWrap: "wrap", marginTop: 4 }}>
-                    <Link
-                      to={serviceTarget(s, href)}
-                      className={`btn ${s.bookable ? "btn--primary" : "btn--blue"}`}
-                      onClick={() => s.bookable && s.id === "reformer" && track("book_reformer_click", { source: "service" })}
-                    >
-                      {s.bookable ? t.common.seeSchedule : t.common.requestSession}
-                    </Link>
-                    <Link to={href(`services/${s.slug}`)} className="link">
-                      {t.common.learnMore}
-                    </Link>
-                  </div>
-                </Reveal>
-              </article>
-            );
-          })}
+                    </span>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
@@ -68,24 +51,24 @@ export function ServiceDetail() {
   const c = t.services.items[s.id];
   useSeo({ title: `${c.name} | re:set pilates`, desc: c.desc });
   return (
-    <div className="page page--bleed tone-dark">
+    <div className="page page--bleed tone-dark page--still">
       <section className="phero">
         <img src={s.image} alt="" style={{ objectPosition: s.pos }} />
         <div className="wrap phero__body stack gap-12">
-          <span className="eyebrow fade-up" style={{ color: "var(--cream)" }}>
+          <span className="eyebrow" style={{ color: "var(--cream)" }}>
             {c.meta}
           </span>
-          <h1 className="display d-lg fade-up">{c.name}</h1>
+          <h1 className="display d-lg">{c.name}</h1>
         </div>
       </section>
       <section className="section--tight">
         <div className="wrap wrap--narrow stack gap-32">
-          <Reveal>
+          <div>
             <p className="display d-sm" style={{ lineHeight: 1.35 }}>
               {c.desc}
             </p>
-          </Reveal>
-          <Reveal className="rows card" style={{ paddingBlock: 6 }}>
+          </div>
+          <div className="rows card" style={{ paddingBlock: 6 }}>
             <div>
               <span className="muted">{t.services.forWho}</span>
               <span style={{ textAlign: "end", maxWidth: "60%", paddingBlock: 12 }}>{c.who}</span>
@@ -108,27 +91,27 @@ export function ServiceDetail() {
                 </span>
               </div>
             )}
-          </Reveal>
+          </div>
           {s.id === "teens" && teensPlan && pricesVisible(teensPlan) && (
-            <Reveal className="stack gap-12">
+            <div className="stack gap-12">
               <h2 className="display d-sm">{t.pricing.title}</h2>
               <TeensPlan plan={teensPlan} brief />
-            </Reveal>
+            </div>
           )}
           {s.id === "groups" && (
-            <Reveal className="stack gap-12">
+            <div className="stack gap-12">
               <h2 className="display d-sm">{t.services.packagesTitle}</h2>
               <Packages />
-            </Reveal>
+            </div>
           )}
-          <Reveal className="row gap-12" style={{ flexWrap: "wrap" }}>
+          <div className="row gap-12" style={{ flexWrap: "wrap" }}>
             <Link to={serviceTarget(s, href)} className={`btn ${s.bookable ? "btn--primary" : "btn--blue"}`} onClick={() => s.id === "reformer" && track("book_reformer_click", { source: "service" })}>
               {s.bookable ? t.common.seeSchedule : t.common.requestSession}
             </Link>
             <Link to={href("pricing")} className="btn btn--secondary">
               {t.nav.pricing}
             </Link>
-          </Reveal>
+          </div>
         </div>
       </section>
     </div>
