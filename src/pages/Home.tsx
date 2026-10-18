@@ -46,7 +46,7 @@ export default function Home() {
     <div className="page page--bleed tone-dark">
       {/* Hero */}
       {/* Editorial first screen: full-bleed studio film, the brass ring, a serif headline (design system: HeroEditorial) */}
-      <section className="hero hero--ed">
+      <section className="hero hero--ed hero--sport">
         <div className="hero__media" ref={heroRef}>
           {showVideo ? (
             <video src={heroSrc} poster={media.heroPoster} autoPlay muted loop playsInline preload="metadata" />
@@ -57,7 +57,7 @@ export default function Home() {
         <div className="hero__scrim" aria-hidden />
         <div className="wrap hero__body">
           <span className="hero__mark fade-up" style={d(100)}>
-            <img src={media.logoDisc} alt="" />
+            <Wordmark />
           </span>
           {isMember && (
             <p className="eyebrow fade-up" style={d(150)}>
@@ -65,15 +65,20 @@ export default function Home() {
             </p>
           )}
           <h1 className="hero__title">
-            {t.home.heroEditorial.map((line, i) => (
+            {t.home.heroSport.map((line, i) => (
               <span className="line" key={line}>
-                <span style={d(200 + i * 130)}>{i === 1 && !isHe ? <em>{line}</em> : line}</span>
+                <span style={d(200 + i * 130)}>{line}</span>
               </span>
             ))}
           </h1>
-          <p className="lede fade-up" style={d(650)}>
+          <p className="lede fade-up" style={d(600)}>
             {t.home.sub}
           </p>
+          <ul className="hero__chips fade-up" style={d(700)}>
+            {t.home.heroChips.map((chip) => (
+              <li key={chip}>{chip}</li>
+            ))}
+          </ul>
           <div className="hero__offer fade-up" style={d(800)}>
             <a href="#schedule" className="btn btn--gold btn--block" onClick={() => track("book_reformer_click", { source: "hero" })}>
               {t.nav.bookTitle} <span aria-hidden>→</span>
