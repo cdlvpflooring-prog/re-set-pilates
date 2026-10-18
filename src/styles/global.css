@@ -1890,3 +1890,14 @@ html[lang="he"] .mcard__name { letter-spacing: 0.02em; text-transform: none; }
 .mcard--member .mcard__bar { position: relative; z-index: 2; }
 /* Member card: the bottom block leaves room for the chip at the end */
 .mcard--member > .stack { padding-inline-end: clamp(56px, 16cqw, 72px); position: relative; z-index: 2; }
+
+/* ───────── v3.4 · Services page uses the "Our classes" cards; colours for the newer cards ───────── */
+#classes .reveal:nth-child(6) .flow-row { --cat: #dcebf4; } /* Teens: pale blue */
+#classes .reveal:nth-child(7) .flow-row { --cat: #efe2cf; } /* Closed groups: oat */
+.page #classes { padding-top: 0; }
+/* Still pages (services): no entrance motion, no hover lift or image zoom; images are plain */
+.page--still .reveal { opacity: 1; transform: none; transition: none; }
+.page--still #classes .flow-row, .page--still .ccard__media img { transition: none; }
+.page--still #classes .flow-row:hover { transform: none; box-shadow: none; }
+.page--still #classes .ccard:hover .ccard__media img { transform: none; }
+.page--still .phero img { animation: none; transform: none; }
