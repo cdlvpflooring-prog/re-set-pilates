@@ -112,6 +112,9 @@ export default function Profile() {
         ) : null}
 
         <Link to={href("progress")} className="nextstep nextstep--progress row between gap-12" aria-label={t.profile.progressTeaser}>
+          <span className="nextstep__logo" aria-hidden>
+            <Wordmark />
+          </span>
           <b className="nextstep__title">{t.nav.progress}</b>
           <span className="chev" aria-hidden />
         </Link>

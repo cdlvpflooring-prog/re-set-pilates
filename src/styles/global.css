@@ -1700,3 +1700,39 @@ html[lang="he"] .nextstep__title { font-style: normal; font-size: clamp(22px, 6.
 .bed[disabled] .bed__block { fill: rgba(31, 22, 18, 0.06); }
 .bed[disabled] .bed__num { color: rgba(31, 22, 18, 0.35); }
 
+/* ───────── v2.8 · sporty hero, wordmark badge, "My progress" as the go-to button ───────── */
+/* Hero: bold sans headline, gold accent bar, stat chips; the brand mark is the site wordmark on a dark pill */
+.hero--sport .hero__mark { width: auto; height: auto; border-radius: 999px; padding: 8px 16px 9px; background: rgba(26, 20, 17, 0.72);
+  border: 1px solid rgba(241, 211, 173, 0.45); box-shadow: 0 0 36px rgba(241, 211, 173, 0.25); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-self: flex-start; }
+.hero--sport .hero__mark .wordmark { font-size: 22px; color: var(--ed-cream); }
+.hero--sport .hero__mark .wordmark i { color: var(--ed-gold); }
+.hero--sport .hero__title, html[lang="he"] .hero--sport .hero__title {
+  position: relative; padding-top: 14px; font-family: "Inter", "Heebo", sans-serif; font-weight: 900; text-transform: uppercase;
+  font-size: clamp(46px, 13vw, 60px); line-height: 0.92; letter-spacing: -0.035em; max-width: 10ch;
+}
+html[lang="he"] .hero--sport .hero__title { text-transform: none; letter-spacing: -0.01em; line-height: 1.02; font-size: clamp(40px, 11.5vw, 54px); }
+.hero--sport .hero__title::before { content: ""; position: absolute; top: 0; inset-inline-start: 0; width: 56px; height: 5px; border-radius: 3px; background: var(--ed-gold); }
+.hero--sport .hero__title .line:last-child, .hero--sport .hero__title .line:last-child span { color: var(--ed-gold); }
+.hero--sport .lede { font-weight: 500; }
+.hero__chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.hero__chips li { padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(252, 241, 220, 0.4); background: rgba(252, 241, 220, 0.08);
+  font-family: "Inter", "Heebo", sans-serif; font-size: 12.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ed-cream); }
+html[lang="he"] .hero__chips li { text-transform: none; letter-spacing: 0; font-size: 13.5px; }
+.hero--sport .btn--gold { font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 15px; box-shadow: 0 10px 28px rgba(241, 211, 173, 0.28); }
+html[lang="he"] .hero--sport .btn--gold { text-transform: none; letter-spacing: 0; font-size: 17px; }
+.hero--sport .btn--outline { font-weight: 600; }
+@media (min-width: 1000px) {
+  .hero--sport .hero__title { font-size: clamp(72px, 7.6vw, 104px); max-width: 11ch; }
+  html[lang="he"] .hero--sport .hero__title { font-size: clamp(60px, 6.4vw, 88px); }
+}
+/* "My progress": the app's go-to button. Upright, heavy, large; the re:set wordmark leads, chevron trails. */
+.nextstep--progress { padding: 22px 52px 22px 18px; gap: 14px; justify-content: flex-start;
+  border-width: 3px; box-shadow: 0 10px 26px rgba(74, 117, 144, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+.nextstep--progress:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(74, 117, 144, 0.22); }
+.nextstep__logo { flex: none; display: inline-flex; padding: 6px 10px 7px; border-radius: 12px; background: #1f1612; color: #fcf1dc; }
+.nextstep__logo .wordmark { font-size: 16px; }
+.nextstep__logo .wordmark i { color: var(--b-peach, #d4e5f1); }
+.nextstep__title, html[lang="he"] .nextstep__title { font-style: normal; font-weight: 900; font-size: clamp(24px, 6.8vw, 30px); letter-spacing: -0.02em; text-align: start; white-space: normal; line-height: 0.95; }
+.nextstep__title::before, .nextstep__title::after { content: none; }
+.nextstep--progress .chev { inset-inline-end: 20px; width: 14px; height: 14px; border-width: 3px; }
+
