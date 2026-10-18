@@ -43,6 +43,7 @@ export function Checkout() {
   const store = useStore();
   const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
   const plan = planById(planId);
   const next = params.get("next");
 
@@ -67,15 +68,25 @@ export function Checkout() {
     const method = siteConfig.payments.find((m) => m.id === id);
     if (!method) return;
     // Real payment happens at the provider's link (plan-specific Arbox link when configured).
-    // Opened before anything is awaited so the browser does not block the new tab.
+    // The tab is opened now (before anything is awaited, so the browser allows it) and only
+    // pointed at the payment page once the order is saved; it is closed if saving fails.
     const url = method.id === "arbox" && !isTodo(plan.arboxUrl) ? plan.arboxUrl : method.url;
-    if (!isTodo(url)) window.open(url, "_blank", "noopener");
+    const payTab = isTodo(url) ? null : window.open("", "_blank");
+    if (payTab) payTab.opener = null;
     const f = new FormData(e.currentTarget as HTMLFormElement);
     const contact = readContact(f);
     const x = readExtras(f);
     setSending(true);
-    // Saved in Airtable as a Pending payment until Orit confirms it.
-    await relay("checkout", { lang, contact, planId: plan.id, method: method.id, heard: x.heard, consent: x.consent, termsAccepted: true, website: x.website });
+    setFailed(false);
+    // Saved in Airtable as a Pending payment until Orit confirms it. A queued order (offline) counts as saved.
+    const r = await relay("checkout", { lang, contact, planId: plan.id, method: method.id, heard: x.heard, consent: x.consent, termsAccepted: true, website: x.website });
+    if (!r.ok && !r.queued) {
+      payTab?.close();
+      setSending(false);
+      setFailed(true);
+      return;
+    }
+    if (payTab) payTab.location.href = url;
     store.saveProfile(profileFrom(contact, x));
     store.setPlan(plan.id);
     setSending(false);
@@ -137,6 +148,11 @@ export function Checkout() {
                 </button>
               ))}
               {!linksReady && <p className="tiny center">{t.checkout.demoPay}</p>}
+              {failed && (
+                <p className="small center" role="alert">
+                  {t.form.failed}
+                </p>
+              )}
             </div>
             {!plan.approved && (
               <p className="tiny center">

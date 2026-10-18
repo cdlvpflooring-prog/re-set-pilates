@@ -508,6 +508,7 @@ export const en = {
     sending: "Sending…",
     saved: "No connection right now. We saved it and will send it automatically.",
     failed: "Something went wrong. Please try again or message us on WhatsApp.",
+    phoneInvalid: "Please enter an Israeli phone number, e.g. 050-123-4567.",
   },
   chat: {
     open: "Chat with {name}",

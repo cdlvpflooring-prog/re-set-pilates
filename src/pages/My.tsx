@@ -8,7 +8,7 @@ import { fromISO, slotStart } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
 import { downloadIcs } from "../lib/ics";
-import { relay } from "../lib/relay";
+import { dropQueued, relay } from "../lib/relay";
 import { useStore, type Booking } from "../lib/store";
 
 export default function My() {
@@ -136,7 +136,9 @@ export default function My() {
               className="btn btn--blush btn--block"
               onClick={() => {
                 // The relay decides on-time vs late cancel from the class time, so the 24-hour rule is applied in one place.
+                // Not sent yet (offline)? Then simply drop it from the outbox instead.
                 if (toCancel.remoteId) relay("cancel", { lang, bookingId: toCancel.remoteId, phone: store.profile.phone });
+                else dropQueued(toCancel.id);
                 store.cancel(toCancel.id, isLate(toCancel));
                 setToCancel(null);
               }}

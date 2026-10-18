@@ -165,3 +165,22 @@ test("retry pass is only issued once the bot check passed", async () => {
   expect(((await r.json()) as { retry?: string }).retry).toBeUndefined(); // Turnstile off: nothing to pass
 });
 
+
+test("localhost origins are refused on the live site", async () => {
+  expect((await call("chat", { lang: "en", question: "hi" }, "http://localhost:5173")).status).toBe(403);
+  const local = await worker.fetch(
+    new Request("http://localhost:8787/api/chat", { method: "POST", headers: { Origin: "http://localhost:5173" }, body: JSON.stringify({ lang: "en", question: "hi" }) }) as never,
+    env,
+    {} as never,
+  );
+  expect(local.status).toBe(200); // wrangler dev: both sides local
+});
+
+test("a later 'how did you hear' answer replaces the automatic Website source", async () => {
+  await call("waitlist", { lang: "he", contact: maya, slot });
+  expect(db[T.members][0].fields[F.members.source]).toBe("Website");
+  await call("checkout", { lang: "he", contact: maya, planId: "m3x", method: "bit", heard: "Instagram", consent: false, termsAccepted: true });
+  expect(db[T.members][0].fields[F.members.source]).toBe("Instagram");
+  await call("checkout", { lang: "he", contact: maya, planId: "m3x", method: "bit", heard: "TikTok", consent: false, termsAccepted: true });
+  expect(db[T.members][0].fields[F.members.source]).toBe("Instagram"); // a real answer is never overwritten
+});

@@ -132,14 +132,15 @@ export default function Quiz() {
 function LeaveNumber({ quizId }: { quizId: string }) {
   const { t, lang } = useI18n();
   const { profile, saveProfile } = useStore();
-  const [state, setState] = useState<"idle" | "sending" | "done">("idle");
+  const [state, setState] = useState<"idle" | "sending" | "done" | "failed">("idle");
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const f = new FormData(e.currentTarget as HTMLFormElement);
     const contact = readContact(f);
     const x = readExtras(f);
     setState("sending");
-    await relay("quiz-contact", { lang, quizId, contact, consent: x.consent, website: x.website });
+    const r = await relay("quiz-contact", { lang, quizId, contact, consent: x.consent, website: x.website });
+    if (!r.ok && !r.queued) return setState("failed");
     saveProfile(profileFrom(contact, x));
     setState("done");
   };
@@ -155,6 +156,11 @@ function LeaveNumber({ quizId }: { quizId: string }) {
       <button className="btn btn--blush btn--block" disabled={state === "sending"}>
         {state === "sending" ? t.form.sending : t.quiz.leaveBtn}
       </button>
+      {state === "failed" && (
+        <p className="small" role="alert" style={{ margin: 0 }}>
+          {t.form.failed}
+        </p>
+      )}
     </form>
   );
 }

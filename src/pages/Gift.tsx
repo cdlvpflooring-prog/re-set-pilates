@@ -23,6 +23,7 @@ export default function Gift() {
   const [done, setDone] = useState(false);
   const [notified, setNotified] = useState(false);
   const [sending, setSending] = useState(false);
+  const [failed, setFailed] = useState(false);
   const [code, setCode] = useState("");
   const { profile, saveProfile } = useStore();
   const pass = passes.find((p) => p.id === choice);
@@ -36,6 +37,7 @@ export default function Gift() {
     const x = readExtras(f);
     track("gift_card_start", { choice });
     setSending(true);
+    setFailed(false);
     const r = await relay("gift", {
       lang,
       buyer,
@@ -46,6 +48,11 @@ export default function Gift() {
       consent: x.consent,
       website: x.website,
     });
+    if (!r.ok && !r.queued) {
+      setSending(false);
+      setFailed(true);
+      return;
+    }
     saveProfile(profileFrom(buyer, x));
     setCode(r.code ?? "");
     setSending(false);
@@ -134,6 +141,11 @@ export default function Gift() {
                 <ConsentField profile={profile} />
               </fieldset>
               <div className="notice">{t.gift.demoPay}</div>
+              {failed && (
+                <p className="small" role="alert" style={{ margin: 0 }}>
+                  {t.form.failed}
+                </p>
+              )}
               <button className="btn btn--sand btn--block" disabled={sending}>
                 {sending ? t.form.sending : t.gift.send}
               </button>
