@@ -1840,3 +1840,53 @@ html[lang="he"] .hero__chips li { font-family: "Frank Ruhl Libre", "Cormorant Ga
   align-self: flex-start; display: inline-block; padding: 7px 14px 8px; border-radius: 999px; margin-top: 2px;
   background: rgba(26, 20, 17, 0.62); border: 1px solid rgba(212, 229, 241, 0.35); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); text-shadow: none;
 }
+
+/* ───────── v3.3 · membership and gift cards feel like a real card: ID-1 proportions, chip, big embossed wordmark, hairline, sheen ───────── */
+.mcard, .gift-card {
+  aspect-ratio: 1.586; border-radius: 22px; padding: clamp(18px, 5.5cqw, 26px) clamp(20px, 6cqw, 28px);
+  container-type: inline-size; isolation: isolate;
+  box-shadow: 0 22px 46px rgba(31, 22, 18, 0.26), 0 2px 6px rgba(31, 22, 18, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+}
+.mcard--member { aspect-ratio: auto; min-height: 220px; }
+/* Hairline inner frame, like a printed card edge */
+.mcard::after, .gift-card::after {
+  content: ""; position: absolute; inset: 7px; border-radius: 16px; pointer-events: none; z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.35); box-shadow: inset 0 0 0 1px rgba(31, 22, 18, 0.06);
+  background: linear-gradient(112deg, transparent 46%, rgba(255, 255, 255, 0.22) 56%, transparent 68%);
+}
+.mcard--ink::after { border-color: rgba(252, 241, 220, 0.22); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.3); }
+/* EMV chip, gold with the contact grid, sitting under the wordmark on the start side */
+.mcard::before, .gift-card::before {
+  content: ""; position: absolute; z-index: 1; inset-inline-start: clamp(20px, 6cqw, 28px); top: 50%; transform: translateY(-50%);
+  width: clamp(38px, 12cqw, 48px); aspect-ratio: 1.28; border-radius: 7px;
+  background:
+    linear-gradient(90deg, transparent 31%, rgba(120, 90, 40, 0.55) 31%, rgba(120, 90, 40, 0.55) 33%, transparent 33%, transparent 66%, rgba(120, 90, 40, 0.55) 66%, rgba(120, 90, 40, 0.55) 68%, transparent 68%),
+    linear-gradient(0deg, transparent 47%, rgba(120, 90, 40, 0.55) 47%, rgba(120, 90, 40, 0.55) 53%, transparent 53%),
+    linear-gradient(135deg, #f2dca6, #c9a35c 55%, #e9cf92);
+  border: 1px solid rgba(120, 90, 40, 0.45); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+.mcard--member::before { top: auto; bottom: clamp(18px, 5.5cqw, 26px); transform: none; inset-inline-start: auto; inset-inline-end: clamp(20px, 6cqw, 28px); }
+/* Wordmark: the card's hero. Big, embossed, "pilates" letter-spaced underneath */
+.mcard .wordmark, .mcard--member .wordmark, .gift-card .wordmark { font-size: clamp(40px, 15cqw, 58px); line-height: 0.88; position: relative; z-index: 2; }
+.mcard .wordmark__sub, .gift-card .wordmark__sub { font-size: 0.3em; letter-spacing: 0.42em; margin-top: 0.26em; opacity: 0.85; }
+.mcard .wordmark i { color: inherit; opacity: 0.6; }
+.mcard--cream .wordmark, .mcard--sand .wordmark, .gift-card .wordmark { text-shadow: 0 1px 0 rgba(255, 255, 255, 0.6), 0 -1px 0 rgba(31, 22, 18, 0.18); }
+.mcard--ink .wordmark { color: var(--b-sun, #fcf1dc); text-shadow: 0 1px 0 rgba(0, 0, 0, 0.5), 0 -1px 0 rgba(255, 255, 255, 0.12); }
+/* Plan name and city as the embossed cardholder line */
+.mcard > .stack, .mcard > .row { position: relative; z-index: 2; }
+.mcard__name { font-family: "Inter", "Heebo", sans-serif; font-size: clamp(15px, 5.2cqw, 19px); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45), 0 -1px 0 rgba(31, 22, 18, 0.18); }
+html[lang="he"] .mcard__name { letter-spacing: 0.02em; text-transform: none; }
+.mcard--ink .mcard__name, .mcard--member.mcard--ink .mcard__name { text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45); }
+.mcard__sub { font-size: clamp(9.5px, 3.2cqw, 11px); letter-spacing: 0.3em; font-weight: 600; opacity: 0.75; margin-top: 4px; }
+/* Richer faces: a soft light pool top-start and depth bottom-end, like laminated plastic */
+.mcard--cream { background: radial-gradient(120% 90% at 10% 0%, #fffdf7 0%, transparent 55%), linear-gradient(135deg, #fbf3e6, #e6cfae); }
+.mcard--sand { background: radial-gradient(120% 90% at 10% 0%, rgba(255, 255, 255, 0.55) 0%, transparent 55%), linear-gradient(135deg, var(--peach-card-a), var(--peach-card-b)); }
+.mcard--ink { background: radial-gradient(120% 90% at 10% 0%, #4a3a30 0%, transparent 55%), linear-gradient(135deg, #352720, #15100d); }
+.gift-card { background: radial-gradient(120% 90% at 10% 0%, #fff 0%, transparent 55%), linear-gradient(140deg, #f9dcd6, var(--b-peach)); }
+.gift-card > * { position: relative; z-index: 2; }
+/* Member card: the chip moves bottom-end so the usage bar keeps its room */
+.mcard--member .mcard__name { font-size: clamp(18px, 6cqw, 24px); letter-spacing: 0.02em; text-transform: none; }
+.mcard--member .mcard__bar { position: relative; z-index: 2; }
+/* Member card: the bottom block leaves room for the chip at the end */
+.mcard--member > .stack { padding-inline-end: clamp(56px, 16cqw, 72px); position: relative; z-index: 2; }
