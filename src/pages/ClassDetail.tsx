@@ -1,3 +1,4 @@
+import { ReformerSketch } from "../components/art";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { instructorName } from "../components/blocks";
@@ -150,7 +151,8 @@ export default function ClassDetail() {
                     aria-label={`${t.klass.bed} ${i + 1}${taken ? ` · ${t.klass.taken}` : ""}`}
                     onClick={() => setBed(bed === i ? null : i)}
                   >
-                    {i + 1}
+                    <ReformerSketch />
+                    <span className="bed__num">{i + 1}</span>
                   </button>
                 );
               })}

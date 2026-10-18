@@ -1680,3 +1680,23 @@ html[lang="he"] .nextstep__title { font-style: normal; font-size: clamp(22px, 6.
 .footer__base { justify-content: center; text-align: center; text-transform: none; letter-spacing: 0; font-size: 13px; }
 @media (min-width: 1000px) { .footer__grid { grid-template-columns: repeat(4, 1fr); } }
 
+/* ───────── v2.7 · "Choose your Reformer": each tile is a sketch of the machine ───────── */
+.bed { height: auto; padding: 10px 0; display: grid; place-items: start center; border-radius: 14px; border-width: 2px; font: inherit; }
+.bed::before { display: none; }
+.bed__sketch { grid-area: 1 / 1; width: 60px; height: 112px; display: block; color: rgba(31, 22, 18, 0.72); }
+.bed__carriage { fill: var(--b-peach, #d4e5f1); fill-opacity: 0.9; }
+.bed__block { fill: rgba(31, 22, 18, 0.14); }
+/* The number sits on the carriage: same grid cell as the sketch, offset to the carriage's centre (y 45 of 120) */
+.bed__num {
+  grid-area: 1 / 1; align-self: start; margin-top: calc(112px * 45 / 120 - 11px);
+  font-family: "Inter", "Heebo", sans-serif; font-size: 22px; font-weight: 800; line-height: 1; color: #1f1612;
+}
+.bed[aria-pressed="true"] .bed__sketch { color: rgba(252, 241, 220, 0.95); }
+.bed[aria-pressed="true"] .bed__carriage { fill: var(--b-peach, #d4e5f1); }
+.bed[aria-pressed="true"] .bed__block { fill: rgba(252, 241, 220, 0.3); }
+.bed[aria-pressed="true"] .bed__num { color: #1f1612; }
+.bed[disabled] .bed__sketch { color: rgba(31, 22, 18, 0.25); }
+.bed[disabled] .bed__carriage { fill: rgba(31, 22, 18, 0.06); }
+.bed[disabled] .bed__block { fill: rgba(31, 22, 18, 0.06); }
+.bed[disabled] .bed__num { color: rgba(31, 22, 18, 0.35); }
+

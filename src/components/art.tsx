@@ -81,3 +81,23 @@ export function ServiceArch({ id, image, pos }: { id: ServiceId; image?: string;
     </div>
   );
 }
+
+/** Top-down sketch of one Reformer for the "choose your Reformer" picker: frame rails, headrest, carriage,
+ *  shoulder blocks, springs and footbar. Colours come from the tile's `currentColor` and the .bed__* classes. */
+export function ReformerSketch() {
+  return (
+    <svg className="bed__sketch" viewBox="0 0 64 120" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="6" y="4" width="52" height="112" rx="7" />
+      <line x1="12" y1="10" x2="12" y2="110" opacity="0.45" />
+      <line x1="52" y1="10" x2="52" y2="110" opacity="0.45" />
+      <rect x="20" y="10" width="24" height="9" rx="3" />
+      <rect x="16" y="22" width="32" height="46" rx="5" className="bed__carriage" />
+      <rect x="15" y="23" width="9" height="12" rx="2" className="bed__block" />
+      <rect x="40" y="23" width="9" height="12" rx="2" className="bed__block" />
+      <path d="M22 70v4l3 3-3 3 3 3-3 3 3 3-3 3v4M32 70v4l3 3-3 3 3 3-3 3 3 3-3 3v4M42 70v4l3 3-3 3 3 3-3 3 3 3-3 3v4" opacity="0.7" />
+      <path d="M14 104h36" strokeWidth="3" />
+      <path d="M16 104v6M48 104v6" />
+    </svg>
+  );
+}
+
