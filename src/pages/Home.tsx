@@ -7,7 +7,7 @@ import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
 import { useReducedMotion } from "motion/react";
 import { pricing } from "../config/pricing";
 import { services } from "../config/services";
-import { isTodo, mapsLink, siteConfig } from "../config/site";
+import { addressLine, isTodo, mapsLink, siteConfig } from "../config/site";
 import { founder, instructors, reviews } from "../config/team";
 import { track } from "../lib/analytics";
 import { fromISO } from "../lib/booking";
@@ -297,7 +297,7 @@ export default function Home() {
           </Reveal>
           <div className="facts3">
             <Reveal className="stack gap-12">
-              <span className="display d-sm">{isHe ? `${c.streetHe}, ${c.cityHe}` : `${c.streetEn}, ${c.cityEn}`}</span>
+              <span className="display d-sm">{addressLine(isHe)}</span>
               <span className="small muted">
                 {t.contact.parking}: <Verified value={c.parking} />
               </span>

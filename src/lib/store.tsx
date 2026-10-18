@@ -158,7 +158,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } catch {
       /* private mode: nothing saved anyway */
     }
-    location.assign(`/${location.pathname.split("/")[1] || ""}/`);
+    location.assign(`/${location.pathname.split("/")[1] || ""}/profile`);
   }, []);
 
   // Upcoming/past depend on the clock: refresh once a minute and whenever the app comes back to the foreground.

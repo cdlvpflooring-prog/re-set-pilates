@@ -77,7 +77,6 @@ export const localBusinessLd = (lang: string) => {
     ...(known(c.email) && { email: c.email }),
     address: {
       "@type": "PostalAddress",
-      streetAddress: he ? c.streetHe : c.streetEn,
       addressLocality: he ? c.cityHe : c.cityEn,
       ...(known(c.postalCode) && { postalCode: c.postalCode }),
       addressCountry: "IL",

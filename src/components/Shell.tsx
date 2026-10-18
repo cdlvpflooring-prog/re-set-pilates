@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { isTodo, siteConfig } from "../config/site";
+import { addressLine, isTodo, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { ChatWidget } from "./ChatWidget";
@@ -234,7 +234,6 @@ function TabBar({ section }: { section: string }) {
 
 function Footer() {
   const { t, href, isHe } = useI18n();
-  const c = siteConfig.contact;
   return (
     <footer className="footer tone-dark has-tabbar">
       <div className="wrap">
@@ -244,9 +243,7 @@ function Footer() {
             <p className="display d-sm hi">
               {t.footer.tagline}
             </p>
-            <p className="small muted">
-              {isHe ? `${c.streetHe}, ${c.cityHe}` : `${c.streetEn}, ${c.cityEn}`}
-            </p>
+            <p className="small muted">{addressLine(isHe)}</p>
           </div>
           <div>
             <h3>{t.footer.explore}</h3>
@@ -280,8 +277,9 @@ function Footer() {
           </div>
         </div>
         <div className="footer__base">
-          <span>© {new Date().getFullYear()} re:set pilates · {t.footer.rights}</span>
-          <span>{isHe ? "גזית 1 · הוד השרון" : "GAZIT 1 · HOD HASHARON"}</span>
+          <span>
+            © {new Date().getFullYear()} re:set pilates · {t.footer.rights}
+          </span>
         </div>
       </div>
     </footer>

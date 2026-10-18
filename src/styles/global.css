@@ -1652,3 +1652,31 @@ html[lang="he"] .nextstep__title { text-transform: none; letter-spacing: 0; font
 .nextstep--progress .chev { width: 12px; height: 12px; border-width: 2.5px; color: #1f1612; }
 .nextstep--progress:active { transform: scale(0.985); }
 
+/* ───────── v2.6 · bed layout 3+2, centred progress tile, blue Request buttons, tidy footer ───────── */
+/* Beds as in the room: three in the front row, two behind them, centred */
+.beds { grid-template-columns: repeat(6, 1fr); gap: 8px; }
+.bed { grid-column: span 2; }
+.bed:nth-child(4) { grid-column: 2 / span 2; }
+/* "My progress": one centred line, heavier and larger, with the brand sparkle */
+.nextstep--progress { justify-content: center; padding: 22px 48px; position: relative; text-align: center;
+  background: linear-gradient(135deg, #dcebf5 0%, var(--b-peach, #d4e5f1) 55%, #c6ddec 100%); }
+.nextstep__title { font-size: clamp(22px, 6.2vw, 30px); font-weight: 900; font-style: italic; letter-spacing: -0.01em; white-space: nowrap; }
+.nextstep__title::before, .nextstep__title::after { content: "✦"; font-style: normal; font-size: 0.55em; color: var(--peach-ink, #2e5670); margin-inline: 0.45em; vertical-align: 0.25em; }
+html[lang="he"] .nextstep__title { font-style: normal; font-size: clamp(22px, 6.2vw, 30px); }
+.nextstep--progress .chev { position: absolute; inset-inline-end: 22px; top: 50%; margin-top: -6px; }
+/* Request-a-session buttons on the services pages: baby blue, ink text and outline */
+.btn--blue { background: var(--b-peach, #d4e5f1); color: #1f1612; border: 2px solid #1f1612; }
+@media (hover: hover) and (pointer: fine) { .btn--blue:hover { background: #c6ddec; } }
+/* Signed-out card on the profile */
+.card--blue { background: var(--b-peach, #d4e5f1); }
+/* Footer: everything centred and evenly spaced; the base line reads as a sentence */
+.footer { text-align: center; }
+.footer__grid { gap: 32px; justify-items: center; }
+.footer__grid > div { display: grid; gap: 10px; justify-items: center; width: 100%; }
+.footer .wordmark { align-items: center; }
+.footer ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; justify-items: center; }
+.footer li a { justify-content: center; }
+.footer h3 { margin: 0 0 4px; }
+.footer__base { justify-content: center; text-align: center; text-transform: none; letter-spacing: 0; font-size: 13px; }
+@media (min-width: 1000px) { .footer__grid { grid-template-columns: repeat(4, 1fr); } }
+

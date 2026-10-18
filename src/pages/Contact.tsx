@@ -1,7 +1,7 @@
 import { Link, useSearchParams } from "react-router-dom";
 import { LeadForm, MapEmbed, PageHead } from "../components/blocks";
 import { Verified } from "../components/ui";
-import { isTodo, mapsLink, siteConfig } from "../config/site";
+import { addressLine, isTodo, mapsLink, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { localBusinessLd, useSeo } from "../lib/seo";
@@ -44,7 +44,7 @@ export default function Contact() {
             <MapEmbed />
             <div className="card row between gap-16">
               <span className="stack gap-4">
-                <span className="key">{isHe ? `${c.streetHe}, ${c.cityHe}` : `${c.streetEn}, ${c.cityEn}`}</span>
+                <span className="key">{addressLine(isHe)}</span>
                 <span className="tiny">
                   {t.contact.parking}: <Verified value={c.parking} />
                 </span>

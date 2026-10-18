@@ -185,7 +185,7 @@ export const intents: Intent[] = [
     id: "where",
     keys: ["where", "address", "location", "map", "directions", "waze", "find you", "איפה", "כתובת", "מיקום", "מפה", "ניווט", "וויז", "וייז", "גזית", "הוד השרון"],
     reply: (he) => ({
-      text: he ? `אנחנו ב${c.streetHe}, ${c.cityHe}.` : `We're at ${c.streetEn}, ${c.cityEn}.`,
+      text: he ? `אנחנו ב${c.cityHe}.` : `We're in ${c.cityEn}.`,
       actions: [{ label: he ? "פתיחה במפות" : "Open in Maps", href: maps }],
     }),
   },
