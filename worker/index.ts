@@ -39,6 +39,26 @@ class BadRequest extends Error {}
 /** Thrown by the lead handler when the Turnstile token is missing or rejected; the form shows "try again". */
 class BotCheckFailed extends Error {}
 
+// A Turnstile token can be used once. When the relay fails after the bot check passed (Airtable down, bad
+// token scope…), the browser keeps the message in an outbox and retries later: it gets a signed "retry pass"
+// instead, valid for the outbox's lifetime, so a lead that already passed the check is never lost.
+const RETRY_DAYS = 14;
+async function hmacHex(secret: string, data: string): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(data));
+  return Array.from(new Uint8Array(sig), (b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function issueRetryPass(secret: string, event: string): Promise<string> {
+  const exp = Date.now() + RETRY_DAYS * 864e5;
+  return `${exp}.${await hmacHex(secret, `${event}.${exp}`)}`;
+}
+async function validRetryPass(secret: string, event: string, pass: unknown): Promise<boolean> {
+  if (typeof pass !== "string") return false;
+  const [exp, sig] = pass.split(".");
+  if (!/^\d{13}$/.test(exp ?? "") || Number(exp) < Date.now() || !sig) return false;
+  return sig === (await hmacHex(secret, `${event}.${exp}`));
+}
+
 async function passesTurnstile(secret: string | undefined, token: unknown, ip: string | null) {
   if (!secret) return true;
   if (typeof token !== "string" || !token) return false;
@@ -274,7 +294,7 @@ function giftCode() {
 
 // ---------- event handlers ----------
 
-type Ctx = { env: Env; ip: string | null };
+type Ctx = { env: Env; ip: string | null; botChecked: boolean };
 type Handler = (at: Airtable, body: Record<string, unknown>, ctx: Ctx) => Promise<RelayReply>;
 
 const lang = (v: unknown) => (v === "en" ? "en" : "he") as "he" | "en";
@@ -283,7 +303,10 @@ const handlers: Record<RelayEvent, Handler> = {
   async lead(at, b, ctx) {
     const m = b as unknown as LeadMsg;
     const c = contact(m.contact);
-    if (!(await passesTurnstile(ctx.env.TURNSTILE_SECRET, m.turnstile, ctx.ip))) throw new BotCheckFailed();
+    const secret = ctx.env.TURNSTILE_SECRET;
+    const viaRetry = !!secret && (await validRetryPass(secret, "lead", m.retry));
+    if (!viaRetry && !(await passesTurnstile(secret, m.turnstile, ctx.ip))) throw new BotCheckFailed();
+    ctx.botChecked = !!secret && !viaRetry; // a retry pass is not renewed; the original one keeps its expiry
     const a = attribution(m.attribution);
     const heard = oneOf(m.heard, HEARD_FROM);
     const interest = INTEREST[text(m.interest, 20)] ?? "Reformer";
@@ -612,15 +635,17 @@ export default {
     // Honeypot: real visitors never fill the hidden "website" field.
     if (typeof body.website === "string" && body.website) return json({ ok: true });
 
+    const ctx: Ctx = { env, ip, botChecked: false };
     try {
-      const reply = await handlers[event](new Airtable(env.AIRTABLE_TOKEN, env.AIRTABLE_BASE), body, { env, ip });
+      const reply = await handlers[event](new Airtable(env.AIRTABLE_TOKEN, env.AIRTABLE_BASE), body, ctx);
       console.log(JSON.stringify({ msg: "relayed", event, id: reply.id }));
       return json(reply);
     } catch (e) {
       if (e instanceof BadRequest) return json({ ok: false, error: e.message }, 400);
       if (e instanceof BotCheckFailed) return json({ ok: false, error: "turnstile" }, 403);
       console.error(JSON.stringify({ msg: "relay failed", event, status: e instanceof AirtableError ? e.status : undefined, detail: e instanceof AirtableError ? e.body : String(e) }));
-      return json({ ok: false, error: "unavailable" }, 502);
+      const retry = ctx.botChecked && env.TURNSTILE_SECRET ? await issueRetryPass(env.TURNSTILE_SECRET, event) : undefined;
+      return json({ ok: false, error: "unavailable", ...(retry ? { retry } : {}) }, 502);
     }
   },
 } satisfies ExportedHandler<Env>;

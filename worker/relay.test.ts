@@ -6,14 +6,22 @@ import { F, T } from "./airtable";
 type Rec = { id: string; fields: Record<string, unknown> };
 let db: Record<string, Rec[]>;
 let n = 0;
+let airtableDown = false; // when true, every Airtable write answers 500
 
 const PLAN: Rec = { id: "recPlan3xxxxxxxxx", fields: { [F.plans.websiteId]: "m3x", [F.plans.name]: "3× per week", [F.plans.type]: "Monthly", [F.plans.regular]: 630, [F.plans.launch]: 590, [F.plans.validityMonths]: 1 } };
 const PASS: Rec = { id: "recPass10xxxxxxxx", fields: { [F.plans.websiteId]: "p10", [F.plans.name]: "10 sessions", [F.plans.type]: "Pass", [F.plans.regular]: 550, [F.plans.bonus]: 1, [F.plans.validityMonths]: 2 } };
 
 beforeEach(() => {
   db = { [T.plans]: [PLAN, PASS], [T.campaigns]: [{ id: "recCampxxxxxxxxxx", fields: { [F.campaigns.utm]: "launch-month" } }] };
+  airtableDown = false;
   globalThis.fetch = (async (input: RequestInfo, init?: RequestInit) => {
     const url = new URL(String(input));
+    // Turnstile stand-in: only the token "good" passes.
+    if (url.hostname === "challenges.cloudflare.com") {
+      const token = (init?.body as FormData).get("response");
+      return new Response(JSON.stringify({ success: token === "good", "error-codes": token === "good" ? [] : ["invalid-input-response"] }), { status: 200 });
+    }
+    if (airtableDown && init?.method === "POST") return new Response(JSON.stringify({ error: { type: "DOWN" } }), { status: 500 });
     const [, , , table, id] = url.pathname.split("/");
     const rows = (db[table] ??= []);
     const method = init?.method ?? "GET";
@@ -39,8 +47,9 @@ beforeEach(() => {
 });
 
 const env = { AIRTABLE_TOKEN: "test", AIRTABLE_BASE: "appTEST", ASSETS: { fetch: async () => new Response("asset") }, FORM_LIMIT: { limit: async () => ({ success: true }) } } as unknown as Env;
-const call = (event: string, body: unknown, origin = "https://reset.example") =>
-  worker.fetch(new Request(`https://reset.example/api/${event}`, { method: "POST", headers: { Origin: origin, "Content-Type": "application/json" }, body: JSON.stringify(body) }) as never, env, {} as never) as Promise<Response>;
+const guarded = { ...env, TURNSTILE_SECRET: "turnstile-secret" } as Env;
+const call = (event: string, body: unknown, origin = "https://reset.example", e: Env = env) =>
+  worker.fetch(new Request(`https://reset.example/api/${event}`, { method: "POST", headers: { Origin: origin, "Content-Type": "application/json" }, body: JSON.stringify(body) }) as never, e, {} as never) as Promise<Response>;
 const maya = { firstName: "Maya", lastName: "Test", phone: "+972 50-123-4567", email: "maya@example.com" };
 const slot = { service: "reformer", date: "2026-10-20", time: "18:00", minutes: 50 };
 
@@ -129,3 +138,30 @@ test("guards: other sites, spam trap, bad phone, unknown plan", async () => {
   expect((await call("lead", { lang: "en", contact: { ...maya, phone: "123" }, interest: "mat", consent: false })).status).toBe(400);
   expect((await call("checkout", { lang: "en", contact: maya, planId: "zzz", method: "bit", consent: false, termsAccepted: true })).status).toBe(400);
 });
+
+test("lead with Turnstile on: bad token refused, failed attempt gets a retry pass that works without a token", async () => {
+  const lead = { lang: "en", contact: maya, interest: "reformer", consent: false };
+  expect((await call("lead", { ...lead, turnstile: "bad" }, undefined, guarded)).status).toBe(403);
+  expect((await call("lead", lead, undefined, guarded)).status).toBe(403);
+  expect(db[T.leads]).toBeUndefined();
+
+  airtableDown = true;
+  const failed = await call("lead", { ...lead, turnstile: "good" }, undefined, guarded);
+  expect(failed.status).toBe(502);
+  const { retry } = (await failed.json()) as { retry?: string };
+  expect(retry).toMatch(/^\d{13}\.[0-9a-f]{64}$/);
+
+  airtableDown = false;
+  expect((await call("lead", { ...lead, retry }, undefined, guarded)).status).toBe(200);
+  expect(db[T.leads].length).toBe(1);
+  // A pass is bound to its event and cannot be forged or reused for another form.
+  expect((await call("lead", { ...lead, retry: retry!.replace(/.$/, (c) => (c === "0" ? "1" : "0")) }, undefined, guarded)).status).toBe(403);
+});
+
+test("retry pass is only issued once the bot check passed", async () => {
+  airtableDown = true;
+  const r = await call("lead", { lang: "en", contact: maya, interest: "reformer", consent: false, turnstile: "good" });
+  expect(r.status).toBe(502);
+  expect(((await r.json()) as { retry?: string }).retry).toBeUndefined(); // Turnstile off: nothing to pass
+});
+
