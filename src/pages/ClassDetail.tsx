@@ -63,7 +63,7 @@ export default function ClassDetail() {
   const arboxUrl = [arbox.services[slot.service], arbox.publicBookingUrl].find(hasPublicBooking);
   // Plan limit: weekly cap for monthly plans, remaining sessions and validity for passes
   const plan = store.planId ? planById(store.planId) : undefined;
-  const usage = plan ? planUsage(plan, store.bookings.filter((b) => b.slotId !== slot.id), fromISO(slot.date), store.planStart) : null;
+  const usage = plan ? planUsage(plan, store.bookings.filter((b) => b.slotId !== slot.id), fromISO(slot.date), store.planStart, store.carry ?? 0) : null;
   const atLimit = !!usage && usage.left <= 0;
   // Name and phone are asked once (first booking or waitlist), then remembered on this device.
   const needsDetails = !store.profile.firstName || !store.profile.lastName || !store.profile.phone;

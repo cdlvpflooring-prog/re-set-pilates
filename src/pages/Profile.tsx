@@ -30,7 +30,7 @@ export default function Profile() {
   const plan = store.planId ? planById(store.planId) : undefined;
 
   // Demo usage figures from local bookings; real balances come from Arbox once connected.
-  const usage = plan ? planUsage(plan, store.bookings, new Date(), store.planStart) : null;
+  const usage = plan ? planUsage(plan, store.bookings, new Date(), store.planStart, store.carry ?? 0) : null;
   const pct = usage && usage.cap ? Math.min(1, usage.used / usage.cap) : 1;
   const since = store.memberSince ? new Date(store.memberSince) : null;
   const until = plan ? planEnd(plan, store.planStart) : new Date();
@@ -49,6 +49,16 @@ export default function Profile() {
             </span>
           </span>
         </div>
+
+        {(store.notices ?? []).filter((n) => !n.read).slice(0, 3).map((n) => (
+          <Link key={n.id} to={href(`receipt/${n.receiptNo}`)} className="notice row between gap-12" role="status">
+            <span className="stack gap-4">
+              <b>{t.receipt.notice.replace("{no}", n.receiptNo)}</b>
+              <span className="tiny">{t.receipt.noticeSub}</span>
+            </span>
+            <span className="chev" aria-hidden />
+          </Link>
+        ))}
 
         {!signedIn && (
           <div className="card card--blue stack gap-12">
@@ -134,6 +144,10 @@ export default function Profile() {
             {t.profile.notifications}
             <Switch checked={store.reminders} onChange={store.setReminders} label={t.profile.notifications} />
           </div>
+          <Link to={href("receipt")}>
+            {t.receipt.list}
+            <span className="chev" aria-hidden />
+          </Link>
           <Link to={href("gift")}>
             {t.nav.gift}
             <span className="chev" aria-hidden />

@@ -13,7 +13,7 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "single-page-application",
-    "run_worker_first": ["/api/*", "/go/*", "/", "/he", "/he/*", "/en", "/en/*"]
+    "run_worker_first": ["/api/*", "/go/*", "/r/*", "/", "/he", "/he/*", "/en", "/en/*"]
   },
   "routes": [
     { "pattern": "resetpilates.org", "custom_domain": true },
@@ -33,6 +33,9 @@
       "simple": { "limit": 20, "period": 60 }
     }
   ],
+  // Receipts by email: onboard resetpilates.org in Cloudflare Email Service (Email > Email Sending), then uncomment.
+  // Without it the receipt still shows in the app and on its /r/ link; WhatsApp/SMS need their secrets (see worker/notify.ts).
+  // "send_email": [{ "name": "EMAIL" }],
   "observability": {
     "enabled": true,
     "traces": { "enabled": true }

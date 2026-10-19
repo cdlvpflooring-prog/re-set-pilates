@@ -3,6 +3,7 @@
 //   GET  /api/health   which secrets are set
 //   /go/<slug>         short links for flyers and QR codes
 //   pages              link-preview and search tags per language and page (see run_worker_first in wrangler.jsonc)
+import { planById } from "../src/config/pricing";
 import { isTodo, mapsLink, siteConfig } from "../src/config/site";
 import { withPreview } from "./preview";
 import type {
@@ -24,6 +25,8 @@ import type {
 } from "../src/lib/relayTypes";
 import { HEARD_FROM, PREF_TIMES, normalizePhone } from "../src/lib/relayTypes";
 import { Airtable, AirtableError, F, T, q, type AirRecord, type Fields } from "./airtable";
+import { isReceiptNumber, type ReceiptData } from "../src/lib/receipt";
+import { channelsFor, receiptLink, sendReceipt, serveReceipt } from "./notify";
 
 declare global {
   interface Env {
@@ -36,6 +39,12 @@ const CANCEL_HOURS = siteConfig.policies.cancelHours; // same policy the site sh
 const MAX_BODY = 8 * 1024;
 
 class BadRequest extends Error {}
+/** The request is fine but would duplicate something that exists (e.g. the same membership is still running). */
+class Conflict extends Error {
+  constructor(message: string, public until?: string) {
+    super(message);
+  }
+}
 /** Thrown by the lead handler when the Turnstile token is missing or rejected; the form shows "try again". */
 class BotCheckFailed extends Error {}
 
@@ -276,6 +285,7 @@ async function planByWebsiteId(at: Airtable, planId: string) {
   const type = (plan.fields[P.type] as string | undefined) ?? "";
   return {
     plan,
+    websiteId: planId,
     name: String(plan.fields[P.name] ?? planId),
     type,
     price: launch || regular, // launch pricing is on; when it ends, clear "Launch price" in Airtable
@@ -294,7 +304,42 @@ function giftCode() {
 
 // ---------- event handlers ----------
 
-type Ctx = { env: Env; ip: string | null; botChecked: boolean };
+type Ctx = { env: Env; ip: string | null; botChecked: boolean; origin: string; wait: (p: Promise<unknown>) => void };
+
+// ---------- receipts ----------
+
+/** A payment already saved for this order (the same purchase sent twice: double tap, outbox retry). */
+async function paymentForOrder(at: Airtable, orderId: string | undefined): Promise<AirRecord | undefined> {
+  if (!orderId) return undefined;
+  const [found] = await at.find(T.payments, `FIND(${q(orderId)},{${F.payments.name}})`);
+  return found;
+}
+
+/** Builds the hosted link, answers with it, and sends the receipt in the background (after the reply). */
+async function issueReceipt(ctx: Ctx, r: ReceiptData): Promise<Pick<RelayReply, "receiptUrl" | "sentVia">> {
+  const link = await receiptLink(ctx.env, ctx.origin, r);
+  const via = channelsFor(ctx.env, r);
+  if (via.length) ctx.wait(sendReceipt(ctx.env, r, via, link));
+  return { receiptUrl: link, sentVia: via };
+}
+
+/**
+ * A membership that is still running for the same monthly plan: buying it again would pay twice for the same month.
+ * Renewing in its last days is fine. Passes may be bought again at any time (the classes add up).
+ */
+async function sameMembershipRunning(at: Airtable, member: AirRecord, planRecordId: string, today: string): Promise<string | undefined> {
+  const ids = linkIds(member.fields[F.members.memberships]);
+  if (!ids.length) return undefined;
+  const S = F.memberships;
+  const renewFrom = addDays(today, 3);
+  const rows = await at.find(T.memberships, `AND(OR(${ids.map((id) => `RECORD_ID()=${q(id)}`).join(",")}),IS_AFTER({${S.renews}},${q(renewFrom)}))`, 20);
+  return rows.find((r) => linkIds(r.fields[S.plan]).includes(planRecordId) && r.fields[S.status] !== "Cancelled")?.fields[S.renews] as string | undefined;
+}
+
+function addDays(isoDate: string, days: number): string {
+  const [y, m, d] = isoDate.split("-").map(Number);
+  return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+}
 type Handler = (at: Airtable, body: Record<string, unknown>, ctx: Ctx) => Promise<RelayReply>;
 
 const lang = (v: unknown) => (v === "en" ? "en" : "he") as "he" | "en";
@@ -343,16 +388,21 @@ const handlers: Record<RelayEvent, Handler> = {
     return { ok: true, id: lead.id };
   },
 
-  async checkout(at, b) {
+  async checkout(at, b, ctx) {
     const m = b as unknown as CheckoutMsg;
     if (m.termsAccepted !== true) throw new BadRequest("terms not accepted");
     const c = contact(m.contact);
     const method = oneOf(m.method, ["arbox", "bit", "card"] as const);
     if (!method) throw new BadRequest("bad method");
+    const orderId = isReceiptNumber(m.orderId) ? m.orderId : undefined;
     const p = await planByWebsiteId(at, text(m.planId, 12, true));
     const kind = oneOf(m.kind, ["reformer", "mat"] as const); // Reformer and Mat plans share one price list
     const kindLabel = kind ? { reformer: "Reformer", mat: "Mat" }[kind] : "";
+    const carry = Math.min(Math.max(Math.round(Number(m.carryOver) || 0), 0), 60);
     const today = todayIL();
+    // The same order sent twice (double tap, outbox retry) is saved once
+    const again = await paymentForOrder(at, orderId);
+    if (again) return { ok: true, id: linkIds(again.fields[F.payments.membership])[0], duplicate: true };
     const member = await upsertMember(at, c, {
       lang: lang(m.lang),
       heard: oneOf(m.heard, HEARD_FROM),
@@ -360,12 +410,16 @@ const handlers: Record<RelayEvent, Handler> = {
       consent: m.consent === true,
       consentSource: "Checkout",
     });
+    if (p.type !== "Pass") {
+      const until = await sameMembershipRunning(at, member, p.plan.id, today);
+      if (until) throw new Conflict("already active", until);
+    }
     await at.update(T.members, member.id, { [F.members.termsOn]: today });
     const S = F.memberships;
     const [y, mo] = today.split("-").map(Number);
     const membership = await at.create(T.memberships, {
       // Status stays empty until Orit confirms the payment and sets it to Active.
-      [S.name]: `${fullName(c)} · ${p.name}${kindLabel ? ` (${kindLabel})` : ""} · ${MONTHS[mo - 1]} ${y}`,
+      [S.name]: `${fullName(c)} · ${p.name}${kindLabel ? ` (${kindLabel})` : ""} · ${MONTHS[mo - 1]} ${y}${carry ? ` · +${carry} carried over` : ""}`,
       [S.member]: [member.id],
       [S.plan]: [p.plan.id],
       [S.start]: today,
@@ -377,7 +431,7 @@ const handlers: Record<RelayEvent, Handler> = {
     });
     const P = F.payments;
     await at.create(T.payments, {
-      [P.name]: `${fullName(c)} · ${p.name}`,
+      [P.name]: [orderId, fullName(c), p.name].filter(Boolean).join(" · "),
       [P.for]: p.type === "Pass" ? "Pass" : "Membership",
       [P.amount]: p.price,
       [P.method]: { arbox: "Arbox", bit: "Bit", card: "Credit card" }[method],
@@ -385,7 +439,24 @@ const handlers: Record<RelayEvent, Handler> = {
       [P.member]: [member.id],
       [P.membership]: [membership.id],
     });
-    return { ok: true, id: membership.id };
+    if (!orderId) return { ok: true, id: membership.id };
+    const lg = lang(m.lang);
+    const label = text(m.itemLabel, 80) || `${p.name}${kindLabel ? ` · ${kindLabel}` : ""}`;
+    const local = planById(p.websiteId);
+    const classes = local?.billingType === "pass" ? (local.sessions ?? 0) + (siteConfig.flags.launchPricing ? (local.bonusSessions ?? 0) : 0) + carry : 0;
+    const sent = await issueReceipt(ctx, {
+      no: orderId,
+      issuedAt: new Date().toISOString(),
+      lang: lg,
+      customer: { name: fullName(c), phone: phonePretty(c.phone), email: c.email },
+      lines: [{ label, ...(carry ? { detail: lg === "he" ? `כולל ${carry} שיעורים שנותרו מהמנוי הקודם` : `Includes ${carry} classes left on your previous plan` } : {}), amount: p.price }],
+      total: p.price,
+      method,
+      paid: false, // Orit confirms the payment in Airtable
+      ...(classes ? { classesTotal: classes } : {}),
+      validUntil: addMonths(today, p.validityMonths || 1),
+    });
+    return { ok: true, id: membership.id, ...sent };
   },
 
   async booking(at, b) {
@@ -449,9 +520,16 @@ const handlers: Record<RelayEvent, Handler> = {
     return { ok: true, id: entry.id };
   },
 
-  async gift(at, b) {
+  async gift(at, b, ctx) {
     const m = b as unknown as GiftMsg;
     const c = contact(m.buyer);
+    const orderId = isReceiptNumber(m.orderId) ? m.orderId : undefined;
+    const again = await paymentForOrder(at, orderId);
+    if (again) {
+      const [giftId] = linkIds(again.fields[F.payments.gift]);
+      const g = giftId ? await at.get(T.gifts, giftId) : undefined;
+      return { ok: true, id: giftId, code: g ? String(g.fields[F.gifts.code] ?? "") : undefined, duplicate: true };
+    }
     const recipient = text(m.recipientName, 60, true);
     const planId = m.planId ? text(m.planId, 12) : "";
     const p = planId ? await planByWebsiteId(at, planId) : null;
@@ -471,14 +549,26 @@ const handlers: Record<RelayEvent, Handler> = {
     });
     const P = F.payments;
     await at.create(T.payments, {
-      [P.name]: `${fullName(c)} · gift card ${code}`,
+      [P.name]: [orderId, fullName(c), `gift card ${code}`].filter(Boolean).join(" · "),
       [P.for]: "Gift card",
       [P.amount]: value,
       [P.status]: "Pending",
       [P.member]: [member.id],
       [P.gift]: [gift.id],
     });
-    return { ok: true, id: gift.id, code };
+    if (!orderId) return { ok: true, id: gift.id, code };
+    const lg = lang(m.lang);
+    const sent = await issueReceipt(ctx, {
+      no: orderId,
+      issuedAt: new Date().toISOString(),
+      lang: lg,
+      customer: { name: fullName(c), phone: phonePretty(c.phone), email: c.email },
+      lines: [{ label: text(m.itemLabel, 80) || (lg === "he" ? "כרטיס מתנה" : "Gift card"), detail: lg === "he" ? `עבור ${recipient}` : `For ${recipient}`, amount: value }],
+      total: value,
+      paid: false,
+      giftCode: code,
+    });
+    return { ok: true, id: gift.id, code, ...sent };
   },
 
   async quiz(at, b) {
@@ -613,9 +703,10 @@ function sameOrigin(req: Request): boolean {
 }
 
 export default {
-  async fetch(req, env): Promise<Response> {
+  async fetch(req, env, ectx): Promise<Response> {
     const url = new URL(req.url);
     if (url.pathname.startsWith("/go/")) return go(url.pathname.slice(4).replace(/\/$/, ""), url);
+    if (url.pathname.startsWith("/r/")) return serveReceipt(env, url);
     if (url.pathname === "/api/health") {
       return json({ ok: true, airtable: Boolean(env.AIRTABLE_TOKEN), turnstile: Boolean(env.TURNSTILE_SECRET) } as RelayReply);
     }
@@ -648,13 +739,14 @@ export default {
     // Honeypot: real visitors never fill the hidden "website" field.
     if (typeof body.website === "string" && body.website) return json({ ok: true });
 
-    const ctx: Ctx = { env, ip, botChecked: false };
+    const ctx: Ctx = { env, ip, botChecked: false, origin: url.origin, wait: (p) => ectx.waitUntil(p) };
     try {
       const reply = await handlers[event](new Airtable(env.AIRTABLE_TOKEN, env.AIRTABLE_BASE), body, ctx);
       console.log(JSON.stringify({ msg: "relayed", event, id: reply.id }));
       return json(reply);
     } catch (e) {
       if (e instanceof BadRequest) return json({ ok: false, error: e.message }, 400);
+      if (e instanceof Conflict) return json({ ok: false, error: e.message, ...(e.until ? { until: e.until } : {}) }, 409);
       if (e instanceof BotCheckFailed) return json({ ok: false, error: "turnstile" }, 403);
       console.error(JSON.stringify({ msg: "relay failed", event, status: e instanceof AirtableError ? e.status : undefined, detail: e instanceof AirtableError ? e.body : String(e) }));
       const retry = ctx.botChecked && env.TURNSTILE_SECRET ? await issueRetryPass(env.TURNSTILE_SECRET, event) : undefined;

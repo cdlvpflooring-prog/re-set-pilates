@@ -42,6 +42,11 @@ export const siteConfig = {
     openingHours: [] as { days: ("Su" | "Mo" | "Tu" | "We" | "Th" | "Fr" | "Sa")[]; opens: string; closes: string }[],
     parking: TODO,
   },
+  // Shown on invoices and receipts once filled (hidden while TODO).
+  business: {
+    legalName: TODO, // the registered business name, e.g. "Orit Schieber Abitan"
+    taxId: TODO, // עוסק פטור / מורשה number
+  },
   // Feature flags
   policies: {
     cancelHours: 24, // cancel at least this many hours before class to get the session back

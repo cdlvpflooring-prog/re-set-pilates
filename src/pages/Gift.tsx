@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Link } from "react-router-dom";
 import { PageHead, effectivePrice, planName, pricesVisible } from "../components/blocks";
 import { Wordmark } from "../components/Shell";
 import { Check } from "../components/ui";
@@ -6,13 +7,15 @@ import { pricing } from "../config/pricing";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
+import { buildReceipt, systemNotice } from "../lib/purchase";
+import { receiptNumber } from "../lib/receipt";
 import { useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
 import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 
 /** Gift card flow (mock checkout: nothing is charged or sent). */
 export default function Gift() {
-  const { t, lang } = useI18n();
+  const { t, lang, href } = useI18n();
   useSeo(t.meta.gift);
   const passes = pricing.passes.filter(pricesVisible);
   const [choice, setChoice] = useState<string>(passes[0]?.id ?? "custom");
@@ -25,7 +28,8 @@ export default function Gift() {
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
   const [code, setCode] = useState("");
-  const { profile, saveProfile } = useStore();
+  const [receiptNo, setReceiptNo] = useState("");
+  const { profile, saveProfile, addReceipt } = useStore();
   const pass = passes.find((p) => p.id === choice);
   const value = pass ? effectivePrice(pass) : amount;
   const label = pass ? planName(pass, t) : t.gift.custom;
@@ -38,7 +42,10 @@ export default function Gift() {
     track("gift_card_start", { choice });
     setSending(true);
     setFailed(false);
+    const no = receiptNumber(); // also the order id: a repeated send is saved once
     const r = await relay("gift", {
+      orderId: no,
+      itemLabel: `${t.nav.gift} · ${label}`,
       lang,
       buyer,
       planId: pass ? pass.id : null,
@@ -55,6 +62,13 @@ export default function Gift() {
     }
     saveProfile(profileFrom(buyer, x));
     setCode(r.code ?? "");
+    addReceipt({
+      ...buildReceipt({ no, lang, contact: buyer, line: { label: `${t.nav.gift} · ${label}`, detail: to, amount: value }, giftCode: r.code }),
+      link: r.receiptUrl,
+      sentVia: r.sentVia,
+    });
+    systemNotice(t.receipt.notice.replace("{no}", no), t.receipt.noticeSub, href(`receipt/${no}`));
+    setReceiptNo(no);
     setSending(false);
     setDone(true);
   };
@@ -94,6 +108,11 @@ export default function Gift() {
                 <p className="key">
                   {t.gift.codeLabel}: <bdi dir="ltr">{code}</bdi>
                 </p>
+              )}
+              {receiptNo && (
+                <Link to={href(`receipt/${receiptNo}`)} className="btn btn--secondary">
+                  {t.checkout.viewReceipt}
+                </Link>
               )}
               <button className="btn btn--secondary" onClick={() => setDone(false)}>
                 {t.gift.another}

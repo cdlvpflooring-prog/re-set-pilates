@@ -62,6 +62,9 @@ export interface CheckoutMsg extends Base {
   heard?: HeardFrom;
   consent: boolean;
   termsAccepted: true;
+  orderId?: string; // receipt number (RS-YYMMDD-XXXX): the same order sent twice is saved once
+  itemLabel?: string; // the plan's name as the buyer saw it, for the receipt
+  carryOver?: number; // unused classes moved over from the buyer's previous plan
 }
 
 export interface SlotRef {
@@ -96,6 +99,8 @@ export interface GiftMsg extends Base {
   recipientName: string;
   note?: string;
   consent: boolean;
+  orderId?: string; // receipt number, see CheckoutMsg
+  itemLabel?: string;
 }
 
 export interface QuizMsg extends Base {
@@ -136,6 +141,10 @@ export interface RelayReply {
   id?: string;
   code?: string; // gift card code
   error?: string;
+  receiptUrl?: string; // hosted copy of the receipt (/r/…), when the Worker can sign one
+  sentVia?: ("email" | "whatsapp" | "sms")[]; // channels the receipt is being sent on
+  until?: string; // 409 "already active": the date the running membership ends (YYYY-MM-DD)
+  duplicate?: boolean; // this order was already saved; nothing new was created
   retry?: string; // on a 5xx after the bot check passed: pass for resending the same message later
   airtable?: boolean; // /api/health only
   turnstile?: boolean;

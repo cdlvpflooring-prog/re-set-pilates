@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { planById, type ClassKind } from "../config/pricing";
 import { fromISO, slotStart, type ClassSlot } from "./booking";
 import { planUsage } from "./plan";
+import type { ReceiptData } from "./receipt";
 import { RELAY_REPLY, relay, type RelayReplyDetail } from "./relay";
 
 export interface Booking {
@@ -28,11 +29,23 @@ export interface Profile {
   consented?: boolean; // ticked "Send me news and offers" at least once
 }
 
+/** In-app notification (the bell on the profile). Purchases add one that opens the receipt. */
+export interface Notice {
+  id: string;
+  at: string; // ISO
+  kind: "receipt";
+  receiptNo: string;
+  read?: boolean;
+}
+
 interface Persisted {
   planId: string | null; // active membership/pass id; null => visitor
   planKind?: ClassKind | null; // Reformer or Mat, chosen at checkout (teens plans have none)
   memberSince: string | null;
   planStart: string | null; // when the current plan was bought; pass balances and validity count from here
+  carry?: number; // classes carried over from the previous plan into the current one
+  receipts?: ReceiptData[]; // newest first
+  notices?: Notice[]; // newest first
   bookings: Booking[];
   waitlist: string[]; // slot ids
   reminders: boolean;
@@ -50,7 +63,11 @@ interface Store extends Persisted {
   cancel: (bookingId: string, late?: boolean) => void;
   joinWaitlist: (slotId: string) => void;
   leaveWaitlist: (slotId: string) => void;
-  setPlan: (planId: string | null, kind?: ClassKind | null) => void;
+  /** `carry` = unused classes moved over from the previous plan (see checkPurchase in plan.ts). */
+  setPlan: (planId: string | null, kind?: ClassKind | null, carry?: number) => void;
+  /** Keep a purchase's receipt and notify in the app. */
+  addReceipt: (r: ReceiptData) => void;
+  markNoticesRead: () => void;
   setReminders: (on: boolean) => void;
   markWelcomeSeen: () => void;
   saveProfile: (p: Partial<Profile>) => void;
@@ -107,7 +124,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     const allowed = (p: Persisted) => {
       const plan = p.planId ? planById(p.planId) : undefined;
       const others = p.bookings.filter((x) => x.slotId !== slot.id);
-      return !plan || planUsage(plan, others, fromISO(slot.date), p.planStart).left > 0;
+      return !plan || planUsage(plan, others, fromISO(slot.date), p.planStart, p.carry ?? 0).left > 0;
     };
     if (!allowed(latest.current)) return null;
     const b: Booking = {
@@ -136,12 +153,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const joinWaitlist = useCallback((id: string) => setS((p) => ({ ...p, waitlist: [...new Set([...p.waitlist, id])] })), []);
   const leaveWaitlist = useCallback((id: string) => setS((p) => ({ ...p, waitlist: p.waitlist.filter((w) => w !== id) })), []);
   const setPlan = useCallback(
-    (planId: string | null, kind: ClassKind | null = null) =>
+    (planId: string | null, kind: ClassKind | null = null, carry = 0) =>
       setS((p) => {
-        // Every purchase starts a fresh plan period; "member since" keeps the first one
+        // Every purchase starts a fresh plan period (carrying unused classes over); "member since" keeps the first one
         const now = new Date().toISOString();
-        return { ...p, planId, planKind: planId ? kind : null, planStart: planId ? now : null, memberSince: planId ? (p.memberSince ?? now) : null };
+        return { ...p, planId, planKind: planId ? kind : null, planStart: planId ? now : null, carry: planId ? carry : 0, memberSince: planId ? (p.memberSince ?? now) : null };
       }),
+    [],
+  );
+  const addReceipt = useCallback(
+    (r: ReceiptData) =>
+      setS((p) => {
+        if (p.receipts?.some((x) => x.no === r.no)) return p;
+        const notice: Notice = { id: `n${Date.now()}`, at: r.issuedAt, kind: "receipt", receiptNo: r.no };
+        return { ...p, receipts: [r, ...(p.receipts ?? [])].slice(0, 50), notices: [notice, ...(p.notices ?? [])].slice(0, 30) };
+      }),
+    [],
+  );
+  const markNoticesRead = useCallback(
+    () => setS((p) => (p.notices?.some((n) => !n.read) ? { ...p, notices: p.notices.map((n) => ({ ...n, read: true })) } : p)),
     [],
   );
   const setReminders = useCallback((on: boolean) => setS((p) => ({ ...p, reminders: on })), []);
@@ -202,6 +232,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       joinWaitlist,
       leaveWaitlist,
       setPlan,
+      addReceipt,
+      markNoticesRead,
       setReminders,
       markWelcomeSeen,
       saveProfile,
@@ -209,7 +241,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       signOut,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- tick only forces the clock-based split to recompute
-  }, [s, tick, book, cancel, joinWaitlist, leaveWaitlist, setPlan, setReminders, markWelcomeSeen, saveProfile, setRemoteId, signOut]);
+  }, [s, tick, book, cancel, joinWaitlist, leaveWaitlist, setPlan, addReceipt, markNoticesRead, setReminders, markWelcomeSeen, saveProfile, setRemoteId, signOut]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
