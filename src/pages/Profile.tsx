@@ -12,7 +12,7 @@ import { planEnd, planUsage } from "../lib/plan";
 import { useStore } from "../lib/store";
 
 export default function Profile() {
-  const { t, href, isHe } = useI18n();
+  const { t, href, isHe, fmtDate } = useI18n();
   useSeo(t.meta.profile);
   const store = useStore();
   const [hint, setHint] = useState(false);
@@ -28,6 +28,8 @@ export default function Profile() {
     setSignIn(false);
   };
   const plan = store.planId ? planById(store.planId) : undefined;
+  const receipts = store.receipts ?? [];
+  const unread = (store.notices ?? []).filter((n) => !n.read).length;
 
   // Demo usage figures from local bookings; real balances come from Arbox once connected.
   const usage = plan ? planUsage(plan, store.bookings, new Date(), store.planStart, store.carry ?? 0) : null;
@@ -123,6 +125,27 @@ export default function Profile() {
           </div>
         ) : null}
 
+        {signedIn && (
+          <Link to={href("receipt")} className="payfolder" aria-label={t.receipt.list}>
+            <span className="payfolder__icon" aria-hidden>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <path d="M8 13h8M8 16h5" />
+              </svg>
+            </span>
+            <span className="stack gap-4" style={{ flex: 1 }}>
+              <b>{t.receipt.list}</b>
+              <span className="tiny">
+                {receipts.length
+                  ? t.receipt.folderSub.replace("{n}", String(receipts.length)).replace("{date}", fmtDate(new Date(receipts[0].issuedAt)))
+                  : t.receipt.folderEmpty}
+              </span>
+            </span>
+            {unread > 0 && <span className="payfolder__badge">{unread} {t.receipt.unread}</span>}
+            <span className="chev" aria-hidden />
+          </Link>
+        )}
+
         <Link to={href("progress")} className="nextstep nextstep--progress row between gap-12" aria-label={t.profile.progressTeaser}>
           <span className="nextstep__logo" aria-hidden>
             <Wordmark />
@@ -144,10 +167,6 @@ export default function Profile() {
             {t.profile.notifications}
             <Switch checked={store.reminders} onChange={store.setReminders} label={t.profile.notifications} />
           </div>
-          <Link to={href("receipt")}>
-            {t.receipt.list}
-            <span className="chev" aria-hidden />
-          </Link>
           <Link to={href("gift")}>
             {t.nav.gift}
             <span className="chev" aria-hidden />

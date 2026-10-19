@@ -1901,3 +1901,15 @@ html[lang="he"] .mcard__name { letter-spacing: 0.02em; text-transform: none; }
 .page--still #classes .flow-row:hover { transform: none; box-shadow: none; }
 .page--still #classes .ccard:hover .ccard__media img { transform: none; }
 .page--still .phero img { animation: none; transform: none; }
+
+/* Unread receipts on the Profile tab */
+.tabbar a { position: relative; }
+.tabbar__badge {
+  position: absolute; top: 3px; inset-inline-end: 4px; min-width: 18px; height: 18px; padding: 0 5px;
+  display: grid; place-items: center; border-radius: 999px; font-size: 11px; font-weight: 700; line-height: 1;
+  background: var(--clay); color: #fffdfa; box-shadow: 0 0 0 2px #fffdfa;
+}
+/* Payments & receipts folder on the profile */
+.payfolder { display: flex; align-items: center; gap: 14px; padding: 18px; border-radius: 22px; background: var(--b-peach, #d4e5f1); color: var(--ink); }
+.payfolder__icon { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 14px; background: rgba(255, 253, 250, 0.7); }
+.payfolder__badge { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: var(--clay); color: #fffdfa; }

@@ -57,7 +57,7 @@ Everything below works on screen as a demo. This is what each flow still needs b
 Built: every membership, pass and gift card purchase makes a receipt (number `RS-YYMMDD-XXXX`) with the logo and studio contact details. It is saved in the app (Profile → Purchases & receipts, plus a notification card), has a private printable link (`/r/…`, encrypted), and is sent automatically on whichever channels are set up below. Unused classes move to the new plan, and the same running monthly membership can't be bought twice.
 
 To switch on each channel (any channel left unset is simply skipped):
-- [ ] **Business details on the receipt**: fill `business.legalName` and `business.taxId` (עוסק number) in `src/config/site.ts`. Phone/WhatsApp appear once `contact.phone` / `contact.whatsapp` are filled.
+- [ ] **Business details on the receipt**: fill `business.legalName` and `business.taxId` (עוסק number) in `src/config/site.ts`. Receipts show only the email; the WhatsApp number appears once `contact.whatsapp` is filled (no social handles or address).
 - [ ] **Email**: in Cloudflare → Email → Email Sending, onboard `resetpilates.org` (adds DNS records), then uncomment `"send_email"` in `wrangler.jsonc`. Sends from `receipts@resetpilates.org`, replies go to the Gmail, and the Gmail gets a copy of every receipt.
 - [ ] **WhatsApp** (new studio number): WhatsApp Business Cloud API. Create and get approved a template (Hebrew + English) with body parameters {{1}} first name, {{2}} receipt number, {{3}} total, {{4}} receipt link. Then add Worker secrets `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` and `WHATSAPP_RECEIPT_TEMPLATE` (the template name).
 - [ ] **SMS** (only used when WhatsApp is not set up): Twilio secrets `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM`.

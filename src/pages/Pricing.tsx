@@ -5,6 +5,7 @@ import { Check, Price } from "../components/ui";
 import { isClassKind, planById } from "../config/pricing";
 import { RENEW_DAYS, checkPurchase, planEnd } from "../lib/plan";
 import { buildReceipt, systemNotice } from "../lib/purchase";
+import { ReceiptNotify } from "../components/ReceiptNotify";
 import { receiptNumber } from "../lib/receipt";
 import { isTodo, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
@@ -124,7 +125,7 @@ export function Checkout() {
     });
     store.addReceipt({ ...receipt, link: r.receiptUrl, sentVia: r.sentVia });
     store.setPlan(plan.id, kind, carry);
-    systemNotice(t.receipt.notice.replace("{no}", no), t.receipt.noticeSub, href(`receipt/${no}`));
+    if (store.reminders) systemNotice(t.receipt.notice.replace("{no}", no), t.receipt.noticeSub, href(`receipt/${no}`));
     setReceiptNo(no);
     setSentVia(r.sentVia ?? []);
     setSending(false);
@@ -151,6 +152,7 @@ export function Checkout() {
             <Link to={href(`receipt/${receiptNo}`)} className="btn btn--secondary btn--block">
               {t.checkout.viewReceipt}
             </Link>
+            <ReceiptNotify receiptNo={receiptNo} />
           </div>
         ) : (
           <form className="stack gap-24" onSubmit={submit}>

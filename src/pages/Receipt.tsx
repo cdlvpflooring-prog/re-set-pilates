@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PageHead } from "../components/blocks";
 import { useI18n } from "../lib/i18n";
-import { renderReceiptHtml, type DocType } from "../lib/receipt";
+import { RECEIPT_LOGO, renderReceiptHtml, type DocType } from "../lib/receipt";
 import { useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
 
@@ -22,7 +22,7 @@ export default function Receipt() {
   const { markNoticesRead } = store;
   useEffect(() => markNoticesRead(), [markNoticesRead, no]);
 
-  const html = useMemo(() => (r ? renderReceiptHtml(r, type, { logo: "/icons/icon-192.png" }) : ""), [r, type]);
+  const html = useMemo(() => (r ? renderReceiptHtml(r, type, { logo: RECEIPT_LOGO }) : ""), [r, type]);
 
   if (!no)
     return (
@@ -39,6 +39,7 @@ export default function Receipt() {
                     <span className="key">{x.lines[0]?.label}</span>
                     <span className="tiny muted">
                       <bdi dir="ltr">{x.no}</bdi> · {fmtDate(new Date(x.issuedAt))} · <bdi dir="ltr">₪{x.total}</bdi>
+                      {!x.paid && <> · {t.receipt.pending}</>}
                     </span>
                   </span>
                   <span className="chev" aria-hidden />

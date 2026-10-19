@@ -94,38 +94,38 @@ const ilDate = (iso: string) => {
   return new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jerusalem", day: "2-digit", month: "2-digit", year: "numeric" }).format(d);
 };
 
-/** Studio contact lines for the document footer and messages; unresolved (TODO) values are left out. */
-export function studioContact(lang: Lang) {
+/**
+ * Studio contact shown on receipts and invoices: the email, plus WhatsApp once `contact.whatsapp` is filled in site.ts.
+ * No social handles, address or website (owner's choice). Business name and number appear once filled.
+ */
+export function studioContact() {
   const c = siteConfig.contact;
-  const he = lang === "he";
   const set = (v?: string) => (v && !isTodo(v) ? v : "");
+  const wa = set(c.whatsapp).replace(/\D/g, "").replace(/^972/, "0"); // 9725XXXXXXXX → 05XXXXXXXX
   return {
     name: siteConfig.brand.name,
     legalName: set(siteConfig.business.legalName),
     taxId: set(siteConfig.business.taxId),
-    city: he ? c.cityHe : c.cityEn,
-    phone: set(c.phone),
-    whatsapp: set(c.whatsapp),
     email: c.email,
-    web: siteConfig.siteUrl.replace(/^https?:\/\//, ""),
-    instagram: siteConfig.social.instagramHandle,
+    whatsapp: wa.length === 10 ? `${wa.slice(0, 3)}-${wa.slice(3, 6)}-${wa.slice(6)}` : wa,
   };
 }
 
-/** Logo for the document: absolute so it also loads inside emails (PNG: Outlook and Gmail don't all show WebP). */
-export const receiptLogo = () => `${siteConfig.siteUrl}/icons/icon-192.png`;
+/** The site's logo (the "re:set / pilates" wordmark, top left of every page) as a PNG, absolute so it loads inside emails. */
+export const RECEIPT_LOGO = "/assets/logo-wordmark.png";
+export const receiptLogo = () => `${siteConfig.siteUrl}${RECEIPT_LOGO}`;
 
 /** A complete, self-contained HTML document (inline styles only, so it renders the same in the app, a browser tab and an email). */
 export function renderReceiptHtml(r: ReceiptData, type: DocType, opts: { logo?: string; link?: string } = {}): string {
   const t = L[r.lang];
   const he = r.lang === "he";
-  const s = studioContact(r.lang);
+  const s = studioContact();
   const title = type === "invoice" ? t.invoice : t.receipt;
   const ink = "#2b2522";
   const muted = "#7a6f68";
   const line = "#e8e0d6";
   // each part isolated so phone numbers, addresses and the @handle keep their direction inside Hebrew text
-  const contact = [s.city, s.phone, s.email, s.web, s.instagram].filter(Boolean).map((v) => `<bdi>${esc(v)}</bdi>`).join(" · ");
+  const contact = [s.email, s.whatsapp ? `WhatsApp ${s.whatsapp}` : ""].filter(Boolean).map((v) => `<bdi>${esc(v)}</bdi>`).join(" · ");
   const rows = r.lines
     .map(
       (l) => `<tr>
@@ -153,15 +153,14 @@ export function renderReceiptHtml(r: ReceiptData, type: DocType, opts: { logo?: 
 <body style="margin:0;background:#f6f1ea;font-family:${he ? "Heebo," : ""}Inter,-apple-system,'Segoe UI',Arial,sans-serif;color:${ink};font-size:15px;line-height:1.5">
 <div class="sheet" style="max-width:560px;margin:24px auto;background:#fffdf9;border-radius:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);padding:32px 28px">
   <table role="presentation" style="width:100%;border-collapse:collapse"><tr>
-    <td style="vertical-align:middle"><img src="${esc(opts.logo ?? receiptLogo())}" width="64" height="64" alt="${esc(s.name)}" style="display:block;border-radius:50%"></td>
+    <td style="vertical-align:middle"><img src="${esc(opts.logo ?? receiptLogo())}" width="113" height="60" alt="${esc(s.name)}" style="display:block;height:60px;width:auto"></td>
     <td style="vertical-align:middle;text-align:${he ? "left" : "right"}">
       <div style="font-size:22px;font-weight:600;letter-spacing:.02em">${esc(title)}</div>
       <div style="color:${muted};font-size:13px;direction:ltr;display:inline-block">${esc(t.no)} ${esc(r.no)}</div>
     </td>
   </tr></table>
-  <div style="margin-top:20px;font-size:18px;font-weight:600">${esc(s.name)}</div>
-  ${s.legalName || s.taxId ? `<div style="color:${muted};font-size:13px">${[s.legalName, s.taxId ? `${t.taxId} ${s.taxId}` : ""].filter(Boolean).map(esc).join(" · ")}</div>` : ""}
-  <div style="color:${muted};font-size:13px">${contact}</div>
+  ${s.legalName || s.taxId ? `<div style="margin-top:16px;color:${muted};font-size:13px">${[s.legalName, s.taxId ? `${t.taxId} ${s.taxId}` : ""].filter(Boolean).map(esc).join(" · ")}</div>` : ""}
+  <div style="margin-top:${s.legalName || s.taxId ? 0 : 16}px;color:${muted};font-size:13px">${contact}</div>
 
   <table role="presentation" style="width:100%;border-collapse:collapse;margin-top:24px;font-size:14px"><tr>
     <td style="vertical-align:top"><div style="color:${muted};font-size:12px;text-transform:uppercase;letter-spacing:.08em">${esc(t.billedTo)}</div>
@@ -194,7 +193,7 @@ export function renderReceiptHtml(r: ReceiptData, type: DocType, opts: { logo?: 
 /** Short plain-text version for WhatsApp, SMS and the email's text part. */
 export function receiptText(r: ReceiptData, link?: string): string {
   const t = L[r.lang];
-  const s = studioContact(r.lang);
+  const s = studioContact();
   return [
     `${s.name} · ${t.receipt} ${r.no}`,
     ...r.lines.map((l) => `${l.label}${l.detail ? ` (${l.detail})` : ""}: ${money(l.amount)}`),
@@ -204,7 +203,7 @@ export function receiptText(r: ReceiptData, link?: string): string {
     r.giftCode ? `${t.giftCode}: ${r.giftCode}` : "",
     r.paid ? "" : t.pending,
     link ? `${t.view}: ${link}` : "",
-    [s.phone, s.email].filter(Boolean).join(" · "),
+    [s.email, s.whatsapp && `WhatsApp ${s.whatsapp}`].filter(Boolean).join(" · "),
   ]
     .filter(Boolean)
     .join("\n");

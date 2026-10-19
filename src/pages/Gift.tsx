@@ -8,6 +8,7 @@ import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
 import { buildReceipt, systemNotice } from "../lib/purchase";
+import { ReceiptNotify } from "../components/ReceiptNotify";
 import { receiptNumber } from "../lib/receipt";
 import { useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
@@ -29,7 +30,7 @@ export default function Gift() {
   const [failed, setFailed] = useState(false);
   const [code, setCode] = useState("");
   const [receiptNo, setReceiptNo] = useState("");
-  const { profile, saveProfile, addReceipt } = useStore();
+  const { profile, saveProfile, addReceipt, reminders } = useStore();
   const pass = passes.find((p) => p.id === choice);
   const value = pass ? effectivePrice(pass) : amount;
   const label = pass ? planName(pass, t) : t.gift.custom;
@@ -67,7 +68,7 @@ export default function Gift() {
       link: r.receiptUrl,
       sentVia: r.sentVia,
     });
-    systemNotice(t.receipt.notice.replace("{no}", no), t.receipt.noticeSub, href(`receipt/${no}`));
+    if (reminders) systemNotice(t.receipt.notice.replace("{no}", no), t.receipt.noticeSub, href(`receipt/${no}`));
     setReceiptNo(no);
     setSending(false);
     setDone(true);
@@ -114,6 +115,7 @@ export default function Gift() {
                   {t.checkout.viewReceipt}
                 </Link>
               )}
+              <ReceiptNotify receiptNo={receiptNo} />
               <button className="btn btn--secondary" onClick={() => setDone(false)}>
                 {t.gift.another}
               </button>
