@@ -40,3 +40,15 @@ self.addEventListener("fetch", (e) => {
       .catch(() => caches.match(req)),
   );
 });
+
+// Purchase notifications (see src/lib/purchase.ts) open their receipt.
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const url = e.notification.data?.url || "/";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((wins) => {
+      const win = wins.find((w) => new URL(w.url).origin === location.origin);
+      return win ? win.navigate(url).then((w) => w?.focus()) : self.clients.openWindow(url);
+    }),
+  );
+});

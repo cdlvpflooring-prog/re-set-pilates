@@ -41,6 +41,13 @@ beforeEach(() => {
     // Tiny formula support: equality on one field id, or phone digits match.
     const f = url.searchParams.get("filterByFormula") ?? "";
     const want = [...f.matchAll(/'([^']*)'/g)].map((m) => m[1]);
+    // RECORD_ID() lists (a member's memberships), optionally with IS_AFTER({renews}, 'date')
+    if (f.includes("RECORD_ID()")) {
+      const after = /IS_AFTER\(\{(\w+)\},'([^']*)'\)/.exec(f);
+      return ok({ records: rows.filter((r) => want.includes(r.id) && (!after || String(r.fields[after[1]] ?? "") > after[2])) });
+    }
+    // FIND('text',{field}): substring match (order ids inside payment names)
+    if (f.startsWith("FIND(")) return ok({ records: rows.filter((r) => Object.values(r.fields).some((v) => typeof v === "string" && want.some((w) => v.includes(w)))) });
     const hit = rows.filter((r) => Object.values(r.fields).some((v) => want.includes(String(v).replace(/\D/g, "")) || want.includes(String(v)) || want.includes(String(v).toLowerCase())));
     return ok({ records: hit });
   }) as typeof fetch;
@@ -183,4 +190,69 @@ test("a later 'how did you hear' answer replaces the automatic Website source", 
   expect(db[T.members][0].fields[F.members.source]).toBe("Instagram");
   await call("checkout", { lang: "he", contact: maya, planId: "m3x", method: "bit", heard: "TikTok", consent: false, termsAccepted: true });
   expect(db[T.members][0].fields[F.members.source]).toBe("Instagram"); // a real answer is never overwritten
+});
+
+test("receipt: checkout with an order id answers with a sealed /r/ link that opens the receipt", async () => {
+  const r = await call("checkout", { lang: "he", contact: maya, planId: "p10", method: "bit", consent: false, termsAccepted: true, orderId: "RS-261019-ABCD", itemLabel: "Reformer · 10", carryOver: 2 }, undefined, guarded);
+  const out = (await r.json()) as { receiptUrl: string; sentVia: string[] };
+  expect(out.sentVia).toEqual([]); // no email binding / WhatsApp / SMS secrets in tests
+  expect(out.receiptUrl).toStartWith("https://reset.example/r/");
+  expect(out.receiptUrl).not.toContain("Maya"); // personal details are encrypted, not readable in the link
+  expect(db[T.payments][0].fields[F.payments.name]).toStartWith("RS-261019-ABCD · ");
+  expect(String(db[T.memberships][0].fields[F.memberships.name])).toContain("+2 carried over");
+  const page = await worker.fetch(new Request(out.receiptUrl) as never, guarded, {} as never);
+  const html = await page.text();
+  expect(html).toContain("RS-261019-ABCD");
+  expect(html).toContain("Maya Test");
+  expect(html).toContain("13"); // 10 + 1 launch bonus + 2 carried
+  const bad = await worker.fetch(new Request(out.receiptUrl.slice(0, -3) + "xyz") as never, guarded, {} as never);
+  expect(bad.status).toBe(404);
+});
+
+test("the same order sent twice is saved once", async () => {
+  const body = { lang: "en", contact: maya, planId: "p10", method: "card", consent: false, termsAccepted: true, orderId: "RS-261019-WXYZ" };
+  await call("checkout", body);
+  const again = (await (await call("checkout", body)).json()) as { ok: boolean; duplicate?: boolean };
+  expect(again).toMatchObject({ ok: true, duplicate: true });
+  expect(db[T.payments].length).toBe(1);
+  expect(db[T.memberships].length).toBe(1);
+});
+
+test("a running monthly membership can't be bought again; a pass can", async () => {
+  await call("checkout", { lang: "en", contact: maya, planId: "m3x", method: "card", consent: false, termsAccepted: true, orderId: "RS-261019-AAAA" });
+  const member = db[T.members][0];
+  member.fields[F.members.memberships] = db[T.memberships].map((m) => m.id);
+  const r = await call("checkout", { lang: "en", contact: maya, planId: "m3x", method: "card", consent: false, termsAccepted: true, orderId: "RS-261019-BBBB" });
+  expect(r.status).toBe(409);
+  expect(((await r.json()) as { until?: string }).until).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  const pass = await call("checkout", { lang: "en", contact: maya, planId: "p10", method: "card", consent: false, termsAccepted: true, orderId: "RS-261019-CCCC" });
+  expect(pass.status).toBe(200);
+});
+
+test("receipts go out on the channels that are set up: email + WhatsApp, SMS only without WhatsApp", async () => {
+  const { channelsFor, e164 } = await import("./notify");
+  const r = { no: "RS-261019-ABCD", issuedAt: "", lang: "he" as const, customer: { name: "Maya Test", phone: "050-123-4567", email: "m@x.com" }, lines: [], total: 1, paid: false };
+  const base = { ...env, EMAIL: {} } as unknown as Env;
+  expect(channelsFor(base, r)).toEqual(["email"]);
+  expect(channelsFor({ ...base, TWILIO_SID: "a", TWILIO_TOKEN: "b", TWILIO_FROM: "c" } as Env, r)).toEqual(["email", "sms"]);
+  expect(channelsFor({ ...base, TWILIO_SID: "a", TWILIO_TOKEN: "b", TWILIO_FROM: "c", WHATSAPP_TOKEN: "t", WHATSAPP_PHONE_ID: "p", WHATSAPP_RECEIPT_TEMPLATE: "receipt" } as Env, r)).toEqual(["email", "whatsapp"]);
+  expect(channelsFor(env, { ...r, customer: { ...r.customer, email: undefined } })).toEqual([]);
+  expect(e164("050-123-4567")).toBe("+972501234567");
+});
+
+test("receipts are sent after the reply, through every configured channel", async () => {
+  const sent: unknown[] = [];
+  const waits: Promise<unknown>[] = [];
+  const e = { ...guarded, EMAIL: { send: async (m: unknown) => void sent.push(m) } } as unknown as Env;
+  const req = new Request("https://reset.example/api/gift", { method: "POST", headers: { Origin: "https://reset.example" }, body: JSON.stringify({ lang: "en", buyer: maya, planId: null, amount: 300, recipientName: "Dana", consent: false, orderId: "RS-261019-GIFT" }) });
+  const res = await worker.fetch(req as never, e, { waitUntil: (p: Promise<unknown>) => void waits.push(p) } as never);
+  expect(((await res.json()) as { sentVia: string[] }).sentVia).toEqual(["email"]);
+  await Promise.all(waits);
+  const mail = sent[0] as { to: { email: string }; subject: string; html: string; bcc: string };
+  expect(mail.to.email).toBe("maya@example.com");
+  expect(mail.subject).toContain("RS-261019-GIFT");
+  expect(mail.html).toContain("/assets/logo-wordmark.png"); // the site logo
+  expect(mail.html).not.toContain("@resetpilates_"); // no social handles
+  expect(mail.html).toContain("resetpilates11@gmail.com"); // studio contact
+  expect(mail.bcc).toBe("resetpilates11@gmail.com");
 });

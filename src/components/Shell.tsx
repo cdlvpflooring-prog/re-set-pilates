@@ -4,6 +4,7 @@ import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-do
 import { addressLine, isTodo, siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
+import { useStore } from "../lib/store";
 import { ChatWidget } from "./ChatWidget";
 
 const ROOTS = ["", "schedule", "services", "my", "profile"];
@@ -208,6 +209,8 @@ function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
 
 function TabBar({ section }: { section: string }) {
   const { t, href } = useI18n();
+  // New receipts show as a count on the Profile tab until they are opened
+  const unread = (useStore().notices ?? []).filter((n) => !n.read).length;
   const tabs: [string, string][] = [
     ["", t.nav.home],
     ["schedule", t.nav.schedule],
@@ -225,6 +228,11 @@ function TabBar({ section }: { section: string }) {
             {/* Static underline per tab (CSS scales it in): a shared-layout animation left it off-centre in RTL. */}
             <span className="tabbar__dot" aria-hidden />
             {label}
+            {to === "profile" && unread > 0 && (
+              <span className="tabbar__badge" aria-label={`${unread} ${t.receipt.unread}`}>
+                {unread}
+              </span>
+            )}
           </Link>
         );
       })}

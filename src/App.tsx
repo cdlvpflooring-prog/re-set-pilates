@@ -19,6 +19,7 @@ import { Checkout, Pricing } from "./pages/Pricing";
 import Profile from "./pages/Profile";
 import Progress from "./pages/Progress";
 import Quiz from "./pages/Quiz";
+import Receipt from "./pages/Receipt";
 import Schedule from "./pages/Schedule";
 import { ServiceDetail, Services } from "./pages/Services";
 
@@ -50,6 +51,8 @@ export default function App() {
                 <Route path="pricing" element={<Pricing />} />
                 <Route path="checkout/:planId" element={<Checkout />} />
                 <Route path="my" element={<My />} />
+                <Route path="receipt" element={<Receipt />} />
+                <Route path="receipt/:no" element={<Receipt />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="progress" element={<Progress />} />
                 <Route path="progress/start" element={<Onboarding />} />

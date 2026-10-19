@@ -51,3 +51,15 @@ Everything below works on screen as a demo. This is what each flow still needs b
 - Included resources are sample titles with no content. Supply real videos/guides and set `approved: true`.
 - Personal paid suggestions are switched off (`paidCards.enabled: false`) until Arbox catalog and membership data are connected; members who opt in see a plain link to the price list.
 - Not built yet (phase 2 in the spec): spring/level progression graph, re-assessment radar chart, trainer level-ups, AI-written recaps and load suggestions, nutrition.
+
+## Receipts (invoice + receipt after every purchase)
+
+Built: every membership, pass and gift card purchase makes a receipt (number `RS-YYMMDD-XXXX`) with the logo and studio contact details. It is saved in the app (Profile → Purchases & receipts, plus a notification card), has a private printable link (`/r/…`, encrypted), and is sent automatically on whichever channels are set up below. Unused classes move to the new plan, and the same running monthly membership can't be bought twice.
+
+To switch on each channel (any channel left unset is simply skipped):
+- [ ] **Business details on the receipt**: fill `business.legalName` and `business.taxId` (עוסק number) in `src/config/site.ts`. Receipts show only the email; the WhatsApp number appears once `contact.whatsapp` is filled (no social handles or address).
+- [ ] **Email**: in Cloudflare → Email → Email Sending, onboard `resetpilates.org` (adds DNS records), then uncomment `"send_email"` in `wrangler.jsonc`. Sends from `receipts@resetpilates.org`, replies go to the Gmail, and the Gmail gets a copy of every receipt.
+- [ ] **WhatsApp** (new studio number): WhatsApp Business Cloud API. Create and get approved a template (Hebrew + English) with body parameters {{1}} first name, {{2}} receipt number, {{3}} total, {{4}} receipt link. Then add Worker secrets `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` and `WHATSAPP_RECEIPT_TEMPLATE` (the template name).
+- [ ] **SMS** (only used when WhatsApp is not set up): Twilio secrets `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM`.
+- [ ] Optional: a separate `RECEIPT_SECRET` for the receipt links (otherwise the Turnstile secret is used; changing it breaks old links).
+- [ ] Legal: this is a purchase confirmation. The official tax invoice/receipt (חשבונית מס / קבלה) must come from the payment or accounting system (Arbox, Green Invoice, etc.) once connected.
