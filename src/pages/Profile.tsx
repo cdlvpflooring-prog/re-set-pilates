@@ -31,7 +31,7 @@ export default function Profile() {
   const receipts = store.receipts ?? [];
   const unread = (store.notices ?? []).filter((n) => !n.read).length;
 
-  // Demo usage figures from local bookings; real balances come from Arbox once connected.
+  // Demo usage figures from local bookings; real balances come from the booking backend once connected.
   const usage = plan ? planUsage(plan, store.bookings, new Date(), store.planStart, store.carry ?? 0) : null;
   const pct = usage && usage.cap ? Math.min(1, usage.used / usage.cap) : 1;
   const since = store.memberSince ? new Date(store.memberSince) : null;

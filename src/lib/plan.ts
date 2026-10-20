@@ -39,7 +39,7 @@ const bookedAt = (b: Booking) => (b.bookedAt ? Date.parse(b.bookedAt) : Number(b
 /**
  * How much of the plan is used, measured for the week of `forDate` (monthly plans) or since the plan was bought (passes).
  * `carry` = classes carried over from the previous plan when this one was bought (see `carryOver`).
- * Real balances come from Arbox once connected; this keeps the demo honest in the meantime.
+ * Real balances come from the booking backend once connected; this keeps the demo honest in the meantime.
  */
 export function planUsage(plan: PricingItem, bookings: Booking[], forDate: Date, planStart: string | null, carry = 0): PlanUsage {
   const start = planStart ? Date.parse(planStart) : 0;

@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { PageHead, effectivePrice, planName, pricesVisible } from "../components/blocks";
 import { Wordmark } from "../components/Shell";
 import { Check } from "../components/ui";
-import { pricing } from "../config/pricing";
+import { pricing, singleClass } from "../config/pricing";
+import { siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
@@ -14,11 +15,12 @@ import { useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
 import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 
-/** Gift card flow (mock checkout: nothing is charged or sent). */
+/** Gift card flow. Until online payment is live it saves the buyer to the launch waitlist instead. */
 export default function Gift() {
   const { t, lang, href } = useI18n();
   useSeo(t.meta.gift);
-  const passes = pricing.passes.filter(pricesVisible);
+  const passes = pricing.passes.filter((p) => p.id !== singleClass.id && pricesVisible(p));
+  const live = siteConfig.flags.paymentsLive;
   const [choice, setChoice] = useState<string>(passes[0]?.id ?? "custom");
   const [amount, setAmount] = useState(300);
   const [to, setTo] = useState("");
@@ -43,6 +45,19 @@ export default function Gift() {
     track("gift_card_start", { choice });
     setSending(true);
     setFailed(false);
+    if (!live) {
+      const w = await relay("launch-waitlist", {
+        lang, contact: buyer, classType: "Gift card", source: "Gift card",
+        planId: pass?.id, wanted: `${t.nav.gift} · ${label} · ₪${value}${to ? ` · ${to}` : ""}`, consent: x.consent, website: x.website,
+      });
+      setSending(false);
+      if (!w.ok && !w.queued) return setFailed(true);
+      saveProfile(profileFrom(buyer, x));
+      setCode("");
+      setReceiptNo("");
+      setDone(true);
+      return;
+    }
     const no = receiptNumber(); // also the order id: a repeated send is saved once
     const r = await relay("gift", {
       orderId: no,
@@ -103,8 +118,8 @@ export default function Gift() {
           {done ? (
             <div className="stack gap-16 center" style={{ paddingTop: 16 }}>
               <Check />
-              <h2 className="display d-md">{t.gift.doneTitle}</h2>
-              <p className="muted">{t.gift.doneSub}</p>
+              <h2 className="display d-md">{live ? t.gift.doneTitle : t.launchWaitlist.doneTitle}</h2>
+              <p className="muted">{live ? t.gift.doneSub : t.launchWaitlist.doneSub}</p>
               {code && (
                 <p className="key">
                   {t.gift.codeLabel}: <bdi dir="ltr">{code}</bdi>
@@ -157,18 +172,23 @@ export default function Gift() {
                 <legend className="eyebrow" style={{ marginBottom: 4 }}>
                   {t.gift.buyerTitle}
                 </legend>
-                <p className="tiny" style={{ margin: 0 }}>{t.gift.buyerNote}</p>
+                {live && <p className="tiny" style={{ margin: 0 }}>{t.gift.buyerNote}</p>}
                 <ContactFields id="g" profile={profile} />
                 <ConsentField profile={profile} />
               </fieldset>
-              <div className="notice">{t.gift.demoPay}</div>
+              {!live && (
+                <div className="notice stack gap-4">
+                  <b>{t.launchWaitlist.title}</b>
+                  <span className="small">{t.launchWaitlist.sub}</span>
+                </div>
+              )}
               {failed && (
                 <p className="small" role="alert" style={{ margin: 0 }}>
                   {t.form.failed}
                 </p>
               )}
               <button className="btn btn--sand btn--block" disabled={sending}>
-                {sending ? t.form.sending : t.gift.send}
+                {sending ? t.form.sending : live ? t.gift.send : t.launchWaitlist.cta}
               </button>
             </form>
           )}

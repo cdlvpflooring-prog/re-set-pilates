@@ -1,6 +1,6 @@
 // Scripted studio assistant. Answers are built from the same config the site uses, so prices,
 // address and policies never drift. Swap `answer()` for an AI call later without touching the UI.
-import { pricing } from "../config/pricing";
+import { pricing, singleClass } from "../config/pricing";
 import { isTodo, mapsLink, siteConfig } from "../config/site";
 import { founder, instructors } from "../config/team";
 import type { Lang } from "../config/site";
@@ -35,6 +35,7 @@ const monthly = (he: boolean) =>
     .join("\n");
 const passes = (he: boolean) =>
   pricing.passes
+    .filter((p) => p.id !== singleClass.id)
     .map((p) => `${p.sessions} ${he ? "כניסות" : "sessions"}: ₪${p.price}${launch && p.bonusSessions ? (he ? " (+1 בהשקה)" : " (+1 at launch)") : ""}`)
     .join("\n");
 
@@ -88,8 +89,8 @@ export const intents: Intent[] = [
     keys: ["type", "kind", "what classes", "which classes", "reformer", "mat ", "difference", "what do you offer", "offer", "סוג", "סוגי", "אילו שיעורים", "איזה שיעורים", "רפורמר", "מזרן", "מכשירים", "ההבדל", "מה יש"],
     reply: (he) => ({
       text: he
-        ? "יש לנו:\n• רפורמר בקבוצות של עד 5 (50 דק׳)\n• פילאטיס מזרן בקבוצה קטנה\n• אימון פרטי 1:1\n• אימון זוגי\n• פילאטיס לנערות 12–17\n• קבוצות סגורות ואירועים: סוגרים את הסטודיו בשבילכן\n• קבוצת נשים בלבד, בתיאום\nרפורמר הוא מיטה עם קפיצים שמוסיפים התנגדות או תמיכה, ומזרן מתמקד בליבה ובגמישות. המנויים לרפורמר ולמזרן באותו מחיר."
-        : "We offer:\n• Reformer in groups of up to 5 (50 min)\n• Mat Pilates in a small group\n• Private 1:1\n• Duo training\n• Teen Pilates (girls 12–17)\n• Closed groups & events: the studio is yours\n• Women-only groups, by request\nThe Reformer uses springs for resistance or support; Mat focuses on core and mobility. Reformer and Mat plans cost the same.",
+        ? "יש לנו:\n• רפורמר בקבוצות של עד 5 (55 דק׳)\n• פילאטיס מזרן בקבוצה קטנה\n• אימון פרטי 1:1\n• אימון זוגי\n• פילאטיס לנערות 12–17\n• קבוצות סגורות ואירועים: סוגרים את הסטודיו בשבילכן\n• קבוצת נשים בלבד, בתיאום\nרפורמר הוא מיטה עם קפיצים שמוסיפים התנגדות או תמיכה, ומזרן מתמקד בליבה ובגמישות. המנויים לרפורמר ולמזרן באותו מחיר."
+        : "We offer:\n• Reformer in groups of up to 5 (55 min)\n• Mat Pilates in a small group\n• Private 1:1\n• Duo training\n• Teen Pilates (girls 12–17)\n• Closed groups & events: the studio is yours\n• Women-only groups, by request\nThe Reformer uses springs for resistance or support; Mat focuses on core and mobility. Reformer and Mat plans cost the same.",
       actions: [{ label: he ? "לכל השירותים" : "All services", to: "services" }, book(he)],
     }),
   },
@@ -98,8 +99,8 @@ export const intents: Intent[] = [
     keys: ["private", "1:1", "one on one", "personal", "duo", "couple", "partner", "friend", "פרטי", "אישי", "זוגי", "חברה", "בת זוג"],
     reply: (he) => ({
       text: he
-        ? "אימון פרטי (1:1) ואימון זוגי מתואמים מראש, 50 דקות, ונבנים סביבך. השאירי פרטים או שלחי וואטסאפ ונמצא שעה שמתאימה."
-        : "Private (1:1) and duo sessions are booked by appointment, 50 minutes, built around you. Leave your details or message us and we'll find a time.",
+        ? "אימון פרטי (1:1) ואימון זוגי מתואמים מראש, 55 דקות, ונבנים סביבך. השאירי פרטים או שלחי הודעה ונמצא שעה שמתאימה."
+        : "Private (1:1) and duo sessions are booked by appointment, 55 minutes, built around you. Leave your details or message us and we'll find a time.",
       actions: [{ label: he ? "לתיאום" : "Request a session", to: "contact?interest=private" }],
       handoff: true,
     }),
@@ -109,8 +110,8 @@ export const intents: Intent[] = [
     keys: ["teen", "teens", "girl", "daughter", "12", "13", "14", "15", "16", "17", "נערות", "נערה", "ילדה", "בת שלי", "הבת", "לנוער"],
     reply: (he) => ({
       text: he
-        ? "פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, 50 דקות. 180 ₪ לחודש (4 אימונים). חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי."
-        : "Teen Pilates for girls aged 12–17: a fixed group of up to 5, 50 minutes. ₪180 a month (4 sessions). Strength, posture, mobility and confidence.",
+        ? "פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, 55 דקות. 180 ₪ לחודש (4 אימונים). חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי."
+        : "Teen Pilates for girls aged 12–17: a fixed group of up to 5, 55 minutes. ₪180 a month (4 sessions). Strength, posture, mobility and confidence.",
       actions: [{ label: he ? "לפרטים ולהרשמה" : "Details & sign up", to: "services/teens" }],
     }),
   },
@@ -168,18 +169,22 @@ export const intents: Intent[] = [
     keys: ["price", "cost", "how much", "membership", "pass", "package", "monthly", "card", "punch", "מחיר", "עלות", "כמה עולה", "מנוי", "כרטיסייה", "חבילה", "חודשי"],
     reply: (he) => ({
       text: he
-        ? `מנוי חודשי${launch ? " (מחירי השקה)" : ""}:\n${monthly(he)}\n\nכרטיסיות (בתוקף חודשיים):\n${passes(he)}`
-        : `Monthly${launch ? " (launch pricing)" : ""}:\n${monthly(he)}\n\nPasses (valid 2 months):\n${passes(he)}`,
+        ? `שיעור בודד: ₪${singleClass.price}\n\nמנוי חודשי${launch ? " (מחירי השקה)" : ""}:\n${monthly(he)}\n\nכרטיסיות (בתוקף חודשיים):\n${passes(he)}`
+        : `Single class: ₪${singleClass.price}\n\nMonthly${launch ? " (launch pricing)" : ""}:\n${monthly(he)}\n\nPasses (valid 2 months):\n${passes(he)}`,
       actions: [prices(he)],
     }),
   },
   {
     id: "payment",
-    keys: ["pay", "payment", "bit", "credit", "visa", "cash", "installments", "arbox", "תשלום", "לשלם", "ביט", "אשראי", "מזומן", "תשלומים", "ארבוקס"],
+    keys: ["pay", "payment", "bit", "credit", "visa", "cash", "installments", "תשלום", "לשלם", "ביט", "אשראי", "מזומן", "תשלומים", "ארבוקס"],
     reply: (he) => ({
       text: he
-        ? "אפשר לשלם דרך Arbox, ב־bit או בכרטיס אשראי, בשלב האחרון של הרכישה. השיעורים עצמם יורדים מהמנוי או מהכרטיסייה, בלי חיוב נוסף."
-        : "You can pay through Arbox, with Bit, or by credit card at the last step of checkout. Classes are then taken from your membership or pass, with no extra charge.",
+        ? siteConfig.flags.paymentsLive
+          ? "אפשר לשלם ב־bit או בכרטיס אשראי, בשלב האחרון של הרכישה. השיעורים עצמם יורדים מהמנוי או מהכרטיסייה, בלי חיוב נוסף."
+          : "התשלום באתר (bit או אשראי) ייפתח בקרוב. בינתיים אפשר להצטרף לרשימת ההמתנה בשלב הרכישה, ואורית תתקשר לשריין מקום."
+        : siteConfig.flags.paymentsLive
+          ? "You can pay with Bit or by credit card at the last step of checkout. Classes are then taken from your membership or pass, with no extra charge."
+          : "Online payment (Bit or card) opens soon. Until then you can join the waitlist at the purchase step, and Orit will call you to save your spot.",
       actions: [prices(he)],
     }),
   },
@@ -215,12 +220,9 @@ export const intents: Intent[] = [
     id: "parking",
     keys: ["parking", "do i park", "to park", " park", "car ", "bus", "accessible", "wheelchair", "elevator", "חניה", "חנייה", "חונים", "לחנות", "איפה חונים", "רכב", "אוטובוס", "נגיש", "נגישות", "מעלית"],
     reply: (he) => ({
-      text: isTodo(c.parking)
-        ? he
-          ? "את פרטי החניה והנגישות המדויקים אורית תשלח לך ישירות. שלחי הודעה ונענה."
-          : "Orit will send you the exact parking and access details. Send a message and we'll reply."
-        : c.parking,
-      handoff: isTodo(c.parking),
+      text: he
+        ? `${c.parking.he}. לשאלות על נגישות, שלחי הודעה ואורית תענה.`
+        : `${c.parking.en}. For access questions, send a message and Orit will reply.`,
     }),
   },
   {

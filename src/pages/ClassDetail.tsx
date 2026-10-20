@@ -4,8 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { instructorName } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
 import { Check, Sheet, Switch } from "../components/ui";
-import { arbox, hasPublicBooking } from "../config/arbox";
-import { planById } from "../config/pricing";
+import { planById, singleClass } from "../config/pricing";
 import { serviceById } from "../config/services";
 import { track } from "../lib/analytics";
 import { bookingProvider, fromISO, slotStart, type ClassSlot } from "../lib/booking";
@@ -59,8 +58,6 @@ export default function ClassDetail() {
   const isReformer = slot.capacity !== null;
   const bedLabel = !isReformer ? copy.short : bed === null ? t.klass.anyBed : `${t.klass.bed} ${bed + 1}`;
 
-  // When the public Arbox link is configured, every confirmed booking is completed there.
-  const arboxUrl = [arbox.services[slot.service], arbox.publicBookingUrl].find(hasPublicBooking);
   // Plan limit: weekly cap for monthly plans, remaining sessions and validity for passes
   const plan = store.planId ? planById(store.planId) : undefined;
   const usage = plan ? planUsage(plan, store.bookings.filter((b) => b.slotId !== slot.id), fromISO(slot.date), store.planStart, store.carry ?? 0) : null;
@@ -82,7 +79,6 @@ export default function ClassDetail() {
     if (atLimit) return;
     const local = store.book(slot, isReformer ? bed : null, remind);
     if (!local) return;
-    if (arboxUrl) window.open(arboxUrl, "_blank", "noopener");
     const contact = whoFrom(e.currentTarget as HTMLFormElement);
     relay("booking", { lang, contact, slot: slotRef, bed: isReformer ? bed : null }, { ref: local.id }).then(
       (r) => r.id && store.setRemoteId(local.id, r.id),
@@ -128,6 +124,13 @@ export default function ClassDetail() {
             <span>{t.klass.instructor}</span>
           </div>
         </div>
+
+        <p className="single-price">
+          <b>{t.pricing.singlePrice.replace("{price}", String(singleClass.price))}</b>
+          <Link to={href(`pricing?kind=${slot.service}&next=${slot.id}`)} className="link small">
+            {t.pricing.singleSave}
+          </Link>
+        </p>
 
         <p className="muted" style={{ fontSize: 14 }}>
           {copy.desc}
@@ -260,12 +263,21 @@ export default function ClassDetail() {
                     <ContactFields id="bk" profile={store.profile} email="none" />
                   </>
                 )}
-                <button className="btn btn--sand btn--block">{arboxUrl ? t.confirm.finishArbox : t.confirm.confirmBtn}</button>
+                <button className="btn btn--sand btn--block">{t.confirm.confirmBtn}</button>
               </form>
             ) : (
-              <Link to={href(`pricing?next=${slot.id}`)} className="btn btn--sand btn--block">
-                {t.confirm.choosePlan}
-              </Link>
+              <>
+                <Link
+                  to={href(`checkout/${singleClass.id}?kind=${slot.service}&next=${slot.id}`)}
+                  className="btn btn--sand btn--block"
+                  onClick={() => track("membership_click", { plan: singleClass.id, kind: slot.service })}
+                >
+                  {t.confirm.single.replace("{price}", String(singleClass.price))}
+                </Link>
+                <Link to={href(`pricing?kind=${slot.service}&next=${slot.id}`)} className="btn btn--secondary btn--block">
+                  {t.confirm.choosePlan}
+                </Link>
+              </>
             )}
             <button
               className="btn btn--ghost btn--sm"

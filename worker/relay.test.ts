@@ -256,3 +256,31 @@ test("receipts are sent after the reply, through every configured channel", asyn
   expect(mail.html).toContain("resetpilates11@gmail.com"); // studio contact
   expect(mail.bcc).toBe("resetpilates11@gmail.com");
 });
+
+test("launch waitlist: saves the person, their class and time, and links the member", async () => {
+  const r = await call("launch-waitlist", {
+    lang: "he", contact: maya, classType: "Teens", prefTime: "Teen evening", source: "Booking",
+    planId: "single", wanted: "Single class · ₪50", slot: "Reformer · Sun 25 Oct · 08:00", consent: true,
+  });
+  expect(r.status).toBe(200);
+  const [row] = db[T.launchWaitlist];
+  const W = F.launchWaitlist;
+  expect(row.fields[W.classType]).toBe("Teens");
+  expect(row.fields[W.prefTime]).toBe("Teen evening");
+  expect(row.fields[W.source]).toBe("Booking");
+  expect(row.fields[W.planId]).toBe("single");
+  expect(row.fields[W.consent]).toBe(true);
+  expect(row.fields[W.member]).toEqual([db[T.members][0].id]);
+  expect(db[T.members][0].fields[F.members.prefTimes]).toEqual(["Evening"]);
+});
+
+test("launch waitlist: a class sign-up needs a time; a gift card does not", async () => {
+  expect((await call("launch-waitlist", { lang: "en", contact: maya, classType: "Reformer", source: "Pricing", consent: false })).status).toBe(400);
+  expect((await call("launch-waitlist", { lang: "en", contact: maya, classType: "Gift card", source: "Gift card", consent: false })).status).toBe(200);
+  expect(db[T.launchWaitlist][0].fields[F.launchWaitlist.prefTime]).toBeUndefined();
+});
+
+test("checkout refuses the removed Arbox payment method", async () => {
+  const r = await call("checkout", { lang: "he", contact: maya, planId: "m3x", method: "arbox", consent: false, termsAccepted: true });
+  expect(r.status).toBe(400);
+});

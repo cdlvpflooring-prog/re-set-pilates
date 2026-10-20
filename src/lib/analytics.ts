@@ -2,6 +2,7 @@
 export type AnalyticsEvent =
   | "book_reformer_click"
   | "membership_click"
+  | "launch_waitlist_join" // waitlist form shown instead of checkout while payments are not live
   | "plan_kind_select" // Reformer / Mat switch on the price list
   | "package_request" // "Book your date" on a closed-group package
   | "service_view"

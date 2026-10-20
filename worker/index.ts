@@ -15,6 +15,7 @@ import type {
   Contact,
   GiftMsg,
   HeardFrom,
+  LaunchWaitlistMsg,
   LeadMsg,
   QuizContactMsg,
   QuizMsg,
@@ -23,7 +24,7 @@ import type {
   SlotRef,
   WaitlistMsg,
 } from "../src/lib/relayTypes";
-import { HEARD_FROM, PREF_TIMES, normalizePhone } from "../src/lib/relayTypes";
+import { HEARD_FROM, LAUNCH_TIMES, PREF_TIMES, normalizePhone } from "../src/lib/relayTypes";
 import { Airtable, AirtableError, F, T, q, type AirRecord, type Fields } from "./airtable";
 import { isReceiptNumber, type ReceiptData } from "../src/lib/receipt";
 import { channelsFor, receiptLink, sendReceipt, serveReceipt } from "./notify";
@@ -392,7 +393,7 @@ const handlers: Record<RelayEvent, Handler> = {
     const m = b as unknown as CheckoutMsg;
     if (m.termsAccepted !== true) throw new BadRequest("terms not accepted");
     const c = contact(m.contact);
-    const method = oneOf(m.method, ["arbox", "bit", "card"] as const);
+    const method = oneOf(m.method, ["bit", "card"] as const);
     if (!method) throw new BadRequest("bad method");
     const orderId = isReceiptNumber(m.orderId) ? m.orderId : undefined;
     const p = await planByWebsiteId(at, text(m.planId, 12, true));
@@ -434,7 +435,7 @@ const handlers: Record<RelayEvent, Handler> = {
       [P.name]: [orderId, fullName(c), p.name].filter(Boolean).join(" · "),
       [P.for]: p.type === "Pass" ? "Pass" : "Membership",
       [P.amount]: p.price,
-      [P.method]: { arbox: "Arbox", bit: "Bit", card: "Credit card" }[method],
+      [P.method]: { bit: "Bit", card: "Credit card" }[method],
       [P.status]: "Pending",
       [P.member]: [member.id],
       [P.membership]: [membership.id],
@@ -518,6 +519,45 @@ const handlers: Record<RelayEvent, Handler> = {
       [W.status]: "Waiting",
     });
     return { ok: true, id: entry.id };
+  },
+
+  // Online payment is not live yet: anyone who tries to buy or book is saved here so Orit can call them when it opens.
+  async "launch-waitlist"(at, b) {
+    const m = b as unknown as LaunchWaitlistMsg;
+    const c = contact(m.contact);
+    const classType = oneOf(m.classType, ["Reformer", "Mat", "Teens", "Gift card", "Not sure"] as const) ?? "Not sure";
+    const prefTime = oneOf(m.prefTime, LAUNCH_TIMES);
+    if (!prefTime && classType !== "Gift card") throw new BadRequest("bad time");
+    const source = oneOf(m.source, ["Pricing", "Booking", "Gift card", "Class page"] as const) ?? "Pricing";
+    const lg = lang(m.lang);
+    const interest = classType === "Reformer" || classType === "Mat" || classType === "Teens" ? classType : undefined;
+    const member = await upsertMember(at, c, {
+      lang: lg,
+      attribution: attribution(m.attribution),
+      consent: m.consent === true,
+      interests: interest ? [interest] : undefined,
+      extra: prefTime ? { [F.members.prefTimes]: [prefTime === "Adult morning" ? "Morning" : "Evening"] } : undefined,
+    });
+    const W = F.launchWaitlist;
+    const planId = text(m.planId, 12);
+    const wanted = text(m.wanted, 80);
+    const slotText = text(m.slot, 80);
+    const row = await at.create(T.launchWaitlist, {
+      [W.name]: fullName(c),
+      [W.phone]: phonePretty(c.phone),
+      ...(c.email ? { [W.email]: c.email } : {}),
+      [W.member]: [member.id],
+      [W.classType]: classType,
+      ...(prefTime ? { [W.prefTime]: prefTime } : {}),
+      ...(wanted ? { [W.wanted]: wanted } : {}),
+      ...(planId ? { [W.planId]: planId } : {}),
+      ...(slotText ? { [W.slot]: slotText } : {}),
+      [W.source]: source,
+      [W.language]: lg === "he" ? "Hebrew" : "English",
+      [W.consent]: m.consent === true,
+      [W.submitted]: new Date().toISOString(),
+    });
+    return { ok: true, id: row.id };
   },
 
   async gift(at, b, ctx) {

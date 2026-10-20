@@ -22,33 +22,35 @@ export default function Contact() {
       <div className="wrap pbody">
         <div className="split split--top screen">
           <div className="stack gap-16">
-            <a
-              className="card row gap-16"
-              style={{ background: "var(--cream)", borderColor: "var(--cream)", color: "var(--charcoal)" }}
-              href={waReady ? `https://wa.me/${c.whatsapp}` : undefined}
-              aria-disabled={!waReady}
-              target="_blank"
-              rel="noreferrer"
-              onClick={() => track("whatsapp_click", { source: "contact" })}
-            >
-              <span className="avatar" style={{ width: 44, height: 44, fontSize: 13, fontFamily: "var(--font-ui)", fontWeight: 600, background: "var(--charcoal)", color: "var(--cream)" }}>
-                WA
-              </span>
-              <span className="stack gap-4" style={{ flex: 1 }}>
-                <span style={{ fontWeight: 600 }}>{t.contact.whatsapp}</span>
-                <span className="small" style={{ opacity: 0.7 }}>
-                  {waReady ? t.contact.whatsappSub : t.common.pending}
+            {/* Shown once the new WhatsApp number is set in site.ts (no "to be confirmed" placeholders on the page). */}
+            {waReady && (
+              <a
+                className="card row gap-16"
+                style={{ background: "var(--cream)", borderColor: "var(--cream)", color: "var(--charcoal)" }}
+                href={`https://wa.me/${c.whatsapp}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => track("whatsapp_click", { source: "contact" })}
+              >
+                <span className="avatar" style={{ width: 44, height: 44, fontSize: 13, fontFamily: "var(--font-ui)", fontWeight: 600, background: "var(--charcoal)", color: "var(--cream)" }}>
+                  WA
                 </span>
-              </span>
-              <span className="chev" aria-hidden />
-            </a>
+                <span className="stack gap-4" style={{ flex: 1 }}>
+                  <span style={{ fontWeight: 600 }}>{t.contact.whatsapp}</span>
+                  <span className="small" style={{ opacity: 0.7 }}>
+                    {t.contact.whatsappSub}
+                  </span>
+                </span>
+                <span className="chev" aria-hidden />
+              </a>
+            )}
 
             <MapEmbed />
             <div className="card row between gap-16">
               <span className="stack gap-4">
                 <span className="key">{addressLine(isHe)}</span>
                 <span className="tiny">
-                  {t.contact.parking}: <Verified value={c.parking} />
+                  {t.contact.parking}: <Verified value={c.parking[isHe ? "he" : "en"]} />
                 </span>
               </span>
               <a className="btn btn--secondary btn--sm" href={maps} target="_blank" rel="noreferrer">
@@ -57,10 +59,12 @@ export default function Contact() {
             </div>
 
             <div className="card rows" style={{ paddingBlock: 4 }}>
-              <div>
-                <span className="muted">{t.contact.phone}</span>
-                {isTodo(c.phone) ? <Verified value={c.phone} /> : <a href={`tel:${c.phone}`} dir="ltr">{c.phone}</a>}
-              </div>
+              {!isTodo(c.phone) && (
+                <a href={`tel:${c.phone}`}>
+                  <span className="muted">{t.contact.phone}</span>
+                  <span dir="ltr">{c.phone}</span>
+                </a>
+              )}
               <div>
                 <span className="muted">{t.contact.hours}</span>
                 {isTodo(c.hours) ? (
@@ -75,15 +79,12 @@ export default function Contact() {
                 <span className="muted">{t.contact.email}</span>
                 <span dir="ltr">{c.email}</span>
               </a>
-              <a
-                href={isTodo(siteConfig.social.googleBusiness) ? undefined : siteConfig.social.googleBusiness}
-                aria-disabled={isTodo(siteConfig.social.googleBusiness)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <span className="muted">{t.contact.google}</span>
-                <Verified value={isTodo(siteConfig.social.googleBusiness) ? siteConfig.social.googleBusiness : "re:set pilates"} />
-              </a>
+              {!isTodo(siteConfig.social.googleBusiness) && (
+                <a href={siteConfig.social.googleBusiness} target="_blank" rel="noreferrer">
+                  <span className="muted">{t.contact.google}</span>
+                  <span>re:set pilates</span>
+                </a>
+              )}
               <a href={siteConfig.social.instagram} target="_blank" rel="noreferrer">
                 <span className="muted">Instagram</span>
                 <span dir="ltr">{siteConfig.social.instagramHandle}</span>
@@ -100,16 +101,11 @@ export default function Contact() {
           </div>
           <div className="stack gap-16">
             <LeadForm initialInterest={params.get("interest") ?? undefined} note={packageNote(params.get("package"), t)} />
-            <a
-              className="btn btn--secondary btn--block btn--arrow"
-              href={isTodo(siteConfig.social.googleReview) ? undefined : siteConfig.social.googleReview}
-              aria-disabled={isTodo(siteConfig.social.googleReview)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {t.contact.googleReview}
-              {isTodo(siteConfig.social.googleReview) ? ` · ${t.common.pending}` : ""}
-            </a>
+            {!isTodo(siteConfig.social.googleReview) && (
+              <a className="btn btn--secondary btn--block btn--arrow" href={siteConfig.social.googleReview} target="_blank" rel="noreferrer">
+                {t.contact.googleReview}
+              </a>
+            )}
           </div>
         </div>
       </div>

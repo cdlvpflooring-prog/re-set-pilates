@@ -8,7 +8,7 @@ import { isTodo, mapsEmbedSrc, siteConfig } from "../config/site";
 import { instructors, reviews, type Person } from "../config/team";
 import type { Content } from "../content/en";
 import { track } from "../lib/analytics";
-import { bookingProvider, fromISO, toISO, upcomingDays, type BookableService, type ClassSlot } from "../lib/booking";
+import { bookingProvider, fromISO, hasClasses, toISO, upcomingDays, type BookableService, type ClassSlot } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
 import { PREF_TIMES, type PrefTime } from "../lib/relayTypes";
@@ -65,7 +65,9 @@ export const planName = (p: PricingItem, t: Content, kind?: ClassKind | null) =>
       ? p.perWeek === "unlimited"
         ? t.pricing.unlimited
         : `${p.perWeek}× ${t.pricing.perWeek}`
-      : `${p.sessions} ${t.pricing.sessions}`;
+      : p.sessions === 1
+        ? t.pricing.single
+        : `${p.sessions} ${t.pricing.sessions}`;
   return kind ? `${base} · ${t.pricing.kinds[kind]}` : base;
 };
 
@@ -437,12 +439,12 @@ function useTurnstile(active: boolean) {
 
 /** Service chips, day strip and bookable class list. State lives in the URL (?service=&date=). */
 /** Formats that can be booked from the schedule (the others are by request). */
-const bookableServices = services.filter((s) => s.bookable);
+const bookableServices = services.filter((s) => s.bookable && hasClasses(s.id as BookableService));
 
 export function ScheduleBoard() {
   const { t, href } = useI18n();
   const [params, setParams] = useSearchParams();
-  const service: BookableService = params.get("service") === "mat" ? "mat" : "reformer";
+  const service: BookableService = params.get("service") === "mat" && hasClasses("mat") ? "mat" : "reformer";
   const days = upcomingDays(10);
   // Default to the first day that still has classes (today may already be over).
   const [firstOpen, setFirstOpen] = useState(toISO(days[0]));
@@ -486,6 +488,7 @@ export function ScheduleBoard() {
 
   return (
     <div className="stack gap-16">
+      {bookableServices.length > 1 && (
       <div className="ctabs" role="tablist" aria-label={t.home.classesTitle}>
         {bookableServices.map((svc) => {
           const s = svc.id as BookableService;
@@ -519,6 +522,7 @@ export function ScheduleBoard() {
           );
         })}
       </div>
+      )}
       <div className="days" role="tablist" aria-label={t.schedule.title}>
         {days.map((d, i) => {
           const iso = toISO(d);
