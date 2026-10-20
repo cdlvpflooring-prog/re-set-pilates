@@ -121,3 +121,44 @@ export function ReformerSketch() {
   );
 }
 
+
+/**
+ * Side view of a Reformer as a single-weight line drawing: frame on four legs, carriage with its headrest
+ * and shoulder blocks, the two risers with pulleys and straps, the springs under the carriage, the footbar.
+ * Decorative only (aria-hidden); colour comes from `currentColor`, so it reads on cream and on studio-dark.
+ */
+export function ReformerLineArt({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 640 260" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      {/* frame rails */}
+      <path d="M40 168h560" />
+      <path d="M40 184h560" />
+      <path d="M40 168v16M600 168v16" />
+      {/* legs */}
+      <path d="M62 184v48M94 184v48M546 184v48M578 184v48" />
+      <path d="M52 232h52M536 232h52" />
+      {/* carriage */}
+      <rect x="150" y="128" width="236" height="36" rx="10" />
+      <path d="M150 146h236" opacity="0.5" />
+      {/* headrest */}
+      <path d="M386 136h58q10 0 10 10v18" />
+      {/* shoulder blocks */}
+      <rect x="312" y="100" width="18" height="28" rx="5" />
+      <rect x="352" y="100" width="18" height="28" rx="5" />
+      {/* springs */}
+      <path d="M478 176l4-6 4 6 4-6 4 6 4-6 4 6 4-6 4 6 4-6 4 6 4-6 4 6 4-6 4 6" opacity="0.8" />
+      <path d="M396 176h82M538 176h16" />
+      {/* footbar */}
+      <path d="M520 168v-62q0-10 10-10h30q10 0 10 10v62" />
+      <path d="M520 112h50" />
+      {/* risers, pulleys, straps */}
+      <path d="M96 168V44M118 168V44" />
+      <circle cx="96" cy="38" r="8" />
+      <circle cx="118" cy="38" r="8" />
+      <path d="M104 40q60 46 150 70" opacity="0.7" />
+      <path d="M126 40q70 40 170 76" opacity="0.7" />
+      <path d="M248 108a10 6 0 1 0 20 0a10 6 0 1 0-20 0" />
+      <path d="M290 114a10 6 0 1 0 20 0a10 6 0 1 0-20 0" />
+    </svg>
+  );
+}

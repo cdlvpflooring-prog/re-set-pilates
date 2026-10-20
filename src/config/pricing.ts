@@ -32,8 +32,10 @@ export const pricing: { memberships: PricingItem[]; passes: PricingItem[] } = {
     { id: "teens", track: "teens", tone: "cream", billingType: "monthly", perWeek: 1, price: 180, currency: "ILS", validityMonths: 1, active: true, approved: true },
   ],
   passes: [
-    // One class, Reformer or Mat (teens may also drop in). Shown on every class page.
-    { id: "single", tone: "cream", billingType: "pass", sessions: 1, price: 50, currency: "ILS", validityMonths: 1, active: true, approved: true },
+    // One class, Reformer or Mat, adults. Shown on every class page. (Airtable Plans & Prices row `single` must match.)
+    { id: "single", tone: "cream", billingType: "pass", sessions: 1, price: 55, currency: "ILS", validityMonths: 1, active: true, approved: true },
+    // One class for the teens group (Airtable row `tsingle`).
+    { id: "tsingle", track: "teens", tone: "cream", billingType: "pass", sessions: 1, price: 50, currency: "ILS", validityMonths: 1, active: true, approved: true },
     { id: "p5", tone: "cream", billingType: "pass", sessions: 5, price: 300, bonusSessions: 1, currency: "ILS", validityMonths: 2, active: true, approved: true },
     { id: "p10", tone: "sand", billingType: "pass", sessions: 10, price: 550, bonusSessions: 1, currency: "ILS", validityMonths: 2, popular: true, active: true, approved: true },
     { id: "p15", tone: "ink", billingType: "pass", sessions: 15, price: 750, bonusSessions: 1, currency: "ILS", validityMonths: 2, active: true, approved: true },
@@ -46,3 +48,15 @@ export const planById = (id: string) => allPlans.find((p) => p.id === id);
 export const generalPlans = (list: PricingItem[]) => list.filter((p) => !p.track);
 export const teensPlan = pricing.memberships.find((p) => p.track === "teens");
 export const singleClass = pricing.passes.find((p) => p.id === "single")!;
+export const teenSingleClass = pricing.passes.find((p) => p.id === "tsingle")!;
+
+/**
+ * Introductory month (owner, 21 Oct 2026, limited time): what one class costs on its own and with any plan.
+ * Adults ₪55 single / ₪50 per class with a plan; teens ₪50 / ₪45. Shown on every class in the schedule.
+ */
+export const intro = {
+  active: true,
+  adult: { single: singleClass.price, plan: 50 },
+  teen: { single: teenSingleClass.price, plan: 45 },
+};
+export const classPrices = (who: "adult" | "teen") => intro[who];

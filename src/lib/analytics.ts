@@ -12,6 +12,7 @@ export type AnalyticsEvent =
   | "whatsapp_click"
   | "language_switch"
   | "lead_form_start"
+  | "request_form_submit" // request-a-session page (private, duo, groups)
   | "lead_form_submit"
   | "booking_confirmed"
   | "waitlist_join"

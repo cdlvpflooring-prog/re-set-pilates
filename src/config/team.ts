@@ -27,38 +27,10 @@ export const founder: Person = {
   approved: true,
 };
 
-export const instructors: Person[] = [
-  {
-    id: "noa",
-    nameHe: "נועה",
-    nameEn: "Noa",
-    roleHe: "מדריכת רפורמר",
-    roleEn: "Reformer instructor",
-    bioHe: "מתמקדת בדיוק ובנשימה. השיעורים שלה איטיים, עמוקים ומלאי תשומת לב לפרטים.",
-    bioEn: "Focused on precision and breath. Her classes are slow, deep and full of attention to detail.",
-    approved: false,
-  },
-  {
-    id: "tal",
-    nameHe: "טל",
-    nameEn: "Tal",
-    roleHe: "מדריכת רפורמר ומזרן",
-    roleEn: "Reformer & Mat instructor",
-    bioHe: "אוהבת לבנות כוח בהדרגה. מתאימה כל תרגיל לרמה שלך ודואגת שתצאי עם חיוך.",
-    bioEn: "Loves building strength step by step. She adapts every exercise to your level and makes sure you leave smiling.",
-    approved: false,
-  },
-  {
-    id: "shira",
-    nameHe: "שירה",
-    nameEn: "Shira",
-    roleHe: "מדריכת רפורמר ואימונים פרטיים",
-    roleEn: "Reformer & private sessions",
-    bioHe: "מלווה מתחילות וחוזרות לתנועה. סבלנית, רגועה וקשובה לגוף שלך.",
-    bioEn: "Guides beginners and those returning to movement. Patient, calm and tuned in to your body.",
-    approved: false,
-  },
-];
+// Instructors other than Orit are added here once they join (name, role, bio, portrait, approved: true).
+export const instructors: Person[] = [];
+/** Everyone who can be named on a class: the founder first, then the instructors. */
+export const roster: Person[] = [founder, ...instructors];
 
 // Only verified items render. Leave empty until real quotes / press exist.
 export interface Review {

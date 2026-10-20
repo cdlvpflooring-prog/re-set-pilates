@@ -1938,3 +1938,81 @@ html[lang="he"] .mcard__name { letter-spacing: 0.02em; text-transform: none; }
 .pkg__photo { position: relative; width: calc(100% + 36px); margin: -18px -18px 4px; aspect-ratio: 16 / 8; overflow: hidden; border-radius: 20px 20px 0 0; background: var(--b-cream); }
 .pkg__photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 @media (prefers-reduced-motion: reduce) { .plan-photo { animation: none; } }
+
+/* ───────── v3.5 · clean hero, tight header, intro-month prices, request page, reformer sketches ───────── */
+/* Hero: greeting, headline, two identical buttons. Everything centred, one column on every screen. */
+.hero--ed .hero__body, .hero--sport .hero__body { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; padding-bottom: calc(28px + var(--safe-b)); }
+.hero--sport .hero__mark { align-self: center; }
+.hero--sport .hero__body .eyebrow, html[lang="he"] .hero--sport .hero__body .eyebrow { align-self: center; margin-top: 0; }
+.hero--sport .hero__title, html[lang="he"] .hero--sport .hero__title { max-width: none; padding-top: 18px; text-align: center; }
+.hero--sport .hero__title::before { inset-inline-start: 50%; transform: translateX(-50%); }
+.hero--sport .hero__offer { width: min(100%, 360px); gap: 10px; margin-top: 6px; }
+.hero--sport .btn--gold, .hero--sport .btn--outline {
+  min-height: 56px; font-size: 16px; font-weight: 800; letter-spacing: 0.04em; border-radius: 999px; padding-inline: 20px; width: 100%;
+}
+html[lang="he"] .hero--sport .btn--gold, html[lang="he"] .hero--sport .btn--outline { font-size: 17.5px; letter-spacing: 0; }
+.hero--sport .btn--gold { box-shadow: 0 12px 30px rgba(212, 229, 241, 0.32); }
+.hero--sport .btn--outline { border: 2px solid var(--b-peach, #d4e5f1); background: rgba(26, 20, 17, 0.42); color: #fff; }
+@media (min-width: 1000px) {
+  .hero--ed .hero__body, .hero--sport .hero__body { display: flex; padding-bottom: 64px; gap: 16px; }
+  .hero--sport .hero__offer { width: 380px; flex-direction: row; gap: 12px; }
+  .hero--sport .btn--gold, .hero--sport .btn--outline { width: auto; flex: 1; }
+  .hero--sport .hero__mark { width: auto; height: auto; }
+}
+.hero--ed .hero__scrim { background: linear-gradient(180deg, rgba(26,20,17,0.38) 0%, rgba(26,20,17,0.08) 28%, rgba(26,20,17,0.28) 50%, rgba(26,20,17,0.9) 78%, #1a1411 100%); }
+
+/* Header: wordmark hugs the start edge, the three controls sit together at the end edge, on every screen */
+.hdr__in, .hdr .hdr__in { display: flex; align-items: center; gap: 8px; padding-inline: 0; }
+.hdr .wrap { padding-inline: 10px; }
+@media (min-width: 1000px) { .hdr .wrap { padding-inline: 18px; } }
+.hdr__brand, .hdr .hdr__brand { justify-self: start; order: 0; margin-inline-end: auto; display: inline-flex; }
+.hdr__start { order: -1; }
+.hdr__start:empty { display: none; }
+.hdr__end, .hdr .hdr__end { gap: 6px; margin-inline-start: auto; }
+.hdr .lang { min-width: 40px; height: 40px; padding: 0 10px; }
+.hdr .hdr__book { min-height: 40px; padding-inline: 14px; }
+.burger { width: 40px; height: 40px; margin-inline-end: -4px; }
+.hdr .wordmark { font-size: 26px; }
+@media (min-width: 1000px) { .hdr .wordmark, .hdr__brand .wordmark { font-size: 32px; } }
+@media (max-width: 999px) { .hdr--pushed .hdr__brand { display: inline-flex; } }
+
+/* Intro-month strip on the schedule */
+.intro { display: grid; gap: 12px; padding: 16px 18px 18px; background: var(--b-blush, #f9dcd6); border: 2px solid #1f1612; }
+.intro__grid { display: grid; gap: 8px; }
+.intro__row { display: grid; grid-template-columns: auto 1fr 1fr; grid-template-areas: "who single plan" "save save save"; align-items: center; gap: 4px 14px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 253, 250, 0.7); }
+.intro__who { grid-area: who; font-weight: 800; font-size: 13.5px; min-width: 64px; }
+.intro__cell { display: flex; flex-direction: column; line-height: 1.1; }
+.intro__cell b { font-family: var(--font-display); font-size: 24px; font-weight: 500; letter-spacing: -0.02em; direction: ltr; }
+.intro__cell small { font-size: 11.5px; color: rgba(31, 22, 18, 0.7); }
+.intro__cell--plan { grid-area: plan; }
+.intro__cell:not(.intro__cell--plan) { grid-area: single; }
+.intro__cell--plan b { color: var(--clay, #a86b55); }
+.intro__save { grid-area: save; font-size: 12.5px; font-weight: 700; color: var(--clay, #a86b55); }
+.slot2__price { font-size: 13.5px; color: rgba(31, 22, 18, 0.78); }
+.slot2__price b { font-weight: 800; color: #1f1612; }
+.slot2__price i { font-style: normal; opacity: 0.5; margin-inline: 2px; }
+
+/* Request a session */
+.req__group { display: grid; gap: 10px; border: 0; padding: 0; margin: 0; min-width: 0; }
+.req__group > legend { padding: 0; margin-bottom: 6px; }
+.req__types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.req__type { display: grid; justify-items: center; gap: 4px; padding: 14px 8px 12px; border-radius: 18px; background: #fff; border: 2px solid rgba(31, 22, 18, 0.14); text-align: center; transition: border-color var(--t-ui) ease, transform var(--t-fast) var(--ease-out); }
+.req__type[aria-checked="true"] { border-color: #1f1612; background: var(--b-peach, #d4e5f1); }
+.req__type:active { transform: scale(0.97); }
+.req__type b { font-size: 14.5px; font-weight: 800; }
+.req__type small { font-size: 11.5px; color: rgba(31, 22, 18, 0.65); line-height: 1.25; }
+.req__glyph { width: 52px; height: 52px; border-radius: 50%; background: rgba(31, 22, 18, 0.06); display: grid; place-items: center; }
+.req__glyph .art { width: 40px; height: 40px; }
+.req__days { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.req__day { min-height: 44px; border-radius: 12px; border: 2px solid rgba(31, 22, 18, 0.14); background: #fff; font-weight: 700; font-size: 14px; }
+.req__day[aria-pressed="true"] { background: #1f1612; color: #fffdfa; border-color: #1f1612; }
+.req textarea.input { min-height: 88px; resize: vertical; line-height: 1.4; padding-top: 12px; }
+@media (max-width: 380px) { .req__types { grid-template-columns: repeat(2, 1fr); } }
+
+/* Reformer line drawings behind the "five beds" block and the dark closing band */
+.block--sketch, .band--sketch { position: relative; overflow: hidden; }
+.block--sketch > *:not(.sketch), .band--sketch > *:not(.sketch) { position: relative; z-index: 1; }
+.sketch { position: absolute; pointer-events: none; z-index: 0; }
+.sketch--small { width: min(46%, 300px); inset-inline-end: 18px; top: 18px; color: #1f1612; opacity: 0.16; }
+.sketch--band { width: min(92%, 760px); inset-inline-end: -6%; bottom: -8%; color: #f1d3ad; opacity: 0.22; }
+@media (min-width: 1000px) { .sketch--small { width: 340px; inset-inline-end: 40px; top: 32px; opacity: 0.18; } .sketch--band { width: 720px; inset-inline-end: 4%; bottom: -4%; } }

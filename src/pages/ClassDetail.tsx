@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { instructorName } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
 import { Check, Sheet, Switch } from "../components/ui";
-import { planById, singleClass } from "../config/pricing";
+import { classPrices, intro, planById, singleClass } from "../config/pricing";
 import { serviceById } from "../config/services";
 import { track } from "../lib/analytics";
 import { bookingProvider, fromISO, slotStart, type ClassSlot } from "../lib/booking";
@@ -128,7 +128,7 @@ export default function ClassDetail() {
         <p className="single-price">
           <b>{t.pricing.singlePrice.replace("{price}", String(singleClass.price))}</b>
           <Link to={href(`pricing?kind=${slot.service}&next=${slot.id}`)} className="link small">
-            {t.pricing.singleSave}
+            {intro.active ? t.pricing.singlePlan.replace("{price}", String(classPrices("adult").plan)) : t.pricing.singleSave}
           </Link>
         </p>
 
