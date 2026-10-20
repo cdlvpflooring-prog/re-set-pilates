@@ -29,6 +29,9 @@ export const he: Content = {
     min: "דק׳",
     seeSchedule: "ללוח השיעורים",
     requestSession: "לתיאום אישי",
+    requestTime: "לבקש מועד",
+    requestTimeTitle: "עדיין אין מועדים פתוחים ל{name}",
+    requestTimeSub: "ספרי לנו מתי נוח לך ונכין לך רפורמר.",
     learnMore: "לפרטים",
     directions: "ניווט",
     byRequest: "בתיאום",
@@ -77,6 +80,7 @@ export const he: Content = {
     heroSport: ["ריסט.", "להיות חזקה."],
     heroChips: ["5 רפורמרים", "50 דק׳", "לכל רמה"],
     heroSecondary: "השיעור הראשון · מה מחכה לך",
+    heroJoin: "התחברות או הרשמה",
     statHead: ["חמש מיטות.", "כל תשומת הלב."],
     stats: [
       { n: "5 מתאמנות", l: "מקסימום בשיעור" },

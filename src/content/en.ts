@@ -27,6 +27,9 @@ export const en = {
     min: "min",
     seeSchedule: "See schedule",
     requestSession: "Request a session",
+    requestTime: "Request a time",
+    requestTimeTitle: "No open times yet for {name}",
+    requestTimeSub: "Tell us when suits you and we'll set up a Reformer for you.",
     learnMore: "Learn more",
     directions: "Directions",
     byRequest: "By request",
@@ -75,6 +78,7 @@ export const en = {
     heroSport: ["Reset.", "Get strong."],
     heroChips: ["5 Reformers", "50 min", "All levels"],
     heroSecondary: "First class · what to expect",
+    heroJoin: "Sign in or join",
     statHead: ["Five beds.", "Your full attention."],
     stats: [
       { n: "5 people", l: "Maximum per class" },

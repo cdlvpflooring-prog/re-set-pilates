@@ -159,6 +159,10 @@ export default function Profile() {
             {t.nav.myClasses}
             <span className="chev" aria-hidden />
           </Link>
+          <Link to={href("#first-class")}>
+            {t.home.heroSecondary}
+            <span className="chev" aria-hidden />
+          </Link>
           <div>
             {t.profile.language}
             <LangToggle />
