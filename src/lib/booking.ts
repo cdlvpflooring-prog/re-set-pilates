@@ -24,7 +24,7 @@ export interface BookingProvider {
 }
 
 const TEMPLATE: Record<BookableService, [time: string, instructor: number][]> = {
-  reformer: [["07:00", 0], ["08:00", 1], ["09:30", 2], ["18:00", 0], ["19:00", 1], ["20:00", 2]],
+  reformer: [["08:00", 1], ["09:00", 2], ["18:00", 0], ["19:00", 1], ["20:00", 2]],
   mat: [["10:30", 1], ["18:30", 2]],
 };
 const BED_ORDER = [2, 0, 4, 1, 3];
