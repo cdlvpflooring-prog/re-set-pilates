@@ -19,7 +19,7 @@ export default function Schedule() {
           <div className="card card--blue stack gap-12 request-time">
             <h2 className="display d-sm">{t.common.requestTimeTitle.replace("{name}", t.services.items[byRequest.id].name)}</h2>
             <p className="small muted">{t.common.requestTimeSub}</p>
-            <Link to={href(`contact?interest=${byRequest.id}`)} className="btn btn--primary btn--arrow" style={{ alignSelf: "flex-start" }}>
+            <Link to={href(`request?type=${byRequest.id}`)} className="btn btn--primary btn--arrow" style={{ alignSelf: "flex-start" }}>
               {t.common.requestTime}
             </Link>
           </div>

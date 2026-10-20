@@ -1,11 +1,11 @@
 import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { generalPlans, pricing, teensPlan, type ClassKind, type PricingItem } from "../config/pricing";
+import { classPrices, generalPlans, intro, pricing, teensPlan, type ClassKind, type PricingItem } from "../config/pricing";
 import { packages } from "../config/packages";
 import { services, type ServiceConfig, type ServiceId } from "../config/services";
 import { isTodo, mapsEmbedSrc, siteConfig } from "../config/site";
-import { instructors, reviews, type Person } from "../config/team";
+import { reviews, roster, type Person } from "../config/team";
 import type { Content } from "../content/en";
 import { track } from "../lib/analytics";
 import { bookingProvider, fromISO, hasClasses, toISO, upcomingDays, type BookableService, type ClassSlot } from "../lib/booking";
@@ -18,8 +18,9 @@ import { ConsentField, ContactFields, HeardField, profileFrom, readContact, read
 import { MaskImg, Price, Segmented } from "./ui";
 
 export const instructorName = (id: string, isHe: boolean) => {
-  const i = instructors.find((x) => x.id === id);
-  return i ? (isHe ? i.nameHe : i.nameEn) : "";
+  const i = roster.find((x) => x.id === id);
+  // First name only on class rows ("with Orit"); the full name stays on the founder's card.
+  return i ? (isHe ? i.nameHe : i.nameEn).split(" ")[0] : "";
 };
 
 /** Same dark title band at the top of every inner page. */
@@ -77,7 +78,7 @@ export const effectivePrice = (p: PricingItem) =>
 
 /** Where a service's primary CTA leads. */
 export const serviceTarget = (s: ServiceConfig, href: (p?: string) => string) =>
-  s.bookable ? href(`schedule?service=${s.id}`) : href(`contact?interest=${s.id}`);
+  s.bookable ? href(`schedule?service=${s.id}`) : href(`request?type=${s.id}`);
 
 export function ServiceCard({ s, delay = 0 }: { s: ServiceConfig; delay?: number }) {
   const { t, href } = useI18n();
@@ -123,6 +124,11 @@ export function SlotRow({ slot, index = 0 }: { slot: ClassSlot; index?: number }
       <span className="small muted">
         {t.home.withInstructor} {instructorName(slot.instructorId, isHe)}
       </span>
+      {intro.active && (
+        <span className="slot2__price">
+          <b>₪{classPrices("adult").single}</b> {t.schedule.introSingle} <i aria-hidden>·</i> <b>₪{classPrices("adult").plan}</b> {t.schedule.introPlan}
+        </span>
+      )}
       <span className="row between gap-12" style={{ marginTop: 6 }}>
         <span className="small muted">
           {slot.minutes} {t.common.min}
@@ -263,6 +269,11 @@ export function TeensPlan({ plan, next, brief }: { plan: PricingItem; next?: str
         <span className="stack gap-4" style={{ flex: 1 }}>
           <span className="row gap-8 key">{planName(plan, t)}</span>
           <span className="tiny">{t.pricing.teensNote}</span>
+          {intro.active && (
+            <span className="tiny">
+              {t.pricing.singlePrice.replace("{price}", String(classPrices("teen").single))} · {t.pricing.singlePlan.replace("{price}", String(classPrices("teen").plan))}
+            </span>
+          )}
         </span>
         <span className="stack" style={{ alignItems: "flex-end", gap: 2 }}>
           <Price amount={effectivePrice(plan)} />
@@ -339,7 +350,7 @@ export function Packages() {
                 </div>
               )}
               <Link
-                to={href(`contact?interest=groups&package=${p.id}`)}
+                to={href(`request?type=groups&package=${p.id}`)}
                 className="btn btn--blue btn--block"
                 onClick={() => track("package_request", { package: p.id })}
               >
@@ -438,7 +449,7 @@ export function LeadForm({ initialInterest, note }: { initialInterest?: string; 
 }
 
 /** Cloudflare Turnstile bot check. Loads only once the visitor starts the form, and only when a site key is set. */
-function useTurnstile(active: boolean) {
+export function useTurnstile(active: boolean) {
   const { lang } = useI18n();
   const [token, setToken] = useState("");
   const [el, setEl] = useState<HTMLDivElement | null>(null);
@@ -555,11 +566,12 @@ export function ScheduleBoard() {
           );
         })}
       </div>
+      {intro.active && <IntroPrices />}
       <div className="stack list-in" key={`${service}-${date}`} aria-live="polite">
         {slots?.length === 0 && (
           <div className="card card--dashed stack gap-12 center">
             <p className="small muted">{t.schedule.closedDay}</p>
-            <Link to={href(`contact?interest=${service}`)} className="btn btn--secondary btn--sm">
+            <Link to={href("request?type=private")} className="btn btn--secondary btn--sm">
               {t.common.requestTime}
             </Link>
           </div>
@@ -567,14 +579,45 @@ export function ScheduleBoard() {
         {slots?.map((s, i) => <SlotRow key={s.id} slot={s} index={i} />)}
       </div>
       {!bookingProvider.isLive && <p className="tiny center">{t.common.demoData}</p>}
-      <div className="card row between gap-16">
-        <span className="stack gap-4">
-          <span className="key">{t.schedule.privateDuo}</span>
-          <span className="tiny">{t.schedule.byAppointment}</span>
-        </span>
-        <Link to={href("contact?interest=private")} className="btn btn--blush btn--sm">
-          {t.schedule.request}
+    </div>
+  );
+}
+
+/** Introductory month: one class on its own against one class with a plan, adults and teens, and the saving. */
+export function IntroPrices() {
+  const { t, href } = useI18n();
+  const rows: { who: "adult" | "teen"; label: string }[] = [
+    { who: "adult", label: t.schedule.introAdults },
+    { who: "teen", label: t.schedule.introTeens },
+  ];
+  return (
+    <div className="intro card">
+      <div className="row between gap-12 wrap-row">
+        <span className="eyebrow">{t.schedule.introTitle}</span>
+        <Link to={href("pricing")} className="link tiny">
+          {t.schedule.introSeePlans}
         </Link>
+      </div>
+      <div className="intro__grid">
+        {rows.map(({ who, label }) => {
+          const p = classPrices(who);
+          return (
+            <div key={who} className="intro__row">
+              <span className="intro__who">{label}</span>
+              <span className="intro__cell">
+                <b>₪{p.single}</b>
+                <small>{t.schedule.introSingle}</small>
+              </span>
+              <span className="intro__cell intro__cell--plan">
+                <b>₪{p.plan}</b>
+                <small>
+                  {t.schedule.introPlan} · {t.schedule.introPerClass}
+                </small>
+              </span>
+              <span className="intro__save">{t.schedule.introSave.replace("{n}", String(p.single - p.plan))}</span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { siteConfig } from "../config/site";
-import { instructors } from "../config/team";
+import { roster } from "../config/team";
 
 // Booking adapter. The UI only talks to `bookingProvider`; swap the mock for the
 // in-house booking backend (Worker + Airtable/D1) once it serves live availability.
@@ -29,7 +29,7 @@ export interface BookingProvider {
 // Mat has no slots yet, so its schedule tab is hidden. Final timetable is set closer to opening.
 export const CLASS_MINUTES = 55;
 const TEMPLATE: Record<BookableService, [time: string, instructor: number][]> = {
-  reformer: [["08:00", 0], ["09:00", 1], ["10:00", 2], ["11:00", 0]],
+  reformer: [["08:00", 0], ["09:00", 0], ["10:00", 0], ["11:00", 0]],
   mat: [],
 };
 /** Formats with at least one class in the week (the others get no schedule tab). */
@@ -65,7 +65,7 @@ function build(service: BookableService, date: string, time: string, instructor:
     date,
     time,
     minutes: CLASS_MINUTES,
-    instructorId: instructors[instructor].id,
+    instructorId: (roster[instructor] ?? roster[0]).id,
     capacity: cap,
     takenBeds: BED_ORDER.slice(0, taken),
     full: !!cap && taken >= cap,

@@ -20,6 +20,7 @@ import Profile from "./pages/Profile";
 import Progress from "./pages/Progress";
 import Quiz from "./pages/Quiz";
 import Receipt from "./pages/Receipt";
+import Request from "./pages/Request";
 import Schedule from "./pages/Schedule";
 import { ServiceDetail, Services } from "./pages/Services";
 
@@ -59,6 +60,7 @@ export default function App() {
                 <Route path="about" element={<About />} />
                 <Route path="faq" element={<Faq />} />
                 <Route path="contact" element={<Contact />} />
+                <Route path="request" element={<Request />} />
                 <Route path="quiz" element={<Quiz />} />
                 <Route path="gift" element={<Gift />} />
                 <Route path="*" element={<Navigate to="." replace />} />

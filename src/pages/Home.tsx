@@ -4,6 +4,7 @@ import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, pla
 import { openChat } from "../components/ChatWidget";
 import { Wordmark } from "../components/Shell";
 import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
+import { ReformerLineArt } from "../components/art";
 import { useReducedMotion } from "motion/react";
 import { pricing } from "../config/pricing";
 import { services } from "../config/services";
@@ -33,8 +34,8 @@ export default function Home() {
   const phone = typeof window !== "undefined" && window.matchMedia("(max-width: 999px)").matches;
   const heroSrc = phone && media.heroVideoPhone ? media.heroVideoPhone : media.heroVideo;
   const c = siteConfig.contact;
-  const launch = siteConfig.flags.launchPricing;
   const maps = mapsLink();
+  const launch = siteConfig.flags.launchPricing;
   const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t.home.greetingMorning : hour < 18 ? t.home.greetingAfternoon : t.home.greetingEvening;
@@ -60,11 +61,10 @@ export default function Home() {
           <span className="hero__mark fade-up" style={d(100)}>
             <Wordmark />
           </span>
-          {isMember && (
-            <p className="eyebrow fade-up" style={d(150)}>
-              {greeting}, {t.profile.firstName}
-            </p>
-          )}
+          {/* Greeting: the member by name, a guest with a welcome. Nothing else but the headline and two buttons. */}
+          <p className="eyebrow fade-up" style={d(150)}>
+            {isMember ? `${greeting}, ${t.profile.firstName}` : t.home.greetingGuest}
+          </p>
           <h1 className="hero__title">
             {t.home.heroSport.map((line, i) => (
               <span className="line" key={line}>
@@ -72,22 +72,13 @@ export default function Home() {
               </span>
             ))}
           </h1>
-          <p className="lede fade-up" style={d(600)}>
-            {t.home.sub}
-          </p>
-          <ul className="hero__chips fade-up" style={d(700)}>
-            {t.home.heroChips.map((chip) => (
-              <li key={chip}>{chip}</li>
-            ))}
-          </ul>
-          <div className="hero__offer fade-up" style={d(800)}>
+          <div className="hero__offer fade-up" style={d(500)}>
             <a href="#schedule" className="btn btn--gold btn--block" onClick={() => track("book_reformer_click", { source: "hero" })}>
-              {t.nav.bookTitle} <span aria-hidden>→</span>
+              {t.nav.bookTitle}
             </a>
             <Link to={href("profile")} className="btn btn--outline btn--block" onClick={() => track("hero_join_click")}>
               {t.home.heroJoin}
             </Link>
-            {launch && <span className="hero__note">{t.common.announcement}</span>}
           </div>
         </div>
       </section>
@@ -114,7 +105,8 @@ export default function Home() {
 
       {/* Why */}
       <section className="section">
-        <div className="wrap block tone-raise">
+        <div className="wrap block tone-raise block--sketch">
+          <ReformerLineArt className="sketch sketch--small" />
           <Reveal>
             <h2 className="display d-lg">
               {t.home.statHead.map((l) => (
@@ -355,7 +347,8 @@ export default function Home() {
       </section>
 
       {/* Book */}
-      <section className="section tone-studio">
+      <section className="section tone-studio band--sketch">
+        <ReformerLineArt className="sketch sketch--band" />
         <Reveal className="wrap stack gap-24">
           <h2 className="display d-xl">
             {t.home.ctaTitle.map((l) => (
