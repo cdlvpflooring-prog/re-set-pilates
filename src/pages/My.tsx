@@ -40,6 +40,9 @@ export default function My() {
                 {t.common.bookMat}
               </Link>
             )}
+            <Link to={href("#first-class")} className="small hi" style={{ textDecoration: "underline", textUnderlineOffset: 4 }}>
+              {t.home.heroSecondary}
+            </Link>
           </div>
         ) : (
           <div className="stack gap-12">

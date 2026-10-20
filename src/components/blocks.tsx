@@ -535,7 +535,14 @@ export function ScheduleBoard() {
         })}
       </div>
       <div className="stack list-in" key={`${service}-${date}`} aria-live="polite">
-        {slots?.length === 0 && <p className="card card--dashed small muted center">{t.schedule.closedDay}</p>}
+        {slots?.length === 0 && (
+          <div className="card card--dashed stack gap-12 center">
+            <p className="small muted">{t.schedule.closedDay}</p>
+            <Link to={href(`contact?interest=${service}`)} className="btn btn--secondary btn--sm">
+              {t.common.requestTime}
+            </Link>
+          </div>
+        )}
         {slots?.map((s, i) => <SlotRow key={s.id} slot={s} index={i} />)}
       </div>
       {!bookingProvider.isLive && <p className="tiny center">{t.common.demoData}</p>}

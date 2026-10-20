@@ -1,6 +1,7 @@
 // GA4-ready event layer. Pushes to dataLayer when present; no-op otherwise.
 export type AnalyticsEvent =
   | "book_reformer_click"
+  | "hero_join_click"
   | "membership_click"
   | "launch_waitlist_join" // waitlist form shown instead of checkout while payments are not live
   | "plan_kind_select" // Reformer / Mat switch on the price list

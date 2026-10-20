@@ -300,8 +300,14 @@ export function Shell() {
   const section = loc.pathname.split("/")[2] ?? "";
 
   useEffect(() => {
+    // A hash (e.g. /en/#first-class from the profile) scrolls to that section once it has rendered; otherwise start at the top.
+    if (loc.hash) {
+      const id = loc.hash.slice(1);
+      const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
+      return () => clearTimeout(t);
+    }
     window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
-  }, [loc.pathname]);
+  }, [loc.pathname, loc.hash]);
 
   return (
     <>

@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
-import { Link } from "react-router-dom";
-import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, planName, pricesVisible, serviceTarget } from "../components/blocks";
+import { Link, useLocation } from "react-router-dom";
+import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, planName, pricesVisible } from "../components/blocks";
 import { openChat } from "../components/ChatWidget";
 import { Wordmark } from "../components/Shell";
 import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
@@ -38,6 +38,7 @@ export default function Home() {
   const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
   const hour = new Date().getHours();
   const greeting = hour < 12 ? t.home.greetingMorning : hour < 18 ? t.home.greetingAfternoon : t.home.greetingEvening;
+  const loc = useLocation();
   const firstTimer = !isMember && upcoming.length === 0;
   const plans = pricing.memberships.filter((p) => FEATURED.includes(p.id) && pricesVisible(p));
   const city = isHe ? c.cityHe : c.cityEn;
@@ -83,9 +84,9 @@ export default function Home() {
             <a href="#schedule" className="btn btn--gold btn--block" onClick={() => track("book_reformer_click", { source: "hero" })}>
               {t.nav.bookTitle} <span aria-hidden>→</span>
             </a>
-            <a href="#classes" className="btn btn--outline btn--block">
-              {t.home.heroSecondary}
-            </a>
+            <Link to={href("profile")} className="btn btn--outline btn--block" onClick={() => track("hero_join_click")}>
+              {t.home.heroJoin}
+            </Link>
             {launch && <span className="hero__note">{t.common.announcement}</span>}
           </div>
         </div>
@@ -135,8 +136,8 @@ export default function Home() {
       </section>
 
       {/* First-timer path */}
-      {firstTimer && (
-        <section className="section--tight">
+      {(firstTimer || loc.hash === "#first-class") && (
+        <section id="first-class" className="section--tight">
           <div className="wrap">
             <Reveal className="stack gap-8 sec-title">
               <p className="eyebrow">{t.home.newHereEyebrow}</p>
@@ -180,7 +181,7 @@ export default function Home() {
               return (
                 <Reveal key={s.id}>
                   <Link
-                    to={s.bookable ? href(`schedule?service=${s.id}`) : serviceTarget(s, href)}
+                    to={href(`schedule?service=${s.id}`)}
                     className="flow-row ccard"
                     onClick={() => track("service_view", { service: s.id })}
                   >
@@ -191,8 +192,8 @@ export default function Home() {
                     <span className="ccard__body">
                       <span className="display d-md ccard__title">{sc.name}</span>
                       <span className="ccard__blurb">{sc.blurb}</span>
-                      <span className={`ccard__cta ${s.bookable ? "ccard__cta--book" : ""}`}>
-                        {s.bookable ? t.nav.bookTitle : t.common.requestSession}
+                      <span className="ccard__cta ccard__cta--book">
+                        {t.nav.bookTitle}
                         <span className="chev" aria-hidden />
                       </span>
                     </span>
