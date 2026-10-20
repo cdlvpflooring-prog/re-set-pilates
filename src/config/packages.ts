@@ -8,11 +8,13 @@ export interface PackageConfig {
   minutes: number;
   capacity: number; // up to
   approved: boolean;
+  image: string; // card photo (generated stand-in until the shoot)
+  pos?: string;
 }
 
 export const packages: PackageConfig[] = [
-  { id: "group", price: 350, minutes: 50, capacity: 5, approved: true },
-  { id: "event", price: 750, minutes: 90, capacity: 5, approved: true },
+  { id: "group", price: 350, minutes: 50, capacity: 5, approved: true, image: "/assets/ex-groups.webp", pos: "50% 40%" },
+  { id: "event", price: 750, minutes: 90, capacity: 5, approved: true, image: "/assets/ex-event.webp", pos: "50% 45%" },
 ];
 
 export const packageById = (id: string) => packages.find((p) => p.id === id);

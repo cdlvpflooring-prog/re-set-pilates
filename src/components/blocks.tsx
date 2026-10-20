@@ -173,6 +173,8 @@ export function PricingList({ next, limit, initialKind }: { next?: string; limit
         <Segmented value={tab} onChange={setTab} options={tabs} />
       </div>
 
+      {!limit && <PlanPhoto tab={tab} />}
+
       {(tab === "monthly" || tab === "passes") && (
         <>
           <div className="row gap-12" style={{ flexWrap: "wrap", alignItems: "center" }}>
@@ -231,6 +233,22 @@ export function PricingList({ next, limit, initialKind }: { next?: string; limit
   );
 }
 
+/** A quiet photo strip above each pricing tab (full pricing page only; the Home excerpt stays plain). */
+const PLAN_PHOTOS: Record<PriceTab, { src: string; pos: string }> = {
+  monthly: { src: "/assets/ex-membership.webp", pos: "50% 40%" },
+  passes: { src: "/assets/ex-pass.webp", pos: "50% 30%" },
+  teens: { src: "/assets/ex-teens.webp", pos: "50% 45%" },
+  groups: { src: "/assets/ex-event.webp", pos: "50% 45%" },
+};
+function PlanPhoto({ tab }: { tab: PriceTab }) {
+  const p = PLAN_PHOTOS[tab];
+  return (
+    <div className="plan-photo" aria-hidden key={tab}>
+      <img src={p.src} alt="" style={{ objectPosition: p.pos }} loading="lazy" />
+    </div>
+  );
+}
+
 /** The girls' weekly group: one monthly plan, bought like any other. */
 export function TeensPlan({ plan, next, brief }: { plan: PricingItem; next?: string; brief?: boolean }) {
   const { t, href } = useI18n();
@@ -283,6 +301,9 @@ export function Packages() {
           const c = t.services.packages[p.id];
           return (
             <article key={p.id} className="card pkg stack gap-12" style={{ "--i": i } as CSSProperties}>
+              <div className="pkg__photo" aria-hidden>
+                <img src={p.image} alt="" style={{ objectPosition: p.pos }} loading="lazy" />
+              </div>
               <div className="row between gap-12" style={{ alignItems: "flex-start" }}>
                 <span className="stack gap-4">
                   <span className="eyebrow">{c.tagline}</span>
