@@ -2,33 +2,44 @@
 
 Everything below works on screen as a demo. This is what each flow still needs before real customers use it.
 
+## Launch prep decisions (owner review, 20 Oct 2026)
+- **No Arbox.** The booking system is built in-house (site + Cloudflare Worker + Airtable). Arbox was removed from checkout, config, chat answers, receipts and the schema.
+- **Payments not live yet** (`flags.paymentsLive: false` in `src/config/site.ts`). Every buy/book button (pricing, booking a class, gift cards) ends in the launch waitlist form instead of a sample purchase. Sign-ups land in Airtable **Launch Waitlist** (name, phone, optional email, class type, Adult morning / Teen evening, what they wanted, which class slot, source, contacted ✓). Name + phone are required.
+- [ ] **Choose the payment provider** for Bit + credit card (not chosen yet; e.g. Grow/Meshulam, PayPlus, Cardcom, Tranzila). Then add the links in `siteConfig.payments`, set `paymentsLive: true`, and call everyone on the Launch Waitlist.
+- [ ] Airtable: create an automation "New Launch Waitlist row → email Orit" (same as the lead email) and a view sorted by Submitted, filtered on Contacted = off.
+- **Single class: ₪50** (down from 55). Shown on every Reformer class page next to time/length/instructor, on the Reformer, Mat and Teens service pages, at the top of the punch-card list, and as "Single class · ₪50" in the booking sheet. Airtable *Plans & Prices* now has rows `single` (₪50) and `teens` (₪180).
+- **Schedule (planned):** 55-minute classes on the hour, 5-minute changeover. Sun–Fri mornings 08:00, 09:00, 10:00, 11:00 = adults (Reformer for now). Sun–Thu evenings 17:00–20:00 = teens (by request until the teen timetable is set). Closed Saturday; no Friday evening. Final timetable is set closer to opening (`src/lib/booking.ts`).
+- [ ] **Mat:** no Mat slots until Mat instructors join, so the Mat schedule tab is hidden and Mat shows "By request". When it starts: up to 8 people, set `bookable: true` in `src/config/services.ts` and add slots in `src/lib/booking.ts` (Mat capacity is not modelled yet).
+- [ ] **Circuit class (idea):** 5 reformers + 3 mat stations, up to 8 people, each station a different exercise. Not on the site yet; decide name, price and slots before adding it.
+- [ ] **For Orit:** create the workout routines and the levels (e.g. beginner / intermediate / advanced) for Reformer, Mat and the circuit. Studio planning only, no site change yet.
+- Contact page: parking = street parking; Google profile + review link set (`g.page/r/CYP9NF0IiTdlEBM`). WhatsApp and phone rows are **hidden** until the new number exists (fill `contact.whatsapp` and `contact.phone`; the WhatsApp card, chat button and receipts pick it up automatically).
+
 ## Scheduling and booking
-- Class times and "spots left" are sample data. Needs the Arbox public link / API so real classes and availability show.
-- A booking is saved only in the visitor's own browser. It does not reach Arbox, so the studio never sees it. Needs the Arbox hand-off (the button is ready: fill `publicBookingUrl` in `src/config/arbox.ts`).
-- Cancelling removes the class on screen only. Needs the Arbox cancellation call and the real cancellation policy text.
-- Bed choice is a preference only; Arbox does not reserve a specific bed.
+- Class times follow the planned week; "spots left" is still sample data. Needs live availability from the in-house booking backend.
+- Bookings and cancellations are sent to Airtable (Bookings) through the Worker, but availability is not read back yet, so two people can pick the same bed.
+- Bed choice is saved with the booking; nothing yet blocks a bed someone else took.
 - Membership limits (for example 3 classes a week) and pass balances are not enforced; the numbers on the profile are estimates.
-- Waitlist and "remind me" are switches only. Nobody is notified. Needs Arbox waitlist or a messaging service (WhatsApp / SMS / email).
-- There is no sign-in. "Maya Levi" is a demo member. Needs real accounts (Arbox login or phone-code login).
+- Waitlist and "remind me" are switches only. Nobody is notified. Needs a messaging service (WhatsApp / SMS / email).
+- There is no sign-in. Needs real accounts (phone-code login, see `ACCOUNTS-PLAN.md`).
 
 ## Checkout (memberships and passes)
-- The three payment buttons (Arbox, Bit, card) have no links yet, so choosing one completes a demo purchase with no charge. Needs the real links in `src/config/site.ts` (`payments`) and the per-plan Arbox links in `src/config/arbox.ts`.
-- After real payment, something must tell the app the plan is active (Arbox membership status). Today the plan turns on as soon as a button is pressed.
+- Hidden while `paymentsLive` is off (waitlist instead). Once on: Bit and card buttons open the provider links in `siteConfig.payments`.
+- After real payment, the provider must tell the app the plan is active (payment webhook → Worker → Airtable). Today Orit confirms it by hand in Airtable.
 - Name, phone and email typed at checkout are not saved or sent anywhere.
 - No receipt or confirmation message is sent.
 
 ## Gift cards
 - No payment is taken and nothing is sent to the recipient.
 - No gift code is created, so a gift cannot be redeemed.
-- To make it real: (1) a payment link, (2) a unique code per gift stored somewhere the studio can see (Arbox coupon, or a simple sheet/database), (3) delivery to the recipient by WhatsApp or email with the note, (4) a way to redeem the code at checkout or at the desk, (5) an expiry rule.
+- To make it real: (1) a payment link, (2) a unique code per gift stored somewhere the studio can see (Airtable Gift Cards), (3) delivery to the recipient by WhatsApp or email with the note, (4) a way to redeem the code at checkout or at the desk, (5) an expiry rule.
 - "Notify me" for the shop saves nothing.
 
 ## Contact and leads
 - Main contact is resetpilates11@gmail.com (set in `src/config/site.ts`).
 - The "call me back" form sends straight into Airtable (Leads & Inquiries) through the Cloudflare Worker once `AIRTABLE_TOKEN` is set on the Worker. Until then, or if sending fails, it opens a ready-to-send email to that Gmail as before. Steps: `CLOUDFLARE-PLAN.md` section 1.
-- Google Business Profile: create/claim the listing, then paste the profile link and the review link into `social.googleBusiness` and `social.googleReview`.
+- Google Business Profile and review links are set. Still to do: the Place ID (`social.googlePlaceId`) so directions open the listing.
 - The three Google reviews on the home page are labelled samples (demo mode only). Replace them with real reviews in `src/config/team.ts`.
-- WhatsApp, phone and parking details are still "to be confirmed".
+- WhatsApp and phone: hidden until the new number exists. Parking: street parking.
 
 ## Content placeholders (planned for the next version)
 - Studio photos and hero video (after construction and the professional shoot).
@@ -38,18 +49,18 @@ Everything below works on screen as a demo. This is what each flow still needs b
 ## Before going live
 - Live at https://resetpilates.org (Cloudflare, auto-published from `main`). Open items: `CLOUDFLARE-PLAN.md` section 1.
 - Turn off demo mode (`flags.demoMode`) and confirm launch pricing on/off.
-- New offers (Oct 2026 flyers): add a "Teens" plan in Airtable *Plans & Prices* with Website ID `teens`, regular price 180, monthly, validity 1 month, or the teens checkout returns "unknown plan". Reformer and Mat share one price list; the chosen class is written into the membership name, e.g. "2× per week (Mat)". Group packages (private group 350, event 750) are request-only and arrive as leads with interest "Event" and the package in the message. Arbox links for `teens` / `groups` are still TODO in `src/config/arbox.ts`.
+- New offers (Oct 2026 flyers): add a "Teens" plan in Airtable *Plans & Prices* with Website ID `teens`, regular price 180, monthly, validity 1 month, or the teens checkout returns "unknown plan". Reformer and Mat share one price list; the chosen class is written into the membership name, e.g. "2× per week (Mat)". Group packages (private group 350, event 750) are request-only and arrive as leads with interest "Event" and the package in the message. (The `teens` row now exists in Airtable.)
 - Photos for Teens and Closed groups are stand-ins (`ex-rest`, `studio`) until the shoot.
 - Google Analytics ID (or Cloudflare Web Analytics). Sitemap and `robots.txt` are set for `resetpilates.org`.
 - Check on a real iPhone and Android phone, in Hebrew and English.
 
 ## My progress (AI trainer MVP, spec in `AI-TRAINER-SPEC.md`)
 - Works as a demo only: answers, check-ins and progress live in the visitor's own browser. Needs sign-in and a private server database (health data encrypted, seen only by the member and her instructor) before real use.
-- Attendance comes from sample data plus the visitor's own demo bookings. Needs Arbox attendance sync.
+- Attendance comes from sample data plus the visitor's own demo bookings. Needs attendance from the in-house bookings.
 - Safety reviews (pain 7+, rising pain, high soreness, onboarding red flags) show in a demo "Studio view" inside Details. Needs a real staff screen and a notification to Orit (WhatsApp / email) that retries until she acknowledges.
 - Orit must approve: health-consent wording, the "stop and see a doctor" wording, all thresholds and score targets in `src/config/trainer.ts`, whether clients may self-test at home, and who covers safety reviews when she is away.
 - Included resources are sample titles with no content. Supply real videos/guides and set `approved: true`.
-- Personal paid suggestions are switched off (`paidCards.enabled: false`) until Arbox catalog and membership data are connected; members who opt in see a plain link to the price list.
+- Personal paid suggestions are switched off (`paidCards.enabled: false`) until catalog and membership data are connected; members who opt in see a plain link to the price list.
 - Not built yet (phase 2 in the spec): spring/level progression graph, re-assessment radar chart, trainer level-ups, AI-written recaps and load suggestions, nutrition.
 
 ## Receipts (invoice + receipt after every purchase)
@@ -62,4 +73,4 @@ To switch on each channel (any channel left unset is simply skipped):
 - [ ] **WhatsApp** (new studio number): WhatsApp Business Cloud API. Create and get approved a template (Hebrew + English) with body parameters {{1}} first name, {{2}} receipt number, {{3}} total, {{4}} receipt link. Then add Worker secrets `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` and `WHATSAPP_RECEIPT_TEMPLATE` (the template name).
 - [ ] **SMS** (only used when WhatsApp is not set up): Twilio secrets `TWILIO_SID`, `TWILIO_TOKEN`, `TWILIO_FROM`.
 - [ ] Optional: a separate `RECEIPT_SECRET` for the receipt links (otherwise the Turnstile secret is used; changing it breaks old links).
-- [ ] Legal: this is a purchase confirmation. The official tax invoice/receipt (חשבונית מס / קבלה) must come from the payment or accounting system (Arbox, Green Invoice, etc.) once connected.
+- [ ] Legal: this is a purchase confirmation. The official tax invoice/receipt (חשבונית מס / קבלה) must come from the payment or accounting system (Green Invoice or the payment provider) once connected.

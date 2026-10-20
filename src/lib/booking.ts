@@ -1,8 +1,8 @@
 import { siteConfig } from "../config/site";
 import { instructors } from "../config/team";
 
-// Booking adapter. The UI only talks to `bookingProvider`; swap the mock for an
-// Arbox-backed implementation once the public API/booking URL is verified.
+// Booking adapter. The UI only talks to `bookingProvider`; swap the mock for the
+// in-house booking backend (Worker + Airtable/D1) once it serves live availability.
 export type BookableService = "reformer" | "mat";
 
 export interface ClassSlot {
@@ -23,10 +23,17 @@ export interface BookingProvider {
   getSlot(id: string): Promise<ClassSlot | null>;
 }
 
+// Planned week (owner, 20 Oct 2026): 55-minute classes on the hour with a 5-minute changeover.
+// Adults train in the morning (08:00-12:00, Sun-Fri); the 17:00-21:00 evening slots (Sun-Thu) are for
+// the teens group, booked by request for now. Mornings are Reformer until Mat instructors join;
+// Mat has no slots yet, so its schedule tab is hidden. Final timetable is set closer to opening.
+export const CLASS_MINUTES = 55;
 const TEMPLATE: Record<BookableService, [time: string, instructor: number][]> = {
-  reformer: [["07:00", 0], ["08:00", 1], ["09:30", 2], ["18:00", 0], ["19:00", 1], ["20:00", 2]],
-  mat: [["10:30", 1], ["18:30", 2]],
+  reformer: [["08:00", 0], ["09:00", 1], ["10:00", 2], ["11:00", 0]],
+  mat: [],
 };
+/** Formats with at least one class in the week (the others get no schedule tab). */
+export const hasClasses = (service: BookableService) => TEMPLATE[service].length > 0;
 const BED_ORDER = [2, 0, 4, 1, 3];
 
 const hash = (s: string) => {
@@ -57,7 +64,7 @@ function build(service: BookableService, date: string, time: string, instructor:
     service,
     date,
     time,
-    minutes: 50,
+    minutes: CLASS_MINUTES,
     instructorId: instructors[instructor].id,
     capacity: cap,
     takenBeds: BED_ORDER.slice(0, taken),
@@ -69,7 +76,7 @@ const mockProvider: BookingProvider = {
   isLive: false,
   async getSchedule(service, date) {
     const day = fromISO(date);
-    if (day.getDay() === 6) return []; // closed Saturdays (TODO_VERIFY hours)
+    if (day.getDay() === 6) return []; // closed Saturdays
     const now = new Date();
     return TEMPLATE[service]
       .map(([time, ins]) => build(service, date, time, ins))

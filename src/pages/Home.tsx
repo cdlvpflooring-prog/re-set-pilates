@@ -303,7 +303,7 @@ export default function Home() {
             <Reveal className="stack gap-12">
               <span className="display d-sm">{addressLine(isHe)}</span>
               <span className="small muted">
-                {t.contact.parking}: <Verified value={c.parking} />
+                {t.contact.parking}: <Verified value={c.parking[isHe ? "he" : "en"]} />
               </span>
               <a className="btn btn--secondary btn--sm btn--arrow" href={maps} target="_blank" rel="noreferrer" style={{ alignSelf: "flex-start" }}>
                 {t.common.directions}

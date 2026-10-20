@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { arbox, hasPublicBooking } from "../config/arbox";
 import { allPlans } from "../config/pricing";
 import { isTodo, mapsLink, siteConfig } from "../config/site";
 import { founder } from "../config/team";
@@ -54,10 +53,12 @@ export const localBusinessLd = (lang: string) => {
         ? p.perWeek === "unlimited"
           ? he ? "מנוי חודשי ללא הגבלה" : "Unlimited monthly membership"
           : he ? `מנוי חודשי, ${p.perWeek} פעמים בשבוע` : `Monthly membership, ${p.perWeek}x a week`
-        : he ? `כרטיסיית ${p.sessions} שיעורים` : `${p.sessions}-class pass`,
+        : p.sessions === 1
+          ? he ? "שיעור בודד" : "Single class"
+          : he ? `כרטיסיית ${p.sessions} שיעורים` : `${p.sessions}-class pass`,
     price: p.price,
     priceCurrency: p.currency,
-    ...(known(p.arboxUrl) && { url: p.arboxUrl }),
+    url: `${origin || siteConfig.siteUrl}/${lang}/pricing`,
   });
 
   return {
@@ -97,9 +98,8 @@ export const localBusinessLd = (lang: string) => {
     knowsLanguage: ["he", "en"],
     founder: { "@type": "Person", name: he ? founder.nameHe : founder.nameEn },
     makesOffer: allPlans.filter((p) => p.active && p.approved).map(offer),
-    ...(hasPublicBooking(arbox.publicBookingUrl) && {
-      potentialAction: { "@type": "ReserveAction", target: arbox.publicBookingUrl, name: he ? "הזמנת שיעור" : "Book a class" },
-    }),
+    // Booking is built into the site (no outside booking system).
+    potentialAction: { "@type": "ReserveAction", target: `${origin || siteConfig.siteUrl}/${lang}/schedule`, name: he ? "הזמנת שיעור" : "Book a class" },
     sameAs: [s.instagram, s.tiktok, s.facebook, known(s.googleBusiness)].filter(Boolean),
   };
 };

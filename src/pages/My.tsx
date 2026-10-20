@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { PageHead, instructorName } from "../components/blocks";
 import { Sheet } from "../components/ui";
 import { mapsLink, siteConfig } from "../config/site";
-import { fromISO, slotStart } from "../lib/booking";
+import { fromISO, hasClasses, slotStart } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
 import { downloadIcs } from "../lib/ics";
@@ -35,9 +35,11 @@ export default function My() {
             <Link to={href("schedule?service=reformer")} className="btn btn--primary">
               {t.common.book}
             </Link>
-            <Link to={href("schedule?service=mat")} className="btn btn--primary">
-              {t.common.bookMat}
-            </Link>
+            {hasClasses("mat") && (
+              <Link to={href("schedule?service=mat")} className="btn btn--primary">
+                {t.common.bookMat}
+              </Link>
+            )}
             <Link to={href("#first-class")} className="small hi" style={{ textDecoration: "underline", textUnderlineOffset: 4 }}>
               {t.home.heroSecondary}
             </Link>

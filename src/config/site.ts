@@ -17,8 +17,8 @@ export const siteConfig = {
     facebook: "https://www.facebook.com/profile.php?id=61595012095305",
     instagramHandle: "@resetpilates_",
     // Google Business Profile: paste the profile link and the "Ask for reviews" link once the listing is live
-    googleBusiness: TODO,
-    googleReview: TODO,
+    googleBusiness: "https://g.page/r/CYP9NF0IiTdlEBM",
+    googleReview: "https://g.page/r/CYP9NF0IiTdlEBM/review",
     // Google Place ID (from the profile, starts with "ChIJ"). Once set, directions and the map open the listing itself.
     googlePlaceId: TODO,
     tiktokHandle: "@reset.pilates",
@@ -40,7 +40,7 @@ export const siteConfig = {
     // Structured opening hours for Google (schema). Must match the Google Business Profile exactly.
     // Days: Su Mo Tu We Th Fr Sa. Example: { days: ["Su", "Mo", "Tu", "We", "Th"], opens: "07:00", closes: "21:00" }
     openingHours: [] as { days: ("Su" | "Mo" | "Tu" | "We" | "Th" | "Fr" | "Sa")[]; opens: string; closes: string }[],
-    parking: TODO,
+    parking: { he: "חניה ברחוב", en: "Street parking" },
   },
   // Shown on invoices and receipts once filled (hidden while TODO).
   business: {
@@ -61,14 +61,16 @@ export const siteConfig = {
     demoMode: false,
     // Real reviews/press only; hidden until verified entries exist.
     showReviews: true,
+    // Online payment (Bit + card) is not connected yet. While false, every buy/book button ends in the
+    // launch waitlist form (Airtable "Launch Waitlist") instead of a checkout. Turn on once a provider is live.
+    paymentsLive: false,
   },
-  // Payment options offered at the end of checkout. Add the real links; a method
-  // without a link completes as a demo so the flow can still be reviewed.
+  // Payment options offered at the end of checkout (only shown once flags.paymentsLive is on).
+  // The booking and payment system is built in-house; add each provider's payment link here.
   payments: [
-    { id: "arbox", url: TODO },
     { id: "bit", url: TODO },
     { id: "card", url: TODO },
-  ] as { id: "arbox" | "bit" | "card"; url: string }[],
+  ] as { id: "bit" | "card"; url: string }[],
   analytics: { ga4MeasurementId: TODO },
   // Public web address (Cloudflare). Used for the sitemap and robots.txt.
   siteUrl: "https://resetpilates.org",

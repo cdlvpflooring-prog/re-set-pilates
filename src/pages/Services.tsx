@@ -1,6 +1,9 @@
 import { Link, useParams } from "react-router-dom";
 import { PageHead, Packages, TeensPlan, pricesVisible, serviceTarget } from "../components/blocks";
-import { teensPlan } from "../config/pricing";
+import { singleClass, teensPlan } from "../config/pricing";
+
+/** Group classes that can also be bought one at a time (shows "Single class: ₪50"). */
+const SINGLE_CLASS = ["reformer", "mat", "teens"];
 import { serviceBySlug, services } from "../config/services";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
@@ -83,6 +86,17 @@ export function ServiceDetail() {
                 {s.minutes} {t.common.min}
               </span>
             </div>
+            {SINGLE_CLASS.includes(s.id) && (
+              <div>
+                <span className="muted">{t.pricing.single}</span>
+                <span className="stack" style={{ alignItems: "flex-end", gap: 2, paddingBlock: 10 }}>
+                  <b>₪{singleClass.price}</b>
+                  <Link to={href(s.id === "teens" ? "pricing" : `pricing?kind=${s.id}`)} className="link tiny">
+                    {t.pricing.singleSave}
+                  </Link>
+                </span>
+              </div>
+            )}
             {s.capacity && (
               <div>
                 <span className="muted">{t.services.capacity}</span>

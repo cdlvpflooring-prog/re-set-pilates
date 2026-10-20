@@ -1,5 +1,7 @@
 # re:set pilates — Airtable plan
 
+> **Update 20 Oct 2026:** Arbox is no longer used. Booking and payments are built in-house (site + Worker + Airtable), so read "Arbox" below as "the studio's own booking system". New tab **Launch Waitlist** (`tblPunpSdfmw6nmaq`) collects everyone who tries to buy or book before online payment opens; *Plans & Prices* gained `single` (₪50) and `teens` (₪180).
+
 One Airtable base, **re:set pilates — Studio OS**, that records every person, plan, booking and payment the website and app touch, so it can be used for marketing, sales and record-keeping.
 
 Arbox stays the system that actually books classes and charges members. Airtable is the studio's own record: it collects what the website captures (sign-ups, leads, quiz answers, chat questions, gift cards) and keeps a copy of what Arbox knows (members, plans, bookings, payments), so the studio can see one complete picture of each customer.

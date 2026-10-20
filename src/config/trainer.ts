@@ -41,7 +41,7 @@ export const trainerConfig = {
 
   /**
    * Personalised paid course/package cards need fresh catalog + entitlement data from the
-   * booking/commerce software (Arbox). Until that sync exists the dashboard shows a plain
+   * in-house booking/commerce system. Until that sync exists the dashboard shows a plain
    * link to the price list instead: no inferred prices, eligibility or urgency.
    */
   paidCards: { enabled: false, cooldownDays: 14, dismissDays: 30 },

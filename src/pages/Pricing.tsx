@@ -14,6 +14,8 @@ import { useSeo } from "../lib/seo";
 import { relay } from "../lib/relay";
 import { useStore } from "../lib/store";
 import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "../components/forms";
+import { LaunchWaitlist } from "../components/LaunchWaitlist";
+import { fromISO } from "../lib/booking";
 
 export function Pricing() {
   const { t, href } = useI18n();
@@ -40,11 +42,12 @@ export function Pricing() {
   );
 }
 
-/** Mock checkout: no card data is collected and nothing is charged. */
+/** Checkout: no card data is collected here; payment happens at the provider's link.
+ * Until payments are live it shows the launch waitlist instead. */
 export function Checkout() {
   const { planId = "" } = useParams();
   const [params] = useSearchParams();
-  const { t, href, lang } = useI18n();
+  const { t, href, lang, fmtDate } = useI18n();
   const store = useStore();
   const [done, setDone] = useState(false);
   const [sending, setSending] = useState(false);
@@ -71,6 +74,28 @@ export function Checkout() {
       </div>
     );
 
+  if (!siteConfig.flags.paymentsLive) {
+    const [svc, date, hhmm] = (next ?? "").split("_");
+    const slot =
+      (svc === "reformer" || svc === "mat") && /^\d{4}-\d{2}-\d{2}$/.test(date ?? "") && /^\d{4}$/.test(hhmm ?? "")
+        ? `${t.services.items[svc].short} · ${fmtDate(fromISO(date))} · ${hhmm.slice(0, 2)}:${hhmm.slice(2)}`
+        : undefined;
+    return (
+      <div className="page tone-dark has-tabbar">
+        <PageHead title={t.launchWaitlist.title} app />
+        <div className="wrap wrap--app pbody screen">
+          <LaunchWaitlist
+            source={next ? "Booking" : "Pricing"}
+            classType={plan.track === "teens" ? "Teens" : kind === "mat" ? "Mat" : "Reformer"}
+            planId={plan.id}
+            wanted={`${planName(plan, t, slot ? null : kind)} · ₪${effectivePrice(plan)}`}
+            slot={slot}
+          />
+        </div>
+      </div>
+    );
+  }
+
   // One active plan at a time: the same running membership can't be bought twice, and unused classes move to the new plan.
   const current = store.planId ? planById(store.planId) : undefined;
   const check = checkPurchase(plan, current ? { plan: current, bookings: store.bookings, planStart: store.planStart, carry: store.carry ?? 0 } : null, new Date(), confirmedRepeat);
@@ -79,17 +104,16 @@ export function Checkout() {
   const launch = siteConfig.flags.launchPricing;
   const passClasses = plan.billingType === "pass" ? (plan.sessions ?? 0) + (launch ? (plan.bonusSessions ?? 0) : 0) + carry : 0;
   const fmt = (d: Date) => `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`;
-  const payLabel = { arbox: t.checkout.payArbox, bit: t.checkout.payBit, card: t.checkout.payCard };
-  const linksReady = siteConfig.payments.some((m) => !isTodo(m.url));
+  const payLabel = { bit: t.checkout.payBit, card: t.checkout.payCard };
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     const id = ((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value;
     const method = siteConfig.payments.find((m) => m.id === id);
     if (!method || !check.ok) return;
-    // Real payment happens at the provider's link (plan-specific Arbox link when configured).
+    // Real payment happens at the provider's link.
     // The tab is opened now (before anything is awaited, so the browser allows it) and only
     // pointed at the payment page once the order is saved; it is closed if saving fails.
-    const url = method.id === "arbox" && !isTodo(plan.arboxUrl) ? plan.arboxUrl : method.url;
+    const url = method.url;
     const payTab = isTodo(url) ? null : window.open("", "_blank");
     if (payTab) payTab.opener = null;
     const f = new FormData(e.currentTarget as HTMLFormElement);
@@ -222,7 +246,6 @@ export function Checkout() {
                   {payLabel[m.id]}
                 </button>
               ))}
-              {!linksReady && <p className="tiny center">{t.checkout.demoPay}</p>}
               {failed && (
                 <p className="small center" role="alert">
                   {t.form.failed}

@@ -158,7 +158,7 @@ const en = {
     streakWeeks: (n: number) => `${n}-week streak`,
     checkin: "How was class?",
     share: "Share a progress card",
-    dataNote: "Sample data · real attendance arrives with Arbox",
+    dataNote: "Sample data · real attendance arrives with online booking",
   },
 
   actions: {
@@ -456,7 +456,7 @@ const he: TrainerCopy = {
     streakWeeks: (n: number) => `רצף של ${n} שבועות`,
     checkin: "איך היה השיעור?",
     share: "לשתף כרטיס התקדמות",
-    dataNote: "נתונים לדוגמה · נוכחות אמיתית תגיע עם Arbox",
+    dataNote: "נתונים לדוגמה · נוכחות אמיתית תגיע עם ההרשמה באתר",
   },
 
   actions: {

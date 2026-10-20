@@ -3,7 +3,7 @@
 // so keep this file free of DOM and Worker APIs.
 //
 // Note: this is the studio's purchase confirmation. The legal tax document (חשבונית מס / קבלה with the
-// business number and a sequential number) comes from the accounting or payment system (Arbox, Green Invoice…)
+// business number and a sequential number) comes from the accounting or payment system (Green Invoice or the payment provider)
 // once it is connected. The business details below stay hidden until they are filled in site.ts.
 import { isTodo, siteConfig } from "../config/site";
 import type { Lang, PayMethod } from "./relayTypes";
@@ -54,7 +54,7 @@ const L = {
     total: "סה״כ",
     totalDue: "סה״כ לתשלום",
     paidBy: "שולם באמצעות",
-    method: { arbox: "Arbox", bit: "bit", card: "כרטיס אשראי" },
+    method: { bit: "bit", card: "כרטיס אשראי" } as Record<string, string>,
     pending: "התשלום ממתין לאישור הסטודיו.",
     classes: "שיעורים במנוי",
     validUntil: "בתוקף עד",
@@ -75,7 +75,7 @@ const L = {
     total: "Total",
     totalDue: "Total due",
     paidBy: "Paid by",
-    method: { arbox: "Arbox", bit: "Bit", card: "Credit card" },
+    method: { bit: "Bit", card: "Credit card" } as Record<string, string>,
     pending: "Payment is awaiting the studio's confirmation.",
     classes: "Classes on your plan",
     validUntil: "Valid until",
@@ -138,7 +138,7 @@ export function renderReceiptHtml(r: ReceiptData, type: DocType, opts: { logo?: 
     r.classesTotal ? [t.classes, String(r.classesTotal)] : null,
     r.validUntil ? [t.validUntil, ilDate(r.validUntil)] : null,
     r.giftCode ? [t.giftCode, r.giftCode] : null,
-    type === "receipt" && r.method ? [t.paidBy, t.method[r.method]] : null,
+    type === "receipt" && r.method ? [t.paidBy, t.method[r.method] ?? r.method] : null,
   ].filter((x): x is string[] => !!x);
 
   return `<!doctype html>

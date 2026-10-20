@@ -4,7 +4,13 @@
 export type Lang = "he" | "en";
 export type HeardFrom = "Instagram" | "TikTok" | "Facebook" | "Google" | "Referral" | "Walk-in" | "Other";
 export type PrefTime = "Early morning" | "Morning" | "Midday" | "Evening";
-export type PayMethod = "arbox" | "bit" | "card";
+export type PayMethod = "bit" | "card";
+/** Launch waitlist time choice: adults train in the morning, teens in the evening. */
+export type LaunchTime = "Adult morning" | "Teen evening";
+export const LAUNCH_TIMES: LaunchTime[] = ["Adult morning", "Teen evening"];
+/** Where a launch-waitlist sign-up came from (which buy/book button). */
+export type LaunchSource = "Pricing" | "Booking" | "Gift card" | "Class page";
+export type LaunchClass = "Reformer" | "Mat" | "Teens" | "Gift card" | "Not sure";
 
 export const HEARD_FROM: HeardFrom[] = ["Instagram", "TikTok", "Facebook", "Google", "Referral", "Walk-in", "Other"];
 export const PREF_TIMES: PrefTime[] = ["Morning", "Midday", "Evening"];
@@ -92,6 +98,18 @@ export interface WaitlistMsg extends Base {
   slot: SlotRef;
 }
 
+/** Before online payment is live, every buy/book button ends here instead of a checkout. */
+export interface LaunchWaitlistMsg extends Base {
+  contact: Contact; // first/last name + phone required, email optional
+  classType: LaunchClass;
+  prefTime?: LaunchTime; // required except for gift cards
+  source: LaunchSource;
+  planId?: string; // Plans & Prices > Website ID, when they picked a plan
+  wanted?: string; // what they tried to buy, as they saw it
+  slot?: string; // the class they were booking, as they saw it
+  consent: boolean;
+}
+
 export interface GiftMsg extends Base {
   buyer: Contact;
   planId: string | null; // null = custom amount
@@ -128,6 +146,7 @@ export interface RelayMap {
   booking: BookingMsg;
   cancel: CancelMsg;
   waitlist: WaitlistMsg;
+  "launch-waitlist": LaunchWaitlistMsg;
   gift: GiftMsg;
   quiz: QuizMsg;
   "quiz-contact": QuizContactMsg;
