@@ -38,6 +38,9 @@ export default function My() {
             <Link to={href("schedule?service=mat")} className="btn btn--primary">
               {t.common.bookMat}
             </Link>
+            <Link to={href("#first-class")} className="small hi" style={{ textDecoration: "underline", textUnderlineOffset: 4 }}>
+              {t.home.heroSecondary}
+            </Link>
           </div>
         ) : (
           <div className="stack gap-12">
