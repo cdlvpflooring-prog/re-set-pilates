@@ -20,7 +20,7 @@ export const services: ServiceConfig[] = [
   { id: "duo", slug: "duo", image: "/assets/ex-duo.webp", pos: "50% 40%", thumb: "/assets/ex-duo-sm.webp", thumbPos: "50% 35%", bookable: false, minutes: 55, approved: true },
   { id: "women", slug: "women-only", image: "/assets/ex-women.webp", pos: "50% 40%", thumb: "/assets/ex-women-sm.webp", thumbPos: "70% 40%", bookable: false, minutes: 55, approved: false },
   // Teens (girls 12-17): a fixed weekly group, sold as its own monthly plan (pricing.ts: "teens"). Photo is a stand-in until the shoot.
-  { id: "teens", slug: "teens", image: "/assets/ex-teens.webp", pos: "50% 45%", thumb: "/assets/ex-teens-sm.webp", thumbPos: "50% 50%", bookable: false, capacity: 5, minutes: 55, approved: true },
+  { id: "teens", slug: "teens", image: "/assets/ex-teens.webp", pos: "50% 50%", thumb: "/assets/ex-teens-sm.webp", thumbPos: "50% 55%", bookable: false, capacity: 5, minutes: 55, approved: true },
   // Closed groups: the studio closes for your group. Two packages (packages.ts): private group and event.
   { id: "groups", slug: "closed-groups", image: "/assets/ex-groups.webp", pos: "50% 45%", thumb: "/assets/ex-groups-sm.webp", thumbPos: "50% 50%", bookable: false, capacity: 5, minutes: 55, approved: true },
 ];

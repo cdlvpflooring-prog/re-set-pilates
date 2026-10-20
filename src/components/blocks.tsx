@@ -237,7 +237,7 @@ export function PricingList({ next, limit, initialKind }: { next?: string; limit
 const PLAN_PHOTOS: Record<PriceTab, { src: string; pos: string }> = {
   monthly: { src: "/assets/ex-membership.webp", pos: "50% 40%" },
   passes: { src: "/assets/ex-pass.webp", pos: "50% 30%" },
-  teens: { src: "/assets/ex-teens.webp", pos: "50% 45%" },
+  teens: { src: "/assets/ex-teens-after.webp", pos: "50% 50%" },
   groups: { src: "/assets/ex-event.webp", pos: "50% 45%" },
 };
 function PlanPhoto({ tab }: { tab: PriceTab }) {
