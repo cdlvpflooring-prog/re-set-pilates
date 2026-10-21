@@ -49,14 +49,18 @@ export const localBusinessLd = (lang: string) => {
   const offer = (p: (typeof allPlans)[number]) => ({
     "@type": "Offer",
     name:
-      p.billingType === "monthly"
+      p.track === "teens"
+        ? p.billingType === "monthly"
+          ? he ? "פילאטיס לנערות, מנוי חודשי" : "Teen Pilates monthly plan"
+          : he ? "שיעור בודד לנערות" : "Teen single class"
+        : p.billingType === "monthly"
         ? p.perWeek === "unlimited"
           ? he ? "מנוי חודשי ללא הגבלה" : "Unlimited monthly membership"
           : he ? `מנוי חודשי, ${p.perWeek} פעמים בשבוע` : `Monthly membership, ${p.perWeek}x a week`
         : p.sessions === 1
           ? he ? "שיעור בודד" : "Single class"
           : he ? `כרטיסיית ${p.sessions} שיעורים` : `${p.sessions}-class pass`,
-    price: p.price,
+    price: siteConfig.flags.launchPricing && p.launchPrice ? p.launchPrice : p.price,
     priceCurrency: p.currency,
     url: `${origin || siteConfig.siteUrl}/${lang}/pricing`,
   });

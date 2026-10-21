@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { classPrices, generalPlans, intro, pricing, teensPlan, type ClassKind, type PricingItem } from "../config/pricing";
+import { classPrices, generalPlans, intro, perClass, planClasses, pricing, teensPlan, type ClassKind, type PricingItem } from "../config/pricing";
 import { packages } from "../config/packages";
 import { services, type ServiceConfig, type ServiceId } from "../config/services";
 import { isTodo, mapsEmbedSrc, siteConfig } from "../config/site";
@@ -73,6 +73,9 @@ export const planName = (p: PricingItem, t: Content, kind?: ClassKind | null) =>
         : `${p.sessions} ${t.pricing.sessions}`;
   return kind ? `${base} · ${t.pricing.kinds[kind]}` : base;
 };
+/** Price-list title for a pass during the launch month: "5 + 1 free" (poster 2); otherwise the plain name. */
+export const listName = (p: PricingItem, t: Content) =>
+  siteConfig.flags.launchPricing && p.billingType === "pass" && p.bonusSessions ? t.pricing.plusOne.replace("{n}", String(p.sessions)) : planName(p, t);
 
 export const pricesVisible = (p: PricingItem) => p.active && (p.approved || siteConfig.flags.showUnapprovedPrices);
 export const effectivePrice = (p: PricingItem) =>
@@ -132,7 +135,7 @@ export function SlotRow({ slot, index = 0, roster }: { slot: ClassSlot; index?: 
       </span>
       {intro.active && (
         <span className="slot2__price">
-          <b>₪{classPrices("adult").single}</b> {t.schedule.introSingle} <i aria-hidden>·</i> <b>₪{classPrices("adult").plan}</b> {t.schedule.introPlan}
+          <b>₪{classPrices("adult").single}</b> {t.schedule.introSingle} <i aria-hidden>·</i> {t.schedule.introFrom}<b>₪{classPrices("adult").plan}</b> {t.schedule.introPlan}
         </span>
       )}
       {beds && <BedsRow beds={beds} />}
@@ -255,21 +258,24 @@ export function PricingList({ next, limit, initialKind }: { next?: string; limit
               >
                 <span className="stack gap-4" style={{ flex: 1 }}>
                   <span className="row gap-8 key">
-                    {planName(p, t)}
+                    {listName(p, t)}
                     {p.popular && <span className="badge">{t.pricing.popular}</span>}
                   </span>
                   <span className="tiny">
                     {t.pricing.kinds[kind]} ·{" "}
-                    {p.billingType === "monthly"
+                    {p.billingType === "monthly" || p.sessions === 1
                       ? t.pricing.validMonth
-                      : `₪${Math.round(p.price / p.sessions!)} ${t.pricing.perSession}${launch && p.bonusSessions ? ` · ${t.pricing.bonus}` : ""}`}
+                      : `${t.pricing.classes.replace("{n}", String(planClasses(p, launch)))} · ₪${perClass(p, launch)} ${t.pricing.perSession}${launch && p.bonusSessions ? ` · ${t.pricing.bonus}` : ""}`}
                   </span>
                 </span>
                 <Price amount={effectivePrice(p)} was={launch && p.launchPrice ? p.price : null} />
               </Link>
             ))}
           </div>
-          <p className="tiny">{t.pricing.validity}</p>
+          <p className="tiny">
+            {t.pricing.validity}
+            {launch ? ` ${t.pricing.launchNote}` : ""}
+          </p>
           {anyUnapproved && (
             <p className="small" style={{ color: "var(--accent)" }}>
               ● {t.pricing.pendingApproval}
@@ -656,7 +662,9 @@ export function IntroPrices() {
                 <small>{t.schedule.introSingle}</small>
               </span>
               <span className="intro__cell intro__cell--plan">
-                <b>₪{p.plan}</b>
+                <b>
+                  <span className="tiny">{t.schedule.introFrom}</span>₪{p.plan}
+                </b>
                 <small>
                   {t.schedule.introPlan} · {t.schedule.introPerClass}
                 </small>

@@ -227,8 +227,8 @@ export function Checkout() {
                     : plan.billingType === "monthly"
                     ? t.pricing.validMonth
                     : launch && plan.bonusSessions
-                      ? t.pricing.bonus
-                      : ""}
+                      ? `${t.pricing.bonus} · ${t.checkout.totalClasses.replace("{n}", String(passClasses - carry))}`
+                      : t.pricing.validPass}
                 </span>
                 {carry > 0 && (
                   <span className="tiny hi">

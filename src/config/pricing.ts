@@ -1,3 +1,22 @@
+/**
+ * PRICE LIST — single source of truth for the whole site (pricing page, Home cards, checkout, receipts, chat, schema.org).
+ * Mirrors the owner's three final posters (Oct 2026):
+ *
+ *   Poster 1 "אימוני פילאטיס מכשירים" (regular prices)
+ *     Monthly (valid one month from purchase):  1×/wk ₪240 · 2×/wk ₪460 · 3×/wk ₪630 · 4×/wk ₪800 · Unlimited ₪990
+ *     Passes  (valid two months from purchase): 5 = ₪300 (₪60/class) · 10 = ₪550 (₪55/class) · 15 = ₪750 (₪50/class)
+ *   Poster 2 "חודש ההשקה" passes:   5+1 = 6 classes ₪300 · 10+1 = 11 classes ₪550 · 15+1 = 16 classes ₪750
+ *                                   (the +1 is for purchases during the launch month only, passes only)
+ *   Poster 3 "חודש ההשקה" monthly:  1× ₪220 (was 240) · 2× ₪430 (460) · 3× ₪590 (630) · 4× ₪750 (800) · Unlimited ₪920 (990)
+ *                                   (launch prices for purchases during the launch month only)
+ *
+ * Launch overlays apply while `siteConfig.flags.launchPricing` is on (`launchPrice` on monthly plans, `bonusSessions` on passes).
+ * Not on the posters, from the owner's earlier flyers / 21 Oct notes: Teens ₪180/month (4 classes), single class ₪55
+ * (teens ₪50), closed-group packages in `packages.ts`. The Worker charges what Airtable *Plans & Prices* says, so that table
+ * must carry the same numbers (see LAUNCH-CHECKLIST.md "Pricing").
+ */
+import { siteConfig } from "./site";
+
 /** Which class a membership or pass is for. Reformer and Mat cost the same; the buyer picks one at checkout. */
 export type ClassKind = "reformer" | "mat";
 export const classKinds: ClassKind[] = ["reformer", "mat"];
@@ -11,8 +30,8 @@ export interface PricingItem {
   perWeek?: number | "unlimited";
   sessions?: number;
   price: number;
-  launchPrice?: number; // monthly launch overlay
-  bonusSessions?: number; // pass launch overlay (+1)
+  launchPrice?: number; // monthly launch overlay (poster 3)
+  bonusSessions?: number; // pass launch overlay, +1 class (poster 2)
   currency: "ILS";
   popular?: boolean;
   tone: "cream" | "sand" | "ink"; // membership card colour, same on pricing and the member's profile
@@ -50,13 +69,29 @@ export const teensPlan = pricing.memberships.find((p) => p.track === "teens");
 export const singleClass = pricing.passes.find((p) => p.id === "single")!;
 export const teenSingleClass = pricing.passes.find((p) => p.id === "tsingle")!;
 
-/**
- * Introductory month (owner, 21 Oct 2026, limited time): what one class costs on its own and with any plan.
- * Adults ₪55 single / ₪50 per class with a plan; teens ₪50 / ₪45. Shown on every class in the schedule.
- */
-export const intro = {
-  active: true,
-  adult: { single: singleClass.price, plan: 50 },
-  teen: { single: teenSingleClass.price, plan: 45 },
+/** Classes a plan gives in its period: weekly plans × 4 weeks, passes incl. the launch +1. null = unlimited. */
+export const planClasses = (p: PricingItem, launch = siteConfig.flags.launchPricing): number | null => {
+  if (p.billingType === "monthly") return p.perWeek === "unlimited" ? null : (p.perWeek as number) * 4;
+  return (p.sessions ?? 0) + (launch ? (p.bonusSessions ?? 0) : 0);
 };
-export const classPrices = (who: "adult" | "teen") => intro[who];
+/** What one class costs inside a plan (₪, rounded), e.g. 5-pass ₪60, 15-pass ₪50, launch 15+1 ₪47. null = unlimited. */
+export const perClass = (p: PricingItem, launch = siteConfig.flags.launchPricing): number | null => {
+  const n = planClasses(p, launch);
+  if (!n) return null;
+  const price = launch && p.launchPrice ? p.launchPrice : p.price;
+  return Math.round(price / n);
+};
+/** The cheapest per-class price among the visible plans of a track ("with a plan from ₪50"). */
+const bestPerClass = (plans: PricingItem[], launch: boolean) =>
+  Math.min(...plans.filter((p) => p.active && p.approved && p.sessions !== 1).map((p) => perClass(p, launch) ?? Infinity));
+
+/**
+ * Introductory month (owner, 21 Oct 2026, limited time): what one class costs on its own and, at best, with a plan.
+ * Adults: single ₪55, with a plan from ₪50 (15-pass; ₪47 with the launch +1). Teens: single ₪50, ₪45 with the monthly plan.
+ * The "with a plan" figure is derived from the price list above so it can never drift from it.
+ */
+export const intro = { active: true };
+export const classPrices = (who: "adult" | "teen", launch = siteConfig.flags.launchPricing) =>
+  who === "teen"
+    ? { single: teenSingleClass.price, plan: (teensPlan && perClass(teensPlan, launch)) || 45 }
+    : { single: singleClass.price, plan: bestPerClass(allPlans.filter((p) => !p.track), launch) };
