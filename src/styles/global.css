@@ -2205,3 +2205,11 @@ html[dir="rtl"] .room .beds { direction: rtl; }
 .pgcard__line { font-size: 13px; }
 .pgcard__count { font-size: 17px; }
 .bed5.is-mine small { color: var(--clay); }
+
+/* Front mirror wall: the same glass bar as the side walls, lying along the bottom; left mirror a little smaller */
+.mirror-h { display: grid; place-items: center; height: 18px; margin-top: 4px; margin-inline: 24px 28px; border-radius: 6px;
+  background: linear-gradient(90deg, #eef3f6, #d9e3ea 45%, #eef3f6); border: 1px solid rgba(31, 22, 18, 0.18); }
+.mirror-h span { font-size: 9px; letter-spacing: 0.24em; color: rgba(31, 22, 18, 0.55); white-space: nowrap; }
+.room { grid-template-columns: 10px 1fr 18px; }
+.mirror-v--small { height: 84px; }
+.mirror-v--small span { font-size: 7.5px; letter-spacing: 0.18em; }

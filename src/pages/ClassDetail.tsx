@@ -178,7 +178,9 @@ export default function ClassDetail() {
               <span>{t.klass.mirrorWall.toUpperCase()}</span>
             </span>
             </div>
-            <div className="mirror">{t.klass.mirrorWall.toUpperCase()}</div>
+            <span className="mirror-h" aria-hidden>
+              <span>{t.klass.mirrorWall.toUpperCase()}</span>
+            </span>
             <p className="tiny">{t.klass.bedOptional}</p>
           </div>
         )}
