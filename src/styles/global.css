@@ -2131,9 +2131,10 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 }
 
 /* Schedule: five tiny reformers show who is booked (name as each person chose; a dot = anonymous) */
-.beds5 { display: flex; gap: 8px; margin-top: 8px; max-width: 100%; }
-.bed5 { display: grid; justify-items: center; gap: 3px; flex: 1 1 0; min-width: 0; max-width: 64px; color: rgba(31, 22, 18, 0.45); }
-.bed5 svg { width: 100%; height: auto; max-width: 44px; }
+.beds5 { display: flex; gap: 6px; margin-top: 10px; max-width: 100%; }
+.bed5 { display: grid; justify-items: center; gap: 4px; flex: 1 1 0; min-width: 0; max-width: 72px; color: rgba(31, 22, 18, 0.45); }
+.bed5 svg { width: 100%; height: auto; max-width: 60px; }
+.bed5 .bed5__line { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .bed5 .bed5__frame { fill: none; stroke: currentColor; stroke-width: 1.6; }
 .bed5 .bed5__carriage { fill: currentColor; opacity: 0.45; }
 .bed5.is-taken { color: #1f1612; }
@@ -2168,3 +2169,38 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 /* "Go" green for start actions (My progress → Start). Not the WhatsApp green, which is reserved for WhatsApp. White text 5.1:1. */
 .btn--go, .btn--primary.btn--go { background: #2a7d47; color: #fff; border-color: #2a7d47; }
 @media (hover: hover) and (pointer: fine) { .btn--go:hover { background: #236b3c; } }
+
+/* Sheets render at the end of <body>; the chat bubble steps aside while one is open */
+body.sheet-open .chat-fab { display: none; }
+
+/* Hero welcome: plain text on the photo (no pill), a little larger, with the person's first name once we know it */
+.hero--v4 .hero__greet, html[lang="he"] .hero--v4 .hero__greet {
+  padding: 0; border: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  font-size: 16px; gap: 10px; text-shadow: 0 1px 12px rgba(26, 20, 17, 0.55);
+}
+html[lang="he"] .hero--v4 .hero__greet { font-size: 18px; }
+.hero--v4 .hero__greet b { font-size: 26px; }
+@media (min-width: 1000px) { .hero--v4 .hero__greet { font-size: 17px; } .hero--v4 .hero__greet b { font-size: 30px; } }
+
+/* Choose your Reformer: the room. Physical layout (same in Hebrew): small mirror left, mirror wall right */
+.room { direction: ltr; display: grid; grid-template-columns: 14px 1fr 18px; gap: 10px; align-items: stretch; }
+.room .beds { direction: inherit; }
+html[dir="rtl"] .room .beds { direction: rtl; }
+.mirror-v { position: relative; border-radius: 6px; background: linear-gradient(180deg, #eef3f6, #d9e3ea 45%, #eef3f6); border: 1px solid rgba(31, 22, 18, 0.18); }
+.mirror-v span { position: absolute; inset: 0; display: grid; place-items: center; writing-mode: vertical-rl; transform: rotate(180deg);
+  font-size: 8.5px; letter-spacing: 0.24em; color: rgba(31, 22, 18, 0.55); white-space: nowrap; }
+.mirror-v--small { align-self: center; height: 112px; } /* about one reformer long */
+.mirror-v--big { height: 100%; }
+.mirror-v--big span { font-size: 9px; }
+
+/* My progress card, compact (owner: ~35% shorter, same look): about the height of the Payments & receipts card */
+.pgcard, .nextstep--progress.pgcard { gap: 8px; padding: 12px 16px 10px; border-width: 2px; }
+.pgcard__head { gap: 10px; }
+.pgcard__logo .wordmark { font-size: 20px; }
+.pgcard .nextstep__title { font-size: clamp(18px, 5.2vw, 22px); }
+.pgcard .chev { width: 11px; height: 11px; border-width: 2.5px; margin-top: -6px; }
+.pgcard__track { height: 8px; margin: 4px 8px 16px; }
+.pgcard__stop i { width: 16px; height: 16px; border-width: 2px; }
+.pgcard__stop small { top: 19px; font-size: 10.5px; }
+.pgcard__line { font-size: 13px; }
+.pgcard__count { font-size: 17px; }

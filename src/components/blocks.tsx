@@ -13,7 +13,7 @@ import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
 import { PREF_TIMES, type PrefTime } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
-import { useRoster, type RosterSlots } from "../lib/roster";
+import { sampleBeds, useRoster, type RosterSlots } from "../lib/roster";
 import { scheduleName } from "../lib/relayTypes";
 import { loadTurnstile } from "../lib/turnstile";
 import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "./forms";
@@ -106,7 +106,7 @@ export function SlotRow({ slot, index = 0, roster }: { slot: ClassSlot; index?: 
   const cap = slot.capacity;
   // Who is on the beds: the studio's bookings (names as each person chose), plus your own from this phone.
   // Without the roster (offline, local dev) the sample availability stands in, as anonymous beds.
-  const booked = roster?.[slot.id] ?? (roster ? [] : slot.takenBeds.map((bed) => ({ bed, name: "" })));
+  const booked = sampleBeds(slot.time) ?? roster?.[slot.id] ?? (roster ? [] : slot.takenBeds.map((bed) => ({ bed, name: "" })));
   const beds = cap ? placeBeds(cap, booked, mine ? { bed: myBooking.bed, name: scheduleName(profile, profile.showAs ?? "short") || t.schedule.you, mine: true } : undefined) : null;
   const taken = beds ? beds.filter(Boolean).length : slot.takenBeds.length + (mine ? 1 : 0);
   const left = cap ? cap - taken : null;
@@ -172,10 +172,13 @@ function BedsRow({ beds }: { beds: BedSeat[] }) {
     <span className="beds5" role="img" aria-label={names.length ? `${t.schedule.whoBooked}: ${names.join(", ")}` : t.schedule.nobodyYet}>
       {beds.map((b, i) => (
         <span key={i} className={`bed5 ${b ? "is-taken" : ""} ${b?.mine ? "is-mine" : ""}`}>
-          <svg viewBox="0 0 36 18" width="36" height="18" aria-hidden>
-            <rect x="1" y="4" width="34" height="10" rx="3" className="bed5__frame" />
-            <rect x="12" y="6.5" width="13" height="5" rx="2" className="bed5__carriage" />
-            <rect x="3" y="7" width="5" height="4" rx="1" className="bed5__carriage" />
+          {/* A reformer from the side: frame on legs, carriage with headrest, footbar at the end */}
+          <svg viewBox="0 0 56 24" width="56" height="24" aria-hidden>
+            <path d="M3 18v4M53 18v4" className="bed5__line" />
+            <rect x="1.5" y="13" width="53" height="5" rx="2.5" className="bed5__frame" />
+            <rect x="9" y="7.5" width="22" height="5" rx="2" className="bed5__carriage" />
+            <path d="M31 9.5h4" className="bed5__line" />
+            <path d="M46 13V6.5h6V13" className="bed5__line" />
           </svg>
           <small>{b ? b.name || "·" : ""}</small>
         </span>

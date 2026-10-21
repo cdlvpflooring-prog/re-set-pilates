@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { createPortal } from "react-dom";
 import {
   useEffect,
   useId,
@@ -193,16 +194,19 @@ export function Sheet({ open, onClose, label, children }: { open: boolean; onClo
     addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("sheet-open"); // hides the chat bubble so it never sits on top of the sheet
     return () => {
       removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      document.body.classList.remove("sheet-open");
     };
   }, [open, onClose]);
 
   const hidden = reduce ? { opacity: 0 } : desktop ? { opacity: 0, y: "-46%", scale: 0.97 } : { y: "100%" };
   const shown = desktop ? { opacity: 1, y: "-50%", scale: 1 } : { opacity: 1, y: 0 };
 
-  return (
+  // Rendered at the end of <body>: inside the animated page it would sit under the tab bar and the chat bubble
+  return createPortal(
     <AnimatePresence>
       {open && (
         <>
@@ -215,7 +219,8 @@ export function Sheet({ open, onClose, label, children }: { open: boolean; onClo
             onClick={onClose}
           />
           <motion.div
-            className="sheet"
+            // tone-dark carries the page palette (legacy name, light colours): the sheet lives outside the page now
+            className="sheet tone-dark"
             role="dialog"
             aria-modal="true"
             aria-label={label}
@@ -235,7 +240,8 @@ export function Sheet({ open, onClose, label, children }: { open: boolean; onClo
           </motion.div>
         </>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   );
 }
 

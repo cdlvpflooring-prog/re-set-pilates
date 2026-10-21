@@ -14,7 +14,6 @@ import { useSeo } from "../lib/seo";
 import { relay } from "../lib/relay";
 import { useStore } from "../lib/store";
 import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "../components/forms";
-import { LaunchWaitlist } from "../components/LaunchWaitlist";
 import { fromISO } from "../lib/booking";
 
 export function Pricing() {
@@ -55,6 +54,7 @@ export function Checkout() {
   const [confirmedRepeat, setConfirmedRepeat] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<Date | null>(null); // the relay found the same membership still running
   const [receiptNo, setReceiptNo] = useState("");
+  const [waitlisted, setWaitlisted] = useState(false); // payments not live: the order went to the launch waitlist
   const [sentVia, setSentVia] = useState<string[]>([]);
   const plan = planById(planId);
   const next = params.get("next");
@@ -74,27 +74,14 @@ export function Checkout() {
       </div>
     );
 
-  if (!siteConfig.flags.paymentsLive) {
-    const [svc, date, hhmm] = (next ?? "").split("_");
-    const slot =
-      (svc === "reformer" || svc === "mat") && /^\d{4}-\d{2}-\d{2}$/.test(date ?? "") && /^\d{4}$/.test(hhmm ?? "")
-        ? `${t.services.items[svc].short} · ${fmtDate(fromISO(date))} · ${hhmm.slice(0, 2)}:${hhmm.slice(2)}`
-        : undefined;
-    return (
-      <div className="page tone-dark has-tabbar">
-        <PageHead title={t.launchWaitlist.title} app />
-        <div className="wrap wrap--app pbody screen">
-          <LaunchWaitlist
-            source={next ? "Booking" : "Pricing"}
-            classType={plan.track === "teens" ? "Teens" : kind === "mat" ? "Mat" : "Reformer"}
-            planId={plan.id}
-            wanted={`${planName(plan, t, slot ? null : kind)} · ₪${effectivePrice(plan)}`}
-            slot={slot}
-          />
-        </div>
-      </div>
-    );
-  }
+  // While online payment is not live the whole checkout still runs; pressing Pay saves the order to the launch
+  // waitlist (with the details already typed) instead of opening a payment page.
+  const live = siteConfig.flags.paymentsLive;
+  const [svc, date, hhmm] = (next ?? "").split("_");
+  const slotLabel =
+    (svc === "reformer" || svc === "mat") && /^\d{4}-\d{2}-\d{2}$/.test(date ?? "") && /^\d{4}$/.test(hhmm ?? "")
+      ? `${t.services.items[svc].short} · ${fmtDate(fromISO(date))} · ${hhmm.slice(0, 2)}:${hhmm.slice(2)}`
+      : undefined;
 
   // One active plan at a time: the same running membership can't be bought twice, and unused classes move to the new plan.
   const current = store.planId ? planById(store.planId) : undefined;
@@ -110,6 +97,7 @@ export function Checkout() {
     const id = ((e.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null)?.value;
     const method = siteConfig.payments.find((m) => m.id === id);
     if (!method || !check.ok) return;
+    if (!live) return saveToWaitlist(e.currentTarget as HTMLFormElement, method.id);
     // Real payment happens at the provider's link.
     // The tab is opened now (before anything is awaited, so the browser allows it) and only
     // pointed at the payment page once the order is saved; it is closed if saving fails.
@@ -155,6 +143,55 @@ export function Checkout() {
     setSending(false);
     setDone(true);
   };
+
+  const saveToWaitlist = async (form: HTMLFormElement, method: "bit" | "card") => {
+    const f = new FormData(form);
+    const contact = readContact(f);
+    const x = readExtras(f);
+    setSending(true);
+    setFailed(false);
+    const teens = plan.track === "teens";
+    const r = await relay("launch-waitlist", {
+      lang,
+      contact,
+      classType: teens ? "Teens" : kind === "mat" ? "Mat" : "Reformer",
+      prefTime: teens ? "Teen evening" : "Adult morning",
+      source: next ? "Booking" : "Pricing",
+      planId: plan.id,
+      wanted: `${planName(plan, t, slotLabel ? null : kind)} · ₪${effectivePrice(plan)} · ${payLabel[method]}`,
+      slot: slotLabel,
+      consent: x.consent,
+      website: x.website,
+    });
+    setSending(false);
+    if (!r.ok && !r.queued) {
+      setFailed(true);
+      return;
+    }
+    store.saveProfile(profileFrom(contact, x));
+    track("launch_waitlist_join", { source: next ? "Booking" : "Pricing", plan: plan.id, method });
+    setWaitlisted(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  if (waitlisted)
+    return (
+      <div className="page tone-dark has-tabbar">
+        <div className="wrap wrap--app pbody screen">
+          <div className="stack gap-16 center" style={{ paddingTop: 40 }}>
+            <Check />
+            <h1 className="display d-md">{t.launchWaitlist.doneTitle}</h1>
+            <p className="muted">{t.launchWaitlist.atPay}</p>
+            <p className="small">
+              <b>{t.launchWaitlist.youChose}:</b> {[`${planName(plan, t, slotLabel ? null : kind)} · ₪${effectivePrice(plan)}`, slotLabel].filter(Boolean).join(" · ")}
+            </p>
+            <Link to={href("schedule")} className="btn btn--sand btn--block">
+              {t.checkout.doneCta}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
 
   return (
     <div className="page tone-dark has-tabbar">

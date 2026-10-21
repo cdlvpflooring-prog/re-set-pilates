@@ -23,7 +23,7 @@ const FEATURED = ["m1x", "m3x", "munl"];
 export default function Home() {
   const { t, href, isHe, fmtDate } = useI18n();
   const wa = useWaLink();
-  const { upcoming, isMember } = useStore();
+  const { upcoming, isMember, profile } = useStore();
   useSeo(t.meta.home, localBusinessLd(isHe ? "he" : "en"));
   const heroRef = useParallax<HTMLDivElement>(-0.9);
   const next = upcoming[0];
@@ -61,7 +61,7 @@ export default function Home() {
           {/* Top: the welcome, with the member's name when we know her. Middle: the photo breathes. */}
           <p className="hero__greet fade-up" style={d(100)}>
             {t.home.greetingGuest}
-            {isMember && <b>{t.profile.firstName}</b>}
+            {profile.firstName && <b>{profile.firstName}</b>}
           </p>
           {/* Bottom: the headline and the two buttons share one column and one left edge */}
           <div className="hero__bottom">
