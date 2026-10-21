@@ -19,6 +19,8 @@ export type AnalyticsEvent =
   | "waitlist_join"
   | "quiz_complete"
   | "gift_card_start"
+  | "shop_view"
+  | "shop_notify" // "tell me when it's here" on a shop item or the teen set
   | "chat_open"
   | "chat_question"
   // Progress profile: never carries health values, only that something happened

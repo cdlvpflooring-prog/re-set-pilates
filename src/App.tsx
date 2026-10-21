@@ -22,6 +22,7 @@ import Quiz from "./pages/Quiz";
 import Receipt from "./pages/Receipt";
 import Request from "./pages/Request";
 import Schedule from "./pages/Schedule";
+import Shop from "./pages/Shop";
 import { ServiceDetail, Services } from "./pages/Services";
 
 function LangRoot() {
@@ -63,6 +64,7 @@ export default function App() {
                 <Route path="request" element={<Request />} />
                 <Route path="quiz" element={<Quiz />} />
                 <Route path="gift" element={<Gift />} />
+                <Route path="shop" element={<Shop />} />
                 <Route path="*" element={<Navigate to="." replace />} />
               </Route>
             </Routes>
