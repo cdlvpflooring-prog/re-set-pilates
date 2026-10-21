@@ -15,7 +15,7 @@ Rule for the whole profile: the name, address and phone must match the website, 
 | Customers visit the location? | Yes |
 | Address | גזית 1, הוד השרון — **NEED** floor / unit / entrance if any |
 | Service area | Leave empty (storefront) |
-| Phone | **NEED** (the new studio number; same one on the website and Instagram) |
+| Phone | 050-837-1101 (same on the website, Instagram and WhatsApp Business) |
 | Website | `https://<domain>/?utm_source=google&utm_medium=organic&utm_campaign=gbp` — **NEED** domain |
 | Booking ("Appointments") link | Arbox public booking link — **NEED** (never the manage.arboxapp.com link) |
 | Opening date | Set the real opening date. If the studio is not open yet, the profile can go live up to 90 days early as "opening soon". |
@@ -202,8 +202,8 @@ The goal: every tab of the profile has something in it, and something new appear
 
 | Button | Value |
 |---|---|
-| Call | studio phone (**NEED**) |
-| Chat / WhatsApp | in Edit profile → Contact → Chat, add the WhatsApp link `https://wa.me/972XXXXXXXXX` (**NEED** number; available in most regions) |
+| Call | 050-837-1101 |
+| Chat / WhatsApp | in Edit profile → Contact → Chat, add the WhatsApp link `https://wa.me/972508371101` |
 | Book / Appointments | Arbox public booking link (**NEED**) |
 | Website | site link with the UTM from section 1 |
 

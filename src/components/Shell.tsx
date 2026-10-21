@@ -1,10 +1,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { addressLine, isTodo, siteConfig } from "../config/site";
+import { addressLine, isTodo, siteConfig, telLink } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { useStore } from "../lib/store";
+import { WaIcon, useWaLink, waReady } from "../lib/whatsapp";
 import { ChatWidget } from "./ChatWidget";
 
 const ROOTS = ["", "schedule", "services", "my", "profile"];
@@ -57,6 +58,7 @@ function Header({ section }: { section: string }) {
   const scrolled = useScrolled();
   const nav = useNavigate();
   const loc = useLocation();
+  const wa = useWaLink();
   const [menu, setMenu] = useState(false);
   const closeMenu = useCallback(() => setMenu(false), []);
   const isRoot = ROOTS.includes(section);
@@ -85,6 +87,18 @@ function Header({ section }: { section: string }) {
         </Link>
         <div className="hdr__end">
           <LangToggle />
+          {waReady() && (
+            <a
+              className="hdr__wa"
+              href={wa}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t.wa.aria}
+              onClick={() => track("whatsapp_click", { source: "header" })}
+            >
+              <WaIcon size={20} />
+            </a>
+          )}
           <Link to={href("schedule")} className="btn btn--sand btn--sm hdr__book" onClick={() => track("book_reformer_click", { source: "header" })}>
             {t.common.bookShort}
           </Link>
@@ -110,6 +124,7 @@ function Header({ section }: { section: string }) {
 function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
   const { t, href } = useI18n();
   const reduce = useReducedMotion();
+  const wa = useWaLink();
 
   useEffect(() => {
     if (!open) return;
@@ -117,9 +132,11 @@ function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
     addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
+    document.body.classList.add("menu-open"); // hides the chat bubble so it can't cover the menu's WhatsApp button
     return () => {
       removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
+      document.body.classList.remove("menu-open");
     };
   }, [open, onClose]);
 
@@ -196,6 +213,23 @@ function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
               >
                 {t.nav.bookTitle}
               </Link>
+              {waReady() && (
+                <div className="menu__contact">
+                  <a
+                    className="btn btn--wa btn--block"
+                    href={wa}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() => track("whatsapp_click", { source: "menu" })}
+                  >
+                    <WaIcon />
+                    {t.contact.whatsapp}
+                  </a>
+                  <a className="menu__tel" href={telLink()} onClick={() => track("phone_click", { source: "menu" })}>
+                    {t.wa.call} <span dir="ltr">{siteConfig.contact.phone}</span>
+                  </a>
+                </div>
+              )}
               <a className="menu__mail" href={`mailto:${siteConfig.contact.email}`} dir="ltr">
                 {siteConfig.contact.email}
               </a>

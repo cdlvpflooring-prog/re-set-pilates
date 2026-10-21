@@ -3,10 +3,11 @@ import { LeadForm, MapEmbed, PageHead } from "../components/blocks";
 import { packageById } from "../config/packages";
 import type { Content } from "../content/en";
 import { Verified } from "../components/ui";
-import { addressLine, isTodo, mapsLink, siteConfig } from "../config/site";
+import { addressLine, isTodo, mapsLink, siteConfig, telLink } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { localBusinessLd, useSeo } from "../lib/seo";
+import { WaIcon, useWaLink, waReady } from "../lib/whatsapp";
 
 export default function Contact() {
   const { t, isHe, href } = useI18n();
@@ -14,7 +15,7 @@ export default function Contact() {
   useSeo(t.meta.contact, localBusinessLd(isHe ? "he" : "en"));
   const c = siteConfig.contact;
   const maps = mapsLink();
-  const waReady = !isTodo(c.whatsapp);
+  const wa = useWaLink();
 
   return (
     <div className="page tone-dark">
@@ -23,22 +24,22 @@ export default function Contact() {
         <div className="split split--top screen">
           <div className="stack gap-16">
             {/* Shown once the new WhatsApp number is set in site.ts (no "to be confirmed" placeholders on the page). */}
-            {waReady && (
+            {waReady() && (
               <a
                 className="card row gap-16"
-                style={{ background: "var(--cream)", borderColor: "var(--cream)", color: "var(--charcoal)" }}
-                href={`https://wa.me/${c.whatsapp}`}
+                style={{ background: "var(--wa)", borderColor: "var(--wa)", color: "var(--wa-ink)" }}
+                href={wa}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => track("whatsapp_click", { source: "contact" })}
               >
-                <span className="avatar" style={{ width: 44, height: 44, fontSize: 13, fontFamily: "var(--font-ui)", fontWeight: 600, background: "var(--charcoal)", color: "var(--cream)" }}>
-                  WA
+                <span className="avatar" style={{ width: 44, height: 44, background: "#fff", color: "var(--wa-ink)" }}>
+                  <WaIcon size={24} />
                 </span>
                 <span className="stack gap-4" style={{ flex: 1 }}>
                   <span style={{ fontWeight: 600 }}>{t.contact.whatsapp}</span>
-                  <span className="small" style={{ opacity: 0.7 }}>
-                    {t.contact.whatsappSub}
+                  <span className="small">
+                    {t.contact.whatsappSub} · <span dir="ltr" style={{ whiteSpace: "nowrap" }}>{c.phone}</span>
                   </span>
                 </span>
                 <span className="chev" aria-hidden />
@@ -60,7 +61,7 @@ export default function Contact() {
 
             <div className="card rows" style={{ paddingBlock: 4 }}>
               {!isTodo(c.phone) && (
-                <a href={`tel:${c.phone}`}>
+                <a href={telLink()} onClick={() => track("phone_click", { source: "contact" })}>
                   <span className="muted">{t.contact.phone}</span>
                   <span dir="ltr">{c.phone}</span>
                 </a>

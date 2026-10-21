@@ -289,9 +289,10 @@ export const intents: Intent[] = [
     keys: ["contact", "phone", "call", "whatsapp", "email", "mail", "gmail", "מייל", "דואר", "talk to", "human", "person", "צור קשר", "טלפון", "להתקשר", "וואטסאפ", "ווטסאפ", "מייל", "לדבר עם", "נציג"],
     reply: (he) => ({
       text: he
-        ? `הכי מהיר בוואטסאפ, ישירות לאורית. במייל: ${c.email}. אפשר גם להשאיר פרטים ונחזור אלייך.`
-        : `WhatsApp is fastest, straight to Orit. By email: ${c.email}. You can also leave your details and we'll call you back.`,
+        ? `הכי מהיר בוואטסאפ, ישירות לאורית: ${c.phone}. במייל: ${c.email}. אפשר גם להשאיר פרטים ונחזור אלייך.`
+        : `WhatsApp is fastest, straight to Orit: ${c.phone}. By email: ${c.email}. You can also leave your details and we'll call you back.`,
       actions: [
+        { label: he ? "חיוג" : "Call", href: `tel:+${c.whatsapp}` },
         { label: he ? "שליחת מייל" : "Send an email", href: `mailto:${c.email}` },
         { label: he ? "צרי קשר" : "Contact", to: "contact" },
       ],
