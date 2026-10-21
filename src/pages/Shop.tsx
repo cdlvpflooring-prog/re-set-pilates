@@ -1,7 +1,8 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { PageHead } from "../components/blocks";
+import { Wordmark } from "../components/Shell";
 import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 import { Accordion, Check, Reveal, Sheet } from "../components/ui";
+import { siteConfig } from "../config/site";
 import { bundleSinglesTotal, shopCategories, shopItem, shopItems, shopMedia, teenBundle, type ShopCategory, type ShopItem } from "../config/shop";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
@@ -33,7 +34,21 @@ export default function Shop() {
 
   return (
     <div className="page tone-dark has-tabbar shop">
-      <PageHead title={c.title} sub={c.sub} />
+      <header className="phead shop-head">
+        <div className="wrap shop-head__in screen">
+          <img className="shop-head__logo" src={siteConfig.studioMedia.logoDisc} alt="" width={120} height={120} decoding="async" />
+          <div className="shop-head__text">
+            <span className="eyebrow shop-head__eyebrow">
+              {c.eyebrow} · {c.comingSoon}
+            </span>
+            <h1 className="shop-head__title">
+              <Wordmark />
+              <span className="display">{c.title}</span>
+            </h1>
+            <p className="lede shop-head__sub">{c.sub}</p>
+          </div>
+        </div>
+      </header>
 
       {/* Hero: the class, each girl at a different moment */}
       <section className="wrap shop-hero">
@@ -45,7 +60,7 @@ export default function Shop() {
           <span className="eyebrow">{c.heroEyebrow}</span>
           <h2 className="display d-lg">{c.heroTitle}</h2>
           <p className="lede">{c.heroBody}</p>
-          <button className="btn btn--sand" onClick={() => open({ id: teenBundle.id, name: bundleName, price: teenBundle.price })}>
+          <button className="btn btn--blue" onClick={() => open({ id: teenBundle.id, name: bundleName, price: teenBundle.price })}>
             {c.notify}
           </button>
         </Reveal>
@@ -86,7 +101,7 @@ export default function Shop() {
               </div>
               {saves > 0 && <span className="badge badge--blush">{c.setSaves.replace("{amount}", String(saves))}</span>}
             </div>
-            <button className="btn btn--primary btn--block" onClick={() => open({ id: teenBundle.id, name: bundleName, price: teenBundle.price })}>
+            <button className="btn btn--blue btn--block" onClick={() => open({ id: teenBundle.id, name: bundleName, price: teenBundle.price })}>
               {c.notify}
             </button>
           </Reveal>
@@ -264,7 +279,7 @@ function NotifyForm({ pick }: { pick: Pick }) {
         <ContactFields id="shop" profile={store.profile} />
       </fieldset>
       <ConsentField profile={store.profile} />
-      <button className="btn btn--sand btn--block" disabled={sending}>
+      <button className="btn btn--blue btn--block" disabled={sending}>
         {sending ? t.form.sending : c.cta}
       </button>
       {failed && (
