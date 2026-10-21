@@ -741,13 +741,13 @@ html[lang="he"] .display { letter-spacing: -0.01em; line-height: 1.1; }
 .btn { font-weight: 500; letter-spacing: 0; font-size: 15px; min-height: 52px; }
 html[lang="he"] .btn { font-size: 16px; }
 .btn--sm { font-size: 14px; min-height: 44px; }
-.btn--primary::after, .btn--sand::after, .btn--arrow::after, .btn--dark::after {
+.btn--primary::after, .btn--sand::after, .btn--arrow::after, .btn--dark::after, .btn--blue::after {
   content: ""; width: 14px; height: 10px; flex: none; margin-inline-start: 6px;
   background: currentColor;
   clip-path: polygon(0 42%, 78% 42%, 52% 8%, 62% 0, 100% 50%, 62% 100%, 52% 92%, 78% 58%, 0 58%);
   transition: transform var(--t-ui) var(--ease-out);
 }
-[dir="rtl"] .btn--primary::after, [dir="rtl"] .btn--sand::after, [dir="rtl"] .btn--arrow::after, [dir="rtl"] .btn--dark::after { transform: scaleX(-1); }
+[dir="rtl"] .btn--primary::after, [dir="rtl"] .btn--sand::after, [dir="rtl"] .btn--arrow::after, [dir="rtl"] .btn--dark::after, [dir="rtl"] .btn--blue::after { transform: scaleX(-1); }
 .btn--block { justify-content: center; gap: 8px; padding-inline: 24px; } /* text centred, arrow inline after it: the same on every full-width button */
 .btn--dark { background: var(--charcoal); color: var(--ivory); }
 @media (hover: hover) and (pointer: fine) {
@@ -872,7 +872,7 @@ body { background: var(--paper); color: var(--ink); }
 .btn--sand { background: var(--ink); color: var(--paper); }
 .btn--dark { background: var(--ink); color: var(--paper); }
 @media (hover: hover) and (pointer: fine) {
-  .btn--primary:hover, .btn--sand:hover, .btn--dark:hover { box-shadow: 0 10px 28px rgba(31, 22, 18, 0.22); }
+  .btn--primary:hover, .btn--sand:hover, .btn--dark:hover, .btn--blue:hover { box-shadow: 0 10px 28px rgba(31, 22, 18, 0.22); }
 }
 
 /* Header */
@@ -2285,4 +2285,31 @@ html[lang="he"] .shop-tag { letter-spacing: 0.04em; font-size: 12px; }
 @media (min-width: 820px) {
   .shop-moment { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr); align-items: center; gap: clamp(28px, 4vw, 64px); }
   .shop-moment__body { max-width: 46ch; }
+}
+
+/* Signature-blue button (shop CTAs) */
+.btn--blue { background: var(--clay); color: #fffdfa; }
+.btn--blue:active { background: var(--peach-ink); }
+
+/* Shop header: the studio's logo disc on baby blue, wordmark + "shop" on one line */
+.shop-head { background: var(--b-peach); position: relative; overflow: hidden; }
+.shop-head::before {
+  content: ""; position: absolute; inset: auto -10% -60% auto; width: 60%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 253, 250, 0.7), rgba(255, 253, 250, 0) 70%); pointer-events: none;
+}
+.shop-head__in { position: relative; display: flex; align-items: center; gap: clamp(18px, 3vw, 34px); }
+.shop-head__logo {
+  flex: none; width: clamp(88px, 12vw, 128px); height: auto; aspect-ratio: 1; object-fit: cover; object-position: 50% 42%;
+  border-radius: 50%; box-shadow: 0 14px 34px rgba(46, 86, 112, 0.22), 0 0 0 4px rgba(255, 253, 250, 0.7);
+}
+.shop-head__text { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.shop-head__eyebrow { color: var(--peach-ink); }
+.shop-head__title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.3em 0.45em; color: var(--ink); }
+.shop-head__title .wordmark { font-size: clamp(34px, 5.2vw, 58px); }
+.shop-head__title .display { font-size: clamp(34px, 5.2vw, 58px); font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
+.shop-head__sub { color: rgba(31, 22, 18, 0.72); max-width: 44ch; }
+@media (max-width: 560px) {
+  .shop-head__in { align-items: flex-start; }
+  .shop-head__logo { width: 72px; }
+  .shop-head__title .wordmark, .shop-head__title .display { font-size: 30px; }
 }
