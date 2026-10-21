@@ -2,6 +2,24 @@
 
 Everything below works on screen as a demo. This is what each flow still needs before real customers use it.
 
+## Pricing — the owner's three posters are the source of truth (21 Oct 2026)
+`src/config/pricing.ts` holds the whole list and every page, the checkout, receipts, the chat and the schema.org data read from it (`src/config/pricing.test.ts` pins it to the posters).
+
+| Plan | Regular (poster 1) | Launch month (posters 2–3) | Valid |
+|---|---|---|---|
+| 1× a week | ₪240 | ₪220 | 1 month from purchase |
+| 2× a week | ₪460 | ₪430 | 1 month |
+| 3× a week | ₪630 | ₪590 | 1 month |
+| 4× a week | ₪800 | ₪750 | 1 month |
+| Unlimited | ₪990 | ₪920 | 1 month |
+| 5-class pass | ₪300 (₪60/class) | 5 + 1 = 6 classes, ₪300 | 2 months from purchase |
+| 10-class pass | ₪550 (₪55/class) | 10 + 1 = 11 classes, ₪550 | 2 months |
+| 15-class pass | ₪750 (₪50/class) | 15 + 1 = 16 classes, ₪750 | 2 months |
+
+Launch prices and the free class are for purchases during the launch month only (`flags.launchPricing`; turn it off when the month ends — the price list, checkout, chat and schema all follow). Reformer and Mat share this list. Not on the posters: Teens ₪180/month (4 classes, single ₪50), single adult class ₪55, closed groups ₪350 / event ₪750 (`packages.ts`).
+- [ ] **Airtable *Plans & Prices* is what the Worker charges**: it must carry the same regular / launch / bonus numbers; row `single` = 55, add row `tsingle` = 50 (still open). When launch month ends, clear the *Launch price* and *Bonus* columns there too.
+- [ ] **Owner to confirm:** a single class (₪55) is cheaper per class than the 5-pass (₪60/class). Either is fine, but it is worth a conscious decision.
+
 ## Launch prep decisions (owner review, 20 Oct 2026)
 - **No Arbox.** The booking system is built in-house (site + Cloudflare Worker + Airtable). Arbox was removed from checkout, config, chat answers, receipts and the schema.
 - **Payments not live yet** (`flags.paymentsLive: false` in `src/config/site.ts`). Every buy/book button (pricing, booking a class, gift cards) ends in the launch waitlist form instead of a sample purchase. Sign-ups land in Airtable **Launch Waitlist** (name, phone, optional email, class type, Adult morning / Teen evening, what they wanted, which class slot, source, contacted ✓). Name + phone are required.

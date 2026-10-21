@@ -1,6 +1,7 @@
 // Scripted studio assistant. Answers are built from the same config the site uses, so prices,
 // address and policies never drift. Swap `answer()` for an AI call later without touching the UI.
-import { pricing, singleClass } from "../config/pricing";
+import { planClasses, pricing, singleClass, teenSingleClass, teensPlan } from "../config/pricing";
+import { packageById } from "../config/packages";
 import { isTodo, mapsLink, siteConfig } from "../config/site";
 import { founder, instructors } from "../config/team";
 import type { Lang } from "../config/site";
@@ -27,6 +28,8 @@ const maps = mapsLink();
 const launch = siteConfig.flags.launchPricing;
 const price = (p: (typeof pricing.memberships)[number]) => (launch && p.launchPrice ? p.launchPrice : p.price);
 const H = siteConfig.policies.cancelHours;
+const group = packageById("group")!;
+const event = packageById("event")!;
 
 const monthly = (he: boolean) =>
   pricing.memberships
@@ -35,8 +38,8 @@ const monthly = (he: boolean) =>
     .join("\n");
 const passes = (he: boolean) =>
   pricing.passes
-    .filter((p) => p.id !== singleClass.id)
-    .map((p) => `${p.sessions} ${he ? "כניסות" : "sessions"}: ₪${p.price}${launch && p.bonusSessions ? (he ? " (+1 בהשקה)" : " (+1 at launch)") : ""}`)
+    .filter((p) => (p.sessions ?? 0) > 1)
+    .map((p) => `${p.sessions} ${he ? "כניסות" : "sessions"}: ₪${p.price}${launch && p.bonusSessions ? (he ? ` (+1 במתנה בחודש ההשקה = ${planClasses(p)} שיעורים)` : ` (+1 free in the launch month = ${planClasses(p)} classes)`) : ""}`)
     .join("\n");
 
 const book = (he: boolean): ChatAction => ({ label: he ? "ללוח השיעורים" : "Open the schedule", to: "schedule" });
@@ -110,8 +113,8 @@ export const intents: Intent[] = [
     keys: ["teen", "teens", "girl", "daughter", "12", "13", "14", "15", "16", "17", "נערות", "נערה", "ילדה", "בת שלי", "הבת", "לנוער"],
     reply: (he) => ({
       text: he
-        ? "פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, 50 דקות. 180 ₪ לחודש (4 אימונים). חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי."
-        : "Teen Pilates for girls aged 12–17: a fixed group of up to 5, 50 minutes. ₪180 a month (4 sessions). Strength, posture, mobility and confidence.",
+        ? `פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, 50 דקות. ${teensPlan?.price ?? ""} ₪ לחודש (4 אימונים), שיעור בודד ${teenSingleClass.price} ₪. חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי.`
+        : `Teen Pilates for girls aged 12–17: a fixed group of up to 5, 50 minutes. ₪${teensPlan?.price ?? ""} a month (4 sessions), ₪${teenSingleClass.price} for a single class. Strength, posture, mobility and confidence.`,
       actions: [{ label: he ? "לפרטים ולהרשמה" : "Details & sign up", to: "services/teens" }],
     }),
   },
@@ -120,8 +123,8 @@ export const intents: Intent[] = [
     keys: ["event", "party", "birthday", "bachelorette", "hen", "team", "group", "close the studio", "אירוע", "מסיבה", "יום הולדת", "רווקות", "צוות", "גיבוש", "קבוצה סגורה", "קבוצה פרטית", "לסגור את הסטודיו"],
     reply: (he) => ({
       text: he
-        ? "סוגרים את הסטודיו רק בשבילכן, עד 5 משתתפות:\n• קבוצה פרטית: אימון מכשירים של 50 דק׳, 350 ₪ לקבוצה\n• חבילת אירוע: 90 דק׳ עם זמן חופשי, מתיחות, 50 דק׳ פילאטיס מכשירים וכיבוד מפנק, 750 ₪ לקבוצה\nבתיאום מראש. שלחי לנו את התאריך ונשריין."
-        : "We close the studio just for you, up to 5 people:\n• Private group: a 50-min equipment session, ₪350 per group\n• Event package: 90 min with free time, stretching, 50 min of equipment Pilates and light refreshments, ₪750 per group\nBy appointment. Send us your date and we'll hold it.",
+        ? `סוגרים את הסטודיו רק בשבילכן, עד ${group.capacity} משתתפות:\n• קבוצה פרטית: אימון מכשירים של ${group.minutes} דק׳, ${group.price} ₪ לקבוצה\n• חבילת אירוע: ${event.minutes} דק׳ עם זמן חופשי, מתיחות, 50 דק׳ פילאטיס מכשירים וכיבוד מפנק, ${event.price} ₪ לקבוצה\nבתיאום מראש. שלחי לנו את התאריך ונשריין.`
+        : `We close the studio just for you, up to ${group.capacity} people:\n• Private group: a ${group.minutes}-min equipment session, ₪${group.price} per group\n• Event package: ${event.minutes} min with free time, stretching, 50 min of equipment Pilates and light refreshments, ₪${event.price} per group\nBy appointment. Send us your date and we'll hold it.`,
       actions: [{ label: he ? "לחבילות" : "See the packages", to: "services/closed-groups" }, { label: he ? "לשריין תאריך" : "Book a date", to: "contact?interest=groups" }],
       handoff: true,
     }),
@@ -169,8 +172,8 @@ export const intents: Intent[] = [
     keys: ["price", "cost", "how much", "membership", "pass", "package", "monthly", "card", "punch", "מחיר", "עלות", "כמה עולה", "מנוי", "כרטיסייה", "חבילה", "חודשי"],
     reply: (he) => ({
       text: he
-        ? `שיעור בודד: ₪${singleClass.price}\n\nמנוי חודשי${launch ? " (מחירי השקה)" : ""}:\n${monthly(he)}\n\nכרטיסיות (בתוקף חודשיים):\n${passes(he)}`
-        : `Single class: ₪${singleClass.price}\n\nMonthly${launch ? " (launch pricing)" : ""}:\n${monthly(he)}\n\nPasses (valid 2 months):\n${passes(he)}`,
+        ? `שיעור בודד: ₪${singleClass.price}\n\nמנוי חודשי (בתוקף לחודש)${launch ? ", מחירי השקה" : ""}:\n${monthly(he)}\n\nכרטיסיות (בתוקף חודשיים):\n${passes(he)}\n\nרפורמר ומזרן באותו מחיר. נערות: ${teensPlan?.price ?? ""} ₪ לחודש.${launch ? "\nמחירי ההשקה תקפים לרכישות במהלך חודש ההשקה בלבד." : ""}`
+        : `Single class: ₪${singleClass.price}\n\nMonthly (valid one month)${launch ? ", launch prices" : ""}:\n${monthly(he)}\n\nPasses (valid 2 months):\n${passes(he)}\n\nReformer and Mat cost the same. Teens: ₪${teensPlan?.price ?? ""} a month.${launch ? "\nLaunch prices are for purchases during the launch month only." : ""}`,
       actions: [prices(he)],
     }),
   },
