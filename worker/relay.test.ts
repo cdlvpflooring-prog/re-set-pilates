@@ -290,7 +290,7 @@ test("checkout refuses the removed Arbox payment method", async () => {
 test("roster: names only as each person chose, by bed, for that day only", async () => {
   const noa = { firstName: "Noa", lastName: "Cohen", phone: "0521111111" };
   const dana = { firstName: "Dana", lastName: "Mor", phone: "0522222222" };
-  await call("booking", { lang: "he", contact: maya, slot, bed: 0 }); // default: first name + initial
+  await call("booking", { lang: "he", contact: maya, slot, bed: 0 }); // default: first initial + last name
   await call("booking", { lang: "he", contact: noa, slot, bed: 2, showAs: "full" });
   await call("booking", { lang: "he", contact: dana, slot, bed: 4, showAs: "anon" });
   await call("booking", { lang: "he", contact: noa, slot: { ...slot, date: "2026-10-21" }, bed: 1 });
@@ -299,7 +299,7 @@ test("roster: names only as each person chose, by bed, for that day only", async
   expect(body.ok).toBe(true);
   expect(Object.keys(body.slots)).toEqual(["reformer_2026-10-20_1800"]);
   expect(body.slots["reformer_2026-10-20_1800"]).toEqual([
-    { bed: 0, name: "Maya T." },
+    { bed: 0, name: "M. Test" },
     { bed: 2, name: "Noa Cohen" },
     { bed: 4, name: "" },
   ]);

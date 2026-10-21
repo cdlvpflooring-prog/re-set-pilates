@@ -11,10 +11,10 @@ export type RosterSlots = NonNullable<RosterReply["slots"]>;
  * Never shown otherwise, so visitors don't see invented bookings.
  */
 const SAMPLE: Record<string, { bed: number | null; name: string }[]> = {
-  "08:00": [{ bed: 0, name: "Maya L." }, { bed: 2, name: "Noa Cohen" }, { bed: 3, name: "" }],
-  "09:00": [{ bed: 1, name: "Dana M." }],
-  "10:00": [{ bed: 0, name: "Shira K." }, { bed: 1, name: "Tal B." }, { bed: 2, name: "" }, { bed: 4, name: "Yael S." }],
-  "11:00": [{ bed: 0, name: "Lior A." }, { bed: 1, name: "Rona G." }, { bed: 2, name: "Gal P." }, { bed: 3, name: "Adi Levi" }, { bed: 4, name: "" }],
+  "08:00": [{ bed: 0, name: "M. Levi" }, { bed: 2, name: "N. Cohen" }, { bed: 3, name: "" }],
+  "09:00": [{ bed: 1, name: "D. Mizrahi" }],
+  "10:00": [{ bed: 0, name: "S. Katz" }, { bed: 1, name: "T. Ben-David" }, { bed: 2, name: "" }, { bed: 4, name: "Y. Shapiro" }],
+  "11:00": [{ bed: 0, name: "L. Amar" }, { bed: 1, name: "R. Golan" }, { bed: 2, name: "G. Peretz" }, { bed: 3, name: "A. Levi" }, { bed: 4, name: "" }],
 };
 export const sampleBeds = (time: string) =>
   typeof location !== "undefined" && new URLSearchParams(location.search).has("sample") ? SAMPLE[time] ?? [] : null;
