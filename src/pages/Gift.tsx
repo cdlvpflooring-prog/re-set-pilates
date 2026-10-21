@@ -27,7 +27,6 @@ export default function Gift() {
   const [from, setFrom] = useState("");
   const [note, setNote] = useState("");
   const [done, setDone] = useState(false);
-  const [notified, setNotified] = useState(false);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
   const [code, setCode] = useState("");
@@ -200,9 +199,9 @@ export default function Gift() {
             <h2 className="display d-sm">{t.gift.shopTitle}</h2>
             <p className="small muted">{t.gift.shopBody}</p>
           </div>
-          <button className="btn btn--secondary btn--sm" disabled={notified} onClick={() => setNotified(true)}>
-            {notified ? t.gift.notified : t.gift.notify}
-          </button>
+          <Link to={href("shop")} className="btn btn--secondary btn--sm">
+            {t.gift.shopLink}
+          </Link>
         </section>
       </div>
     </div>

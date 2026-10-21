@@ -529,8 +529,9 @@ const handlers: Record<RelayEvent, Handler> = {
     const c = contact(m.contact);
     const classType = oneOf(m.classType, ["Reformer", "Mat", "Teens", "Gift card", "Not sure"] as const) ?? "Not sure";
     const prefTime = oneOf(m.prefTime, LAUNCH_TIMES);
-    if (!prefTime && classType !== "Gift card") throw new BadRequest("bad time");
-    const source = oneOf(m.source, ["Pricing", "Booking", "Gift card", "Class page"] as const) ?? "Pricing";
+    const source = oneOf(m.source, ["Pricing", "Booking", "Gift card", "Class page", "Shop"] as const) ?? "Pricing";
+    // Gift cards and shop "notify me" sign-ups have no class time to pick.
+    if (!prefTime && classType !== "Gift card" && source !== "Shop") throw new BadRequest("bad time");
     const lg = lang(m.lang);
     const interest = classType === "Reformer" || classType === "Mat" || classType === "Teens" ? classType : undefined;
     const member = await upsertMember(at, c, {

@@ -9,7 +9,7 @@ export type PayMethod = "bit" | "card";
 export type LaunchTime = "Adult morning" | "Teen evening";
 export const LAUNCH_TIMES: LaunchTime[] = ["Adult morning", "Teen evening"];
 /** Where a launch-waitlist sign-up came from (which buy/book button). */
-export type LaunchSource = "Pricing" | "Booking" | "Gift card" | "Class page";
+export type LaunchSource = "Pricing" | "Booking" | "Gift card" | "Class page" | "Shop";
 export type LaunchClass = "Reformer" | "Mat" | "Teens" | "Gift card" | "Not sure";
 
 export const HEARD_FROM: HeardFrom[] = ["Instagram", "TikTok", "Facebook", "Google", "Referral", "Walk-in", "Other"];
