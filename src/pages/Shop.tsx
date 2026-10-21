@@ -2,7 +2,6 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Wordmark } from "../components/Shell";
 import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 import { Accordion, Check, Reveal, Sheet } from "../components/ui";
-import { siteConfig } from "../config/site";
 import { bundleSinglesTotal, shopCategories, shopItem, shopItems, shopMedia, teenBundle, type ShopCategory, type ShopItem } from "../config/shop";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
@@ -36,17 +35,12 @@ export default function Shop() {
     <div className="page tone-dark has-tabbar shop">
       <header className="phead shop-head">
         <div className="wrap shop-head__in screen">
-          <img className="shop-head__logo" src={siteConfig.studioMedia.logoDisc} alt="" width={120} height={120} decoding="async" />
-          <div className="shop-head__text">
-            <span className="eyebrow shop-head__eyebrow">
-              {c.eyebrow} · {c.comingSoon}
-            </span>
-            <h1 className="shop-head__title">
-              <Wordmark />
-              <span className="display">{c.title}</span>
-            </h1>
-            <p className="lede shop-head__sub">{c.sub}</p>
-          </div>
+          <span className="eyebrow shop-head__eyebrow">{c.comingSoon}</span>
+          <h1 className="shop-head__title">
+            <Wordmark />
+            <span className="display">{c.title}</span>
+          </h1>
+          <p className="display shop-head__sub">{c.sub}</p>
         </div>
       </header>
 
