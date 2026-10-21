@@ -185,7 +185,8 @@ export default function Home() {
                     <span className="ccard__body">
                       <span className="display d-md ccard__title">{sc.name}</span>
                       <span className="ccard__blurb">{sc.blurb}</span>
-                      <span className="ccard__cta ccard__cta--book">
+                      <span className="ccard__cta ccard__cta--book ccard__cta--mat">
+                        <span className="mat-roll" aria-hidden />
                         {t.nav.bookTitle}
                         <span className="chev" aria-hidden />
                       </span>
