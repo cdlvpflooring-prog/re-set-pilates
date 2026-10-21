@@ -92,6 +92,8 @@ export const F = {
     class: "fldQpbk3hhquVqDlg",
     membership: "fldcWCddEi0NGbTfS",
     classStartUnix: "fldroUJbwrnzrJZbW",
+    slotId: "fldwdMNMj8inuVLgr", // website slot id, e.g. reformer_2026-11-02_0800
+    shownOn: "fldOfsVV4LonkLVRb", // name shown on the schedule beds ("" = anonymous)
   },
   waitlist: {
     name: "fldPmPArpzv98Q9ro",

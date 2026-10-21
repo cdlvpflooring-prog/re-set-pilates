@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
 import { planName } from "../components/blocks";
+import { ShowAsPicker } from "./ClassDetail";
 import { ContactFields, readContact } from "../components/forms";
 import { LangToggle, Wordmark } from "../components/Shell";
 import { Sheet, Switch } from "../components/ui";
@@ -146,13 +147,7 @@ export default function Profile() {
           </Link>
         )}
 
-        <Link to={href("progress")} className="nextstep nextstep--progress row between gap-12" aria-label={t.profile.progressTeaser}>
-          <span className="nextstep__logo" aria-hidden>
-            <Wordmark />
-          </span>
-          <b className="nextstep__title">{t.nav.progress}</b>
-          <span className="chev" aria-hidden />
-        </Link>
+        <ProgressCard done={store.past.length} />
 
         <div className="card rows" style={{ paddingBlock: 4 }}>
           <Link to={href("my")}>
@@ -166,6 +161,10 @@ export default function Profile() {
           <div>
             {t.profile.language}
             <LangToggle />
+          </div>
+          <div className="stack gap-8" style={{ alignItems: "stretch" }}>
+            <span>{t.schedule.showAsTitle}</span>
+            <ShowAsPicker value={store.profile.showAs ?? "short"} onChange={(v) => store.saveProfile({ showAs: v })} name={store.profile.firstName ? store.profile : undefined} label={false} />
           </div>
           <div>
             {t.profile.notifications}
@@ -224,5 +223,47 @@ export default function Profile() {
         </Sheet>
       </div>
     </div>
+  );
+}
+
+/** Class milestones: the bar fills stop by stop, each stop a badge. */
+const MILESTONES = [0, 5, 10, 25, 50, 100];
+
+/** "My progress": a milestone bar that fills with every class attended. */
+function ProgressCard({ done }: { done: number }) {
+  const { t, href } = useI18n();
+  const last = MILESTONES.length - 1;
+  const i = MILESTONES.findIndex((m) => m > done); // next stop, -1 once past the last
+  const next = i === -1 ? undefined : MILESTONES[i];
+  // Stops are evenly spaced; between two stops the fill grows in proportion
+  const pos = i === -1 ? 1 : (i - 1 + (done - MILESTONES[i - 1]) / (MILESTONES[i] - MILESTONES[i - 1])) / last;
+  const line =
+    done === 0
+      ? t.profile.progressStart
+      : next === undefined
+        ? t.profile.progressTop.replace("{count}", String(done))
+        : t.profile.progressNext.replace("{n}", String(next - done)).replace("{m}", String(next));
+  return (
+    <Link to={href("progress")} className="nextstep nextstep--progress pgcard" aria-label={`${t.nav.progress}. ${line}`}>
+      <span className="pgcard__head">
+        <span className="pgcard__logo" aria-hidden>
+          <Wordmark />
+        </span>
+        <b className="nextstep__title">{t.nav.progress}</b>
+        <span className="chev" aria-hidden />
+      </span>
+      <span className="pgcard__track" aria-hidden>
+        <span className="pgcard__fill" style={{ width: `${pos * 100}%` }} />
+        {MILESTONES.slice(1).map((m, k) => (
+          <span key={m} className={`pgcard__stop ${done >= m ? "is-won" : ""}`} style={{ insetInlineStart: `${((k + 1) / last) * 100}%` }}>
+            <i />
+            <small>{m}</small>
+          </span>
+        ))}
+      </span>
+      <span className="pgcard__line">
+        <b className="pgcard__count">{done}</b> {line}
+      </span>
+    </Link>
   );
 }

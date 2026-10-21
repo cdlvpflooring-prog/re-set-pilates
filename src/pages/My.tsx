@@ -35,11 +35,10 @@ export default function My() {
             <Link to={href("schedule?service=reformer")} className="btn btn--primary">
               {t.common.book}
             </Link>
-            {hasClasses("mat") && (
-              <Link to={href("schedule?service=mat")} className="btn btn--primary">
-                {t.common.bookMat}
-              </Link>
-            )}
+            {/* Mat is by request until Mat classes are on the schedule; then the button opens the Mat tab */}
+            <Link to={href(hasClasses("mat") ? "schedule?service=mat" : "request?type=mat")} className="btn btn--primary">
+              {t.common.bookMat}
+            </Link>
             <Link to={href("#first-class")} className="small hi" style={{ textDecoration: "underline", textUnderlineOffset: 4 }}>
               {t.home.heroSecondary}
             </Link>

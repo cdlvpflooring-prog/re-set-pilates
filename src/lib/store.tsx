@@ -1,3 +1,4 @@
+import type { ShowAs } from "./relayTypes";
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { planById, type ClassKind } from "../config/pricing";
 import { fromISO, slotStart, type ClassSlot } from "./booking";
@@ -26,6 +27,7 @@ export interface Profile {
   phone: string;
   email: string;
   heard?: string; // "How did you hear about us?" — asked once
+  showAs?: ShowAs; // how the name appears on the schedule beds (default "short": first name + initial)
   consented?: boolean; // ticked "Send me news and offers" at least once
 }
 

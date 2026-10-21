@@ -24,7 +24,7 @@ import type {
   SlotRef,
   WaitlistMsg,
 } from "../src/lib/relayTypes";
-import { HEARD_FROM, LAUNCH_TIMES, PREF_TIMES, normalizePhone } from "../src/lib/relayTypes";
+import { HEARD_FROM, LAUNCH_TIMES, PREF_TIMES, SHOW_AS, normalizePhone, scheduleName, type RosterReply } from "../src/lib/relayTypes";
 import { Airtable, AirtableError, F, T, q, type AirRecord, type Fields } from "./airtable";
 import { isReceiptNumber, type ReceiptData } from "../src/lib/receipt";
 import { channelsFor, receiptLink, sendReceipt, serveReceipt } from "./notify";
@@ -84,7 +84,7 @@ async function passesTurnstile(secret: string | undefined, token: unknown, ip: s
 
 // ---------- small helpers ----------
 
-const json = (body: RelayReply, status = 200) =>
+const json = (body: RelayReply | RosterReply, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
 
 function text(v: unknown, max: number, required = false): string {
@@ -475,6 +475,8 @@ const handlers: Record<RelayEvent, Handler> = {
       [B.class]: [klass.id],
       ...(membership ? { [B.membership]: [membership] } : {}),
       ...(s.service === "reformer" ? { [B.bed]: bed } : {}),
+      [B.slotId]: s.slotId,
+      [B.shownOn]: scheduleName(c, oneOf(m.showAs, SHOW_AS) ?? "short"),
       [B.via]: "App",
       [B.status]: "Booked",
     });
@@ -742,11 +744,49 @@ function sameOrigin(req: Request): boolean {
   return local(u.hostname) && local(o.hostname);
 }
 
+/**
+ * Who is booked on each class of one day, for the bed sketches on the schedule.
+ * Public, so it returns only the bed and the name each person chose to show (never phone, email or record ids).
+ * Cached for a minute at the edge so busy schedule pages cost one Airtable call.
+ */
+async function roster(env: Env, url: URL, ectx: ExecutionContext): Promise<Response> {
+  const date = url.searchParams.get("date") ?? "";
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json({ ok: false }, 400);
+  if (!env.AIRTABLE_TOKEN) return json({ ok: false }, 503);
+  const key = new Request(`${url.origin}/api/roster?date=${date}`);
+  const cache = typeof caches === "undefined" ? undefined : caches.default; // absent in local tests
+  const hit = await cache?.match(key);
+  if (hit) return hit;
+  const B = F.bookings;
+  try {
+    const rows = await new Airtable(env.AIRTABLE_TOKEN, env.AIRTABLE_BASE).find(
+      T.bookings,
+      `AND({${B.status}}='Booked', FIND(${q(`_${date}_`)}, {${B.slotId}}))`,
+      100,
+    );
+    const slots: NonNullable<RosterReply["slots"]> = {};
+    for (const r of rows) {
+      const id = String(r.fields[B.slotId] ?? "");
+      if (!id) continue;
+      const n = Number(r.fields[B.bed]);
+      (slots[id] ??= []).push({ bed: n >= 1 && n <= 5 ? n - 1 : null, name: String(r.fields[B.shownOn] ?? "").slice(0, 40) });
+    }
+    const res = json({ ok: true, slots });
+    res.headers.set("Cache-Control", "public, max-age=60");
+    if (cache) ectx.waitUntil(cache.put(key, res.clone()));
+    return res;
+  } catch (e) {
+    console.error(JSON.stringify({ msg: "roster failed", status: e instanceof AirtableError ? e.status : undefined }));
+    return json({ ok: false }, 502);
+  }
+}
+
 export default {
   async fetch(req, env, ectx): Promise<Response> {
     const url = new URL(req.url);
     if (url.pathname.startsWith("/go/")) return go(url.pathname.slice(4).replace(/\/$/, ""), url);
     if (url.pathname.startsWith("/r/")) return serveReceipt(env, url);
+    if (url.pathname === "/api/roster" && req.method === "GET") return roster(env, url, ectx);
     if (url.pathname === "/api/health") {
       return json({ ok: true, airtable: Boolean(env.AIRTABLE_TOKEN), turnstile: Boolean(env.TURNSTILE_SECRET) } as RelayReply);
     }

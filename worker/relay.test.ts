@@ -46,6 +46,8 @@ beforeEach(() => {
       const after = /IS_AFTER\(\{(\w+)\},'([^']*)'\)/.exec(f);
       return ok({ records: rows.filter((r) => want.includes(r.id) && (!after || String(r.fields[after[1]] ?? "") > after[2])) });
     }
+    // AND(... FIND(...)): every quoted value matches a field exactly or as a substring (roster: Booked + slot date)
+    if (f.startsWith("AND(") && f.includes("FIND(")) return ok({ records: rows.filter((r) => want.every((w) => Object.values(r.fields).some((v) => typeof v === "string" && v.includes(w)))) });
     // FIND('text',{field}): substring match (order ids inside payment names)
     if (f.startsWith("FIND(")) return ok({ records: rows.filter((r) => Object.values(r.fields).some((v) => typeof v === "string" && want.some((w) => v.includes(w)))) });
     const hit = rows.filter((r) => Object.values(r.fields).some((v) => want.includes(String(v).replace(/\D/g, "")) || want.includes(String(v)) || want.includes(String(v).toLowerCase())));
@@ -283,4 +285,24 @@ test("launch waitlist: a class sign-up needs a time; a gift card does not", asyn
 test("checkout refuses the removed Arbox payment method", async () => {
   const r = await call("checkout", { lang: "he", contact: maya, planId: "m3x", method: "arbox", consent: false, termsAccepted: true });
   expect(r.status).toBe(400);
+});
+
+test("roster: names only as each person chose, by bed, for that day only", async () => {
+  const noa = { firstName: "Noa", lastName: "Cohen", phone: "0521111111" };
+  const dana = { firstName: "Dana", lastName: "Mor", phone: "0522222222" };
+  await call("booking", { lang: "he", contact: maya, slot, bed: 0 }); // default: first name + initial
+  await call("booking", { lang: "he", contact: noa, slot, bed: 2, showAs: "full" });
+  await call("booking", { lang: "he", contact: dana, slot, bed: 4, showAs: "anon" });
+  await call("booking", { lang: "he", contact: noa, slot: { ...slot, date: "2026-10-21" }, bed: 1 });
+  const res = await worker.fetch(new Request("https://reset.example/api/roster?date=2026-10-20") as never, env, { waitUntil() {} } as never);
+  const body = (await res.json()) as { ok: boolean; slots: Record<string, { bed: number | null; name: string }[]> };
+  expect(body.ok).toBe(true);
+  expect(Object.keys(body.slots)).toEqual(["reformer_2026-10-20_1800"]);
+  expect(body.slots["reformer_2026-10-20_1800"]).toEqual([
+    { bed: 0, name: "Maya T." },
+    { bed: 2, name: "Noa Cohen" },
+    { bed: 4, name: "" },
+  ]);
+  expect(JSON.stringify(body)).not.toContain("052"); // no phone numbers
+  expect((await worker.fetch(new Request("https://reset.example/api/roster?date=bad") as never, env, {} as never)).status).toBe(400);
 });
