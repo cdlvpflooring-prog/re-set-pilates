@@ -2137,12 +2137,12 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 .bed5 .bed5__line { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .bed5 .bed5__frame { fill: none; stroke: currentColor; stroke-width: 1.6; }
 .bed5 .bed5__carriage { fill: currentColor; opacity: 0.45; }
+/* Booked: the whole reformer fills in solid black (yours in the accent blue) */
 .bed5.is-taken { color: #1f1612; }
-.bed5.is-taken .bed5__frame { fill: #1f1612; stroke: #1f1612; }
-.bed5.is-taken .bed5__carriage { fill: #fffdfa; opacity: 1; }
+.bed5.is-taken .bed5__frame, .bed5.is-taken .bed5__carriage { fill: currentColor; stroke: currentColor; opacity: 1; }
+.bed5.is-taken .bed5__line { stroke-width: 2.4; }
 .bed5.is-mine { color: var(--clay); }
-.bed5.is-mine .bed5__frame { fill: var(--clay); stroke: var(--clay); }
-.bed5 small { font: 600 10.5px/1.1 "Inter", "Heebo", sans-serif; color: #1f1612; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 10px; }
+.bed5 small { font: 700 11px/1.15 "Inter", "Heebo", sans-serif; letter-spacing: -0.01em; text-align: center; color: #1f1612; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 10px; }
 .showas { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
 .showas legend { padding: 0; margin-bottom: 2px; color: rgba(31, 22, 18, 0.7); }
 .showas .chip.is-on { background: #1f1612; color: #fffdfa; border-color: #1f1612; }
@@ -2204,3 +2204,4 @@ html[dir="rtl"] .room .beds { direction: rtl; }
 .pgcard__stop small { top: 19px; font-size: 10.5px; }
 .pgcard__line { font-size: 13px; }
 .pgcard__count { font-size: 17px; }
+.bed5.is-mine small { color: var(--clay); }

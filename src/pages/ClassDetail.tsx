@@ -341,7 +341,7 @@ export default function ClassDetail() {
   );
 }
 
-/** "On the schedule, show me as": full name, first name + initial, or anonymous (a filled bed, no name). */
+/** "On the schedule, show me as": full name, first initial + last name, or anonymous (a filled bed, no name). */
 export function ShowAsPicker({ value, onChange, name, label = true }: { value: ShowAs; onChange: (v: ShowAs) => void; name?: { firstName: string; lastName: string }; label?: boolean }) {
   const { t } = useI18n();
   const sample = name ?? { firstName: t.profile.firstName, lastName: t.profile.name.split(" ").slice(-1)[0] ?? "" };

@@ -27,7 +27,7 @@ export interface Profile {
   phone: string;
   email: string;
   heard?: string; // "How did you hear about us?" — asked once
-  showAs?: ShowAs; // how the name appears on the schedule beds (default "short": first name + initial)
+  showAs?: ShowAs; // how the name appears on the schedule beds (default "short": first initial + last name)
   consented?: boolean; // ticked "Send me news and offers" at least once
 }
 
