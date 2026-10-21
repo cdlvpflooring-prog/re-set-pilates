@@ -178,7 +178,9 @@ export default function ClassDetail() {
               <span>{t.klass.mirrorWall.toUpperCase()}</span>
             </span>
             </div>
-            <div className="mirror">{t.klass.mirrorWall.toUpperCase()}</div>
+            <span className="mirror-h" aria-hidden>
+              <span>{t.klass.mirrorWall.toUpperCase()}</span>
+            </span>
             <p className="tiny">{t.klass.bedOptional}</p>
           </div>
         )}
@@ -341,7 +343,7 @@ export default function ClassDetail() {
   );
 }
 
-/** "On the schedule, show me as": full name, first name + initial, or anonymous (a filled bed, no name). */
+/** "On the schedule, show me as": full name, first initial + last name, or anonymous (a filled bed, no name). */
 export function ShowAsPicker({ value, onChange, name, label = true }: { value: ShowAs; onChange: (v: ShowAs) => void; name?: { firstName: string; lastName: string }; label?: boolean }) {
   const { t } = useI18n();
   const sample = name ?? { firstName: t.profile.firstName, lastName: t.profile.name.split(" ").slice(-1)[0] ?? "" };

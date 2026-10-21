@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { PageHead, effectivePrice, planName, pricesVisible } from "../components/blocks";
 import { Wordmark } from "../components/Shell";
 import { Check } from "../components/ui";
-import { pricing, singleClass } from "../config/pricing";
+import { pricing } from "../config/pricing";
 import { siteConfig } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
@@ -19,7 +19,7 @@ import { ConsentField, ContactFields, profileFrom, readContact, readExtras } fro
 export default function Gift() {
   const { t, lang, href } = useI18n();
   useSeo(t.meta.gift);
-  const passes = pricing.passes.filter((p) => p.id !== singleClass.id && pricesVisible(p));
+  const passes = pricing.passes.filter((p) => (p.sessions ?? 0) > 1 && pricesVisible(p));
   const live = siteConfig.flags.paymentsLive;
   const [choice, setChoice] = useState<string>(passes[0]?.id ?? "custom");
   const [amount, setAmount] = useState(300);

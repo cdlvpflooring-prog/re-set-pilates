@@ -25,7 +25,7 @@ export function normalizePhone(raw: string): string | null {
   return /^0\d{8,9}$/.test(d) ? d : null;
 }
 
-/** How a person's name appears on the public schedule beds: "Maya Levi", "Maya L." or not at all. */
+/** How a person's name appears on the public schedule beds: "Maya Levi", "M. Levi" or not at all. */
 export type ShowAs = "full" | "short" | "anon";
 export const SHOW_AS: ShowAs[] = ["short", "full", "anon"];
 
@@ -35,7 +35,7 @@ export function scheduleName(c: Pick<Contact, "firstName" | "lastName">, showAs:
   const last = c.lastName.trim();
   if (showAs === "anon" || !first) return "";
   if (showAs === "full") return `${first} ${last}`.trim();
-  return last ? `${first} ${[...last][0]}.` : first;
+  return last ? `${[...first][0]}. ${last}` : first; // "M. Levi"
 }
 
 /** GET /api/roster?date=YYYY-MM-DD → who is on which bed, per class slot (names only as each person chose). */
