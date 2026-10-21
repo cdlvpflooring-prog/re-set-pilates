@@ -1111,7 +1111,7 @@ html[lang="he"] .tabbar a { letter-spacing: 0; font-weight: 700; }
   transition: background-color var(--t-ui) ease, border-color var(--t-ui) ease, transform var(--t-fast) var(--ease-out);
 }
 .chip:active { transform: scale(0.96); }
-.chip--wa { background: #25d366; border-color: #25d366; color: #fff; }
+.chip--wa { background: var(--wa); border-color: var(--wa); color: var(--wa-ink); }
 @media (hover: hover) and (pointer: fine) { .chip:not(.chip--wa):hover { border-color: var(--ink, #1f1612); } }
 .chat__topics { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 4px; }
 .chat__form { display: flex; gap: 8px; padding: 10px 12px 6px; border-top: 1px solid rgba(31, 22, 18, 0.08); }
@@ -2016,3 +2016,15 @@ html[lang="he"] .hero--sport .btn--gold, html[lang="he"] .hero--sport .btn--outl
 .sketch--small { width: min(46%, 300px); inset-inline-end: 18px; top: 18px; color: #1f1612; opacity: 0.16; }
 .sketch--band { width: min(92%, 760px); inset-inline-end: -6%; bottom: -8%; color: #f1d3ad; opacity: 0.22; }
 @media (min-width: 1000px) { .sketch--small { width: 340px; inset-inline-end: 40px; top: 32px; opacity: 0.18; } .sketch--band { width: 720px; inset-inline-end: 4%; bottom: -4%; } }
+
+/* WhatsApp: the studio's first line of contact. WhatsApp green fill with ink text (8.96:1; white on this green is only 1.98:1). */
+:root { --wa: #25d366; --wa-ink: #1f1612; }
+.hdr__wa { display: inline-grid; place-items: center; width: 40px; height: 40px; border-radius: 999px; background: var(--wa); color: var(--wa-ink); flex: none; }
+@media (hover: hover) and (pointer: fine) { .hdr__wa:hover { filter: brightness(0.95); } }
+.btn--wa { background: var(--wa); color: var(--wa-ink); gap: 10px; }
+.menu__contact { display: grid; gap: 8px; }
+.menu__tel { text-align: center; font-size: 14px; font-weight: 600; color: rgba(31, 22, 18, 0.7); }
+.chat__wa { display: flex; align-items: center; gap: 12px; padding: 10px 16px; background: var(--wa); color: var(--wa-ink); font-size: 13px; line-height: 1.3; }
+.chat__wa b { font-size: 14px; font-weight: 600; }
+
+body.menu-open .chat-fab { display: none; }

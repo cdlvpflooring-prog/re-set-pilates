@@ -16,7 +16,7 @@ Everything below works on screen as a demo. This is what each flow still needs b
 - [ ] **Mat:** no Mat slots until Mat instructors join, so the Mat schedule tab is hidden and Mat shows "By request". When it starts: up to 8 people, set `bookable: true` in `src/config/services.ts` and add slots in `src/lib/booking.ts` (Mat capacity is not modelled yet).
 - [ ] **Circuit class (idea):** 5 reformers + 3 mat stations, up to 8 people, each station a different exercise. Not on the site yet; decide name, price and slots before adding it.
 - [ ] **For Orit:** create the workout routines and the levels (e.g. beginner / intermediate / advanced) for Reformer, Mat and the circuit. Studio planning only, no site change yet.
-- Contact page: parking = street parking; Google profile + review link set (`g.page/r/CYP9NF0IiTdlEBM`). WhatsApp and phone rows are **hidden** until the new number exists (fill `contact.whatsapp` and `contact.phone`; the WhatsApp card, chat button and receipts pick it up automatically).
+- Contact page: parking = street parking; Google profile + review link set (`g.page/r/CYP9NF0IiTdlEBM`). Studio WhatsApp + phone = **050-837-1101** (`contact.phone`, `contact.whatsapp` = 972508371101). WhatsApp shows in the header (green icon), the menu (button + call link), the top of the Contact page and the top of the "Ask Orit" chat; every link carries a pre-written first message for the page it came from (`t.wa.prefill`, `src/lib/whatsapp.tsx`). Receipts and the Google schema use the same number.
 
 ## Scheduling and booking
 - Class times follow the planned week; "spots left" is still sample data. Needs live availability from the in-house booking backend.
@@ -43,7 +43,7 @@ Everything below works on screen as a demo. This is what each flow still needs b
 - The "call me back" form sends straight into Airtable (Leads & Inquiries) through the Cloudflare Worker once `AIRTABLE_TOKEN` is set on the Worker. Until then, or if sending fails, it opens a ready-to-send email to that Gmail as before. Steps: `CLOUDFLARE-PLAN.md` section 1.
 - Google Business Profile and review links are set. Still to do: the Place ID (`social.googlePlaceId`) so directions open the listing.
 - The three Google reviews on the home page are labelled samples (demo mode only). Replace them with real reviews in `src/config/team.ts`.
-- WhatsApp and phone: hidden until the new number exists. Parking: street parking.
+- WhatsApp and phone: 050-837-1101 (live). WhatsApp Business catalog, channel and class group links are empty slots in `siteConfig.whatsappBusiness` (hidden until filled). Parking: street parking.
 
 ## Content placeholders (planned for the next version)
 - Studio photos and hero video (after construction and the professional shoot).

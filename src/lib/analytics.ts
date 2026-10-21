@@ -10,6 +10,7 @@ export type AnalyticsEvent =
   | "schedule_view"
   | "contact_click"
   | "whatsapp_click"
+  | "phone_click"
   | "language_switch"
   | "lead_form_start"
   | "request_form_submit" // request-a-session page (private, duo, groups)

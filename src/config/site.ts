@@ -24,8 +24,9 @@ export const siteConfig = {
     tiktokHandle: "@reset.pilates",
   },
   contact: {
-    phone: TODO,
-    whatsapp: TODO, // international digits only, e.g. 9725XXXXXXXX
+    // One studio number for WhatsApp and calls. WhatsApp is the first line of contact in Israel.
+    phone: "050-837-1101", // shown as is (local format)
+    whatsapp: "972508371101", // international digits only: 972 + the number without its leading 0
     email: "resetpilates11@gmail.com", // main customer contact: all important communication goes here
     streetHe: "גזית 1",
     streetEn: "Gazit 1",
@@ -41,6 +42,13 @@ export const siteConfig = {
     // Days: Su Mo Tu We Th Fr Sa. Example: { days: ["Su", "Mo", "Tu", "We", "Th"], opens: "07:00", closes: "21:00" }
     openingHours: [] as { days: ("Su" | "Mo" | "Tu" | "We" | "Th" | "Fr" | "Sa")[]; opens: string; closes: string }[],
     parking: { he: "חניה ברחוב", en: "Street parking" },
+  },
+  // WhatsApp Business extras on the same number. Each link stays hidden on the site until it is filled in.
+  whatsappBusiness: {
+    catalog: TODO, // wa.me/c/972508371101 once the catalog has items
+    channel: TODO, // whatsapp.com/channel/… (studio news, schedule, openings)
+    // Invite links for the member groups, one per class (chat.whatsapp.com/…)
+    groups: { reformer: TODO, teens: TODO, mat: TODO } as Record<"reformer" | "teens" | "mat", string>,
   },
   // Shown on invoices and receipts once filled (hidden while TODO).
   business: {
@@ -85,6 +93,15 @@ export const siteConfig = {
     music: "", // optional user-uploaded track; never autoplays
   },
 };
+
+/** WhatsApp chat link to the studio, with an optional pre-written first message. */
+export function waLink(text?: string) {
+  const base = `https://wa.me/${siteConfig.contact.whatsapp}`;
+  return text ? `${base}?text=${encodeURIComponent(text)}` : base;
+}
+
+/** Phone link in international form (works from abroad too). */
+export const telLink = () => `tel:+${siteConfig.contact.whatsapp}`;
 
 /** Google Maps link: opens the Google listing once the Place ID is set, the address until then. */
 /** Public address line. The street is deliberately left out: the owner asked that it not appear on the site. */

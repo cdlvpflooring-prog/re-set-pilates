@@ -74,7 +74,7 @@ export const localBusinessLd = (lang: string) => {
     url: `${origin}/`,
     logo: abs(siteConfig.studioMedia.logoDisc),
     image: [abs(siteConfig.studioMedia.heroPoster), abs(siteConfig.studioMedia.ogImage)],
-    ...(known(c.phone) && { telephone: c.phone }),
+    ...(known(c.phone) && { telephone: `+${c.whatsapp}` }),
     ...(known(c.email) && { email: c.email }),
     address: {
       "@type": "PostalAddress",

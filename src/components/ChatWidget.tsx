@@ -2,12 +2,13 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useLocation } from "react-router-dom";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { isTodo, siteConfig } from "../config/site";
+import { waLink } from "../config/site";
 import { founder } from "../config/team";
 import { answer, quickTopics, type ChatReply } from "../content/chat";
 import { track } from "../lib/analytics";
 import { relay } from "../lib/relay";
 import { useI18n } from "../lib/i18n";
+import { WaIcon, useWaLink, waReady as hasWa } from "../lib/whatsapp";
 
 interface Msg extends ChatReply {
   id: number;
@@ -30,8 +31,8 @@ export function ChatWidget() {
   const inputRef = useRef<HTMLInputElement>(null);
   const nextId = useRef(1);
   const name = isHe ? founder.nameHe.split(" ")[0] : founder.nameEn.split(" ")[0];
-  const wa = siteConfig.contact.whatsapp;
-  const waReady = !isTodo(wa);
+  const waReady = hasWa();
+  const waPage = useWaLink();
   // Booking and checkout are focused flows (the booking sheet has its own "Ask Orit" button); keep the bubble off their controls.
   const { pathname } = useLocation();
   const section = pathname.split("/")[2] ?? "";
@@ -104,6 +105,8 @@ export function ChatWidget() {
   };
 
   const asked = msgs.some((m) => m.from === "me");
+  // Handing off to WhatsApp carries the visitor's last question, so they don't have to type it again.
+  const lastQ = [...msgs].reverse().find((m) => m.from === "me")?.text ?? "";
 
   return (
     <>
@@ -129,6 +132,23 @@ export function ChatWidget() {
               </button>
             </header>
 
+            {waReady && (
+              <a
+                className="chat__wa"
+                href={waPage}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => track("whatsapp_click", { source: "chat_top" })}
+              >
+                <WaIcon size={20} />
+                <span className="stack" style={{ flex: 1, minWidth: 0 }}>
+                  <b>{t.chat.whatsapp}</b>
+                  <span>{t.wa.sub}</span>
+                </span>
+                <span className="chev" aria-hidden />
+              </a>
+            )}
+
             <div className="chat__list" ref={listRef} aria-live="polite">
               {msgs.map((m) => (
                 <div key={m.id} className={`bubble bubble--${m.from}`}>
@@ -151,7 +171,7 @@ export function ChatWidget() {
                         (waReady ? (
                           <a
                             className="chip chip--wa"
-                            href={`https://wa.me/${wa}?text=${encodeURIComponent(t.chat.waPrefill)}`}
+                            href={waLink(t.chat.waPrefill + lastQ)}
                             target="_blank"
                             rel="noreferrer"
                             onClick={() => track("whatsapp_click", { source: "chat" })}
