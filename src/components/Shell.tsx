@@ -153,6 +153,7 @@ function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
     ["profile", t.nav.profile],
     ["quiz", t.nav.quiz],
     ["gift", t.nav.gift],
+    ["shop", t.nav.shop],
     ["faq", t.nav.faq],
     ["contact", t.nav.contact],
   ];
@@ -295,6 +296,7 @@ function Footer() {
               <li><Link to={href("pricing")}>{t.nav.pricing}</Link></li>
               <li><Link to={href("quiz")}>{t.nav.quiz}</Link></li>
               <li><Link to={href("gift")}>{t.nav.gift}</Link></li>
+              <li><Link to={href("shop")}>{t.nav.shop}</Link></li>
             </ul>
           </div>
           <div>
