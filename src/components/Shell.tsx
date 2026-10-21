@@ -222,11 +222,11 @@ function SiteMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
                     rel="noreferrer"
                     onClick={() => track("whatsapp_click", { source: "menu" })}
                   >
-                    <WaIcon />
+                    <WaIcon size={16} />
                     {t.contact.whatsapp}
                   </a>
                   <a className="menu__tel" href={telLink()} onClick={() => track("phone_click", { source: "menu" })}>
-                    {t.wa.call} <span dir="ltr">{siteConfig.contact.phone}</span>
+                    {t.wa.callStudio} · <span dir="ltr">{siteConfig.contact.phone}</span>
                   </a>
                 </div>
               )}

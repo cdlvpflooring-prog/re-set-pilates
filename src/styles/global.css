@@ -2159,3 +2159,9 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
   .block--sketch .sketch--top, [dir="rtl"] .block--sketch .sketch--top { right: 24px; }
   [dir="rtl"] .block--sketch .sketch--top { right: auto; left: 24px; }
 }
+
+/* Menu foot: both buttons centred with a small inline icon (arrow after "Book a class", WhatsApp glyph before the text) */
+.menu__foot .btn--block { justify-content: center; gap: 8px; min-height: 52px; }
+.menu__foot .btn--block::after { margin-inline-start: 2px; }
+.menu__foot .btn--wa svg { width: 16px; height: 16px; flex: none; }
+.menu__tel { font-size: 14px; }

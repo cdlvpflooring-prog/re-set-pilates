@@ -649,6 +649,7 @@ export const he: Content = {
     label: "וואטסאפ",
     aria: "שליחת הודעת וואטסאפ ל-re:set",
     call: "חיוג",
+    callStudio: "חיוג ל-re:set pilates",
     sub: "אורית עונה אישית",
     prefill: {
       home: "היי אורית, אשמח לשמוע על re:set pilates.",

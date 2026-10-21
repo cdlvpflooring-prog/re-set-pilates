@@ -648,6 +648,7 @@ export const en = {
     label: "WhatsApp",
     aria: "Message re:set on WhatsApp",
     call: "Call",
+    callStudio: "Call re:set pilates",
     sub: "Orit replies personally",
     prefill: {
       home: "Hi Orit, I'd love to hear about re:set pilates.",
