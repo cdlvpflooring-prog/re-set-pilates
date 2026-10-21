@@ -8,6 +8,7 @@ import { classPrices, intro, planById, singleClass } from "../config/pricing";
 import { serviceById } from "../config/services";
 import { track } from "../lib/analytics";
 import { bookingProvider, fromISO, slotStart, type ClassSlot } from "../lib/booking";
+import { withRoster } from "../lib/roster";
 import { useI18n } from "../lib/i18n";
 import { downloadIcs } from "../lib/ics";
 import { planUsage } from "../lib/plan";
@@ -31,7 +32,10 @@ export default function ClassDetail() {
 
   useEffect(() => {
     let alive = true;
-    bookingProvider.getSlot(id).then((s) => alive && setSlot(s));
+    bookingProvider.getSlot(id).then(async (s) => {
+      const real = s ? await withRoster(s) : s; // beds taken by real bookings, same as the schedule
+      if (alive) setSlot(real);
+    });
     return () => {
       alive = false;
     };
@@ -147,6 +151,11 @@ export default function ClassDetail() {
                 {bedLabel}
               </span>
             </div>
+            {/* The room as it is: a small mirror on the left wall, the big mirror wall on the right, mirrors along the front */}
+            <div className="room">
+            <span className="mirror-v mirror-v--small" aria-hidden>
+              <span>{t.klass.mirror.toUpperCase()}</span>
+            </span>
             <div className="beds">
               {Array.from({ length: slot.capacity! }, (_, i) => {
                 const taken = slot.takenBeds.includes(i);
@@ -164,6 +173,10 @@ export default function ClassDetail() {
                   </button>
                 );
               })}
+            </div>
+            <span className="mirror-v mirror-v--big" aria-hidden>
+              <span>{t.klass.mirrorWall.toUpperCase()}</span>
+            </span>
             </div>
             <div className="mirror">{t.klass.mirrorWall.toUpperCase()}</div>
             <p className="tiny">{t.klass.bedOptional}</p>

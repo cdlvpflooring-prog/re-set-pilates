@@ -285,6 +285,7 @@ export const en = {
     chooseBed: "Choose your Reformer",
     bedOptional: "Optional. Leave it empty for any Reformer.",
     mirrorWall: "Mirror wall",
+    mirror: "Mirror",
     anyBed: "Any Reformer",
     bed: "Reformer",
     taken: "Taken",
@@ -621,6 +622,7 @@ export const en = {
     note: "Nothing is charged. We only use your number to contact you about opening.",
     doneTitle: "You're on the list",
     doneSub: "Thank you! Orit will be in touch as soon as booking opens.",
+    atPay: "Online payment isn't open yet, so nothing was charged. Your order is saved and Orit will call you to confirm your spot and take payment as soon as it opens.",
   },
   form: {
     firstName: "First name",
