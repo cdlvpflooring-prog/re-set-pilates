@@ -2146,3 +2146,6 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 .showas legend { padding: 0; margin-bottom: 2px; color: rgba(31, 22, 18, 0.7); }
 .showas .chip.is-on { background: #1f1612; color: #fffdfa; border-color: #1f1612; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+/* Home "Say hello": the WhatsApp number first, as a line with the glyph */
+.hello__wa { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; font-weight: 600; color: #1f1612; }
+.hello__wa svg { color: var(--wa); }

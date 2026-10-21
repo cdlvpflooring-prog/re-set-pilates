@@ -15,12 +15,14 @@ import { fromISO } from "../lib/booking";
 import { useI18n } from "../lib/i18n";
 import { localBusinessLd, useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
+import { WaIcon, useWaLink, waReady } from "../lib/whatsapp";
 
 const FEATURED = ["m1x", "m3x", "munl"];
 
 /** One long page: hero → why → classes → schedule → pricing → people → visit → questions → book. */
 export default function Home() {
   const { t, href, isHe, fmtDate } = useI18n();
+  const wa = useWaLink();
   const { upcoming, isMember } = useStore();
   useSeo(t.meta.home, localBusinessLd(isHe ? "he" : "en"));
   const heroRef = useParallax<HTMLDivElement>(-0.9);
@@ -312,6 +314,13 @@ export default function Home() {
             </Reveal>
             <Reveal delay={180} className="stack gap-12">
               <span className="display d-sm">{t.home.sayHello}</span>
+              {waReady() && (
+                <a href={wa} target="_blank" rel="noreferrer" className="hello__wa" onClick={() => track("whatsapp_click", { source: "home" })}>
+                  <WaIcon size={18} />
+                  <span dir="ltr">{c.phone}</span>
+                  <span className="small muted">· {t.wa.label}</span>
+                </a>
+              )}
               <a href={`mailto:${c.email}`} className="small muted" dir="ltr" style={{ textAlign: "start" }}>
                 {c.email}
               </a>
