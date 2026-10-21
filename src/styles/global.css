@@ -2016,3 +2016,64 @@ html[lang="he"] .hero--sport .btn--gold, html[lang="he"] .hero--sport .btn--outl
 .sketch--small { width: min(46%, 300px); inset-inline-end: 18px; top: 18px; color: #1f1612; opacity: 0.16; }
 .sketch--band { width: min(92%, 760px); inset-inline-end: -6%; bottom: -8%; color: #f1d3ad; opacity: 0.22; }
 @media (min-width: 1000px) { .sketch--small { width: 340px; inset-inline-end: 40px; top: 32px; opacity: 0.18; } .sketch--band { width: 720px; inset-inline-end: 4%; bottom: -4%; } }
+
+/* ───────── v3.6 · hero: welcome at the top, headline and buttons in one column at the bottom; angled sketch; coloured steps ───────── */
+.hero--v4 .hero__body, html[lang="he"] .hero--v4 .hero__body {
+  display: flex; flex-direction: column; justify-content: space-between; align-items: stretch; text-align: start;
+  height: 100%; gap: 0; padding-top: 14px; padding-bottom: calc(26px + var(--safe-b));
+}
+/* Welcome, right under the header's wordmark; the member's name beside it */
+.hero--v4 .hero__greet {
+  margin: 0; align-self: flex-start; display: inline-flex; align-items: baseline; gap: 8px;
+  font-family: "Inter", "Heebo", sans-serif; font-size: 12.5px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: var(--b-peach, #d4e5f1);
+  padding: 8px 14px 9px; border-radius: 999px; background: rgba(26, 20, 17, 0.55); border: 1px solid rgba(212, 229, 241, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+html[lang="he"] .hero--v4 .hero__greet { letter-spacing: 0; text-transform: none; font-size: 14px; }
+.hero--v4 .hero__greet b { font-family: "Cormorant Garamond", "Frank Ruhl Libre", Georgia, serif; font-size: 20px; font-weight: 600; letter-spacing: 0; text-transform: none; color: #fff; line-height: 1; }
+/* Bottom block: one column, one left edge for the headline and both buttons */
+.hero--v4 .hero__bottom { display: flex; flex-direction: column; align-items: flex-start; gap: 18px; width: min(100%, 360px); }
+.hero--v4 .hero__title, html[lang="he"] .hero--v4 .hero__title { padding-top: 0; margin: 0; text-align: start; max-width: none; }
+.hero--v4 .hero__title::before { content: none; }
+.hero--v4 .hero__offer, .hero--v4 .hero__body .hero__offer { display: flex; flex-direction: column; gap: 10px; width: 100%; margin: 0; }
+.hero--v4 .hero__offer .btn, .hero--v4 .hero__offer .btn--gold, .hero--v4 .hero__offer .btn--outline,
+html[lang="he"] .hero--v4 .hero__offer .btn--gold, html[lang="he"] .hero--v4 .hero__offer .btn--outline {
+  width: 100%; min-width: 0; min-height: 56px; padding-inline: 20px; justify-content: center; border-radius: 999px;
+  font-family: "Inter", "Heebo", sans-serif; font-size: 16px; font-weight: 800; letter-spacing: 0.04em;
+}
+html[lang="he"] .hero--v4 .hero__offer .btn { font-size: 17.5px; letter-spacing: 0; }
+.hero--v4 .hero__offer .btn--gold { background: var(--b-peach, #d4e5f1); color: #1f1612; border: 2px solid var(--b-peach, #d4e5f1); box-shadow: 0 12px 30px rgba(212, 229, 241, 0.3); }
+.hero--v4 .hero__offer .btn--outline { background: rgba(26, 20, 17, 0.42); color: #fff; border: 2px solid var(--b-peach, #d4e5f1); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.hero--v4 .hero__scrim { background: linear-gradient(180deg, rgba(26,20,17,0.5) 0%, rgba(26,20,17,0.06) 24%, rgba(26,20,17,0.1) 46%, rgba(26,20,17,0.88) 74%, #1a1411 100%); }
+@media (min-width: 1000px) {
+  .hero--v4 .hero__body, html[lang="he"] .hero--v4 .hero__body { display: flex; padding-top: 22px; padding-bottom: 60px; }
+  .hero--v4 .hero__bottom { width: 440px; gap: 22px; }
+  .hero--v4 .hero__offer { flex-direction: row; gap: 12px; }
+  .hero--v4 .hero__offer .btn { flex: 1; width: auto; }
+  .hero--v4 .hero__greet { font-size: 13px; }
+}
+
+/* "Five beds": the reformer drawing lies across the box at an angle, faint, with the words on top of it */
+.block--sketch .sketch--small {
+  width: 124%; inset-inline-end: auto; left: -14%; top: 6%; transform: rotate(-9deg); transform-origin: center; opacity: 0.13; color: #1f1612;
+}
+[dir="rtl"] .block--sketch .sketch--small { left: auto; right: -14%; transform: rotate(9deg); }
+@media (min-width: 720px) { .block--sketch .sketch--small { width: 78%; left: auto; inset-inline-end: -6%; top: 10%; transform: rotate(-7deg); opacity: 0.12; } [dir="rtl"] .block--sketch .sketch--small { right: auto; left: -6%; transform: rotate(7deg); } }
+@media (min-width: 1000px) { .block--sketch .sketch--small { width: 62%; top: 4%; } }
+
+/* First class, step by step: three cards, three colours, the re:set outline */
+.steps { gap: 12px; }
+.steps > .step { position: relative; align-items: center; gap: 16px; padding: 18px 18px 18px 16px; border-radius: 22px; border: 2px solid #1f1612; background: var(--step-bg, #f8ecd9); box-shadow: 0 10px 24px rgba(31, 22, 18, 0.08); }
+.steps > .step:nth-child(1) { --step-bg: var(--b-peach, #d4e5f1); }
+.steps > .step:nth-child(2) { --step-bg: #f9dcd6; }
+.steps > .step:nth-child(3) { --step-bg: var(--b-sun, #f8ecd9); }
+.steps > .step .step__n { flex: none; width: 46px; height: 46px; border-radius: 50%; background: #1f1612; color: #fffdfa; display: grid; place-items: center; font-family: "Inter", "Heebo", sans-serif; font-size: 17px; font-weight: 800; }
+.steps > .step .d-sm { font-size: 22px; line-height: 1.15; }
+.steps > .step .small { color: rgba(31, 22, 18, 0.72); }
+@media (min-width: 900px) { .steps > .step { flex-direction: column; align-items: flex-start; gap: 14px; padding: 22px; } }
+/* The drawing crosses the whole box diagonally, centred, so the words sit on it */
+.block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small {
+  width: 150%; left: -25%; right: auto; top: 50%; transform: translateY(-50%) rotate(-12deg); opacity: 0.14;
+}
+[dir="rtl"] .block--sketch .sketch--small { transform: translateY(-50%) rotate(12deg); }
+@media (min-width: 720px) { .block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small { width: 96%; left: 14%; top: 50%; transform: translateY(-50%) rotate(-9deg); } [dir="rtl"] .block--sketch .sketch--small { left: -10%; transform: translateY(-50%) rotate(9deg); } }
+@media (min-width: 1000px) { .block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small { width: 72%; left: 34%; } [dir="rtl"] .block--sketch .sketch--small { left: -6%; } }
