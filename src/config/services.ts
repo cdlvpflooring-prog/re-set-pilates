@@ -14,15 +14,15 @@ export interface ServiceConfig {
 }
 
 export const services: ServiceConfig[] = [
-  { id: "reformer", slug: "reformer-groups", image: "/assets/ex-group.webp", pos: "50% 45%", thumb: "/assets/ex-tab-reformer-sm.webp", thumbPos: "50% 60%", bookable: true, capacity: 5, minutes: 55, approved: true },
-  { id: "mat", slug: "mat-pilates", image: "/assets/ex-mat.webp", pos: "50% 55%", thumb: "/assets/ex-tab-mat-sm.webp", thumbPos: "50% 45%", bookable: false, minutes: 55, approved: true }, // by request until Mat instructors join (then true + slots in lib/booking.ts)
-  { id: "private", slug: "private-1to1", image: "/assets/ex-private.webp", pos: "50% 45%", thumb: "/assets/ex-private-sm.webp", thumbPos: "60% 40%", bookable: false, minutes: 55, approved: true },
-  { id: "duo", slug: "duo", image: "/assets/ex-duo.webp", pos: "50% 40%", thumb: "/assets/ex-duo-sm.webp", thumbPos: "50% 35%", bookable: false, minutes: 55, approved: true },
-  { id: "women", slug: "women-only", image: "/assets/ex-women.webp", pos: "50% 40%", thumb: "/assets/ex-women-sm.webp", thumbPos: "70% 40%", bookable: false, minutes: 55, approved: false },
+  { id: "reformer", slug: "reformer-groups", image: "/assets/ex-group.webp", pos: "50% 45%", thumb: "/assets/ex-tab-reformer-sm.webp", thumbPos: "50% 60%", bookable: true, capacity: 5, minutes: 50, approved: true },
+  { id: "mat", slug: "mat-pilates", image: "/assets/ex-mat.webp", pos: "50% 55%", thumb: "/assets/ex-tab-mat-sm.webp", thumbPos: "50% 45%", bookable: false, minutes: 50, approved: true }, // by request until Mat instructors join (then true + slots in lib/booking.ts)
+  { id: "private", slug: "private-1to1", image: "/assets/ex-private.webp", pos: "50% 45%", thumb: "/assets/ex-private-sm.webp", thumbPos: "60% 40%", bookable: false, minutes: 50, approved: true },
+  { id: "duo", slug: "duo", image: "/assets/ex-duo.webp", pos: "50% 40%", thumb: "/assets/ex-duo-sm.webp", thumbPos: "50% 35%", bookable: false, minutes: 50, approved: true },
+  { id: "women", slug: "women-only", image: "/assets/ex-women.webp", pos: "50% 40%", thumb: "/assets/ex-women-sm.webp", thumbPos: "70% 40%", bookable: false, minutes: 50, approved: false },
   // Teens (girls 12-17): a fixed weekly group, sold as its own monthly plan (pricing.ts: "teens"). Photo is a stand-in until the shoot.
-  { id: "teens", slug: "teens", image: "/assets/ex-teens.webp", pos: "50% 50%", thumb: "/assets/ex-teens-sm.webp", thumbPos: "50% 55%", bookable: false, capacity: 5, minutes: 55, approved: true },
+  { id: "teens", slug: "teens", image: "/assets/ex-teens.webp", pos: "50% 50%", thumb: "/assets/ex-teens-sm.webp", thumbPos: "50% 55%", bookable: false, capacity: 5, minutes: 50, approved: true },
   // Closed groups: the studio closes for your group. Two packages (packages.ts): private group and event.
-  { id: "groups", slug: "closed-groups", image: "/assets/ex-groups.webp", pos: "50% 45%", thumb: "/assets/ex-groups-sm.webp", thumbPos: "50% 50%", bookable: false, capacity: 5, minutes: 55, approved: true },
+  { id: "groups", slug: "closed-groups", image: "/assets/ex-groups.webp", pos: "50% 45%", thumb: "/assets/ex-groups-sm.webp", thumbPos: "50% 50%", bookable: false, capacity: 5, minutes: 50, approved: true },
 ];
 
 export const serviceById = (id: string) => services.find((s) => s.id === id);

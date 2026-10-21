@@ -37,8 +37,6 @@ export default function Home() {
   const maps = mapsLink();
   const launch = siteConfig.flags.launchPricing;
   const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? t.home.greetingMorning : hour < 18 ? t.home.greetingAfternoon : t.home.greetingEvening;
   const loc = useLocation();
   const firstTimer = !isMember && upcoming.length === 0;
   const plans = pricing.memberships.filter((p) => FEATURED.includes(p.id) && pricesVisible(p));
@@ -48,7 +46,7 @@ export default function Home() {
     <div className="page page--bleed tone-dark">
       {/* Hero */}
       {/* Editorial first screen: full-bleed studio film, the brass ring, a serif headline (design system: HeroEditorial) */}
-      <section className="hero hero--ed hero--sport">
+      <section className="hero hero--ed hero--sport hero--v4">
         <div className="hero__media" ref={heroRef}>
           {showVideo ? (
             <video src={heroSrc} poster={media.heroPoster} autoPlay muted loop playsInline preload="metadata" />
@@ -58,27 +56,28 @@ export default function Home() {
         </div>
         <div className="hero__scrim" aria-hidden />
         <div className="wrap hero__body">
-          <span className="hero__mark fade-up" style={d(100)}>
-            <Wordmark />
-          </span>
-          {/* Greeting: the member by name, a guest with a welcome. Nothing else but the headline and two buttons. */}
-          <p className="eyebrow fade-up" style={d(150)}>
-            {isMember ? `${greeting}, ${t.profile.firstName}` : t.home.greetingGuest}
+          {/* Top: the welcome, with the member's name when we know her. Middle: the photo breathes. */}
+          <p className="hero__greet fade-up" style={d(100)}>
+            {t.home.greetingGuest}
+            {isMember && <b>{t.profile.firstName}</b>}
           </p>
-          <h1 className="hero__title">
-            {t.home.heroSport.map((line, i) => (
-              <span className="line" key={line}>
-                <span style={d(200 + i * 130)}>{line}</span>
-              </span>
-            ))}
-          </h1>
-          <div className="hero__offer fade-up" style={d(500)}>
-            <a href="#schedule" className="btn btn--gold btn--block" onClick={() => track("book_reformer_click", { source: "hero" })}>
-              {t.nav.bookTitle}
-            </a>
-            <Link to={href("profile")} className="btn btn--outline btn--block" onClick={() => track("hero_join_click")}>
-              {t.home.heroJoin}
-            </Link>
+          {/* Bottom: the headline and the two buttons share one column and one left edge */}
+          <div className="hero__bottom">
+            <h1 className="hero__title">
+              {t.home.heroSport.map((line, i) => (
+                <span className="line" key={line}>
+                  <span style={d(200 + i * 130)}>{line}</span>
+                </span>
+              ))}
+            </h1>
+            <div className="hero__offer fade-up" style={d(500)}>
+              <a href="#schedule" className="btn btn--gold" onClick={() => track("book_reformer_click", { source: "hero" })}>
+                {t.nav.bookTitle}
+              </a>
+              <Link to={href("profile")} className="btn btn--outline" onClick={() => track("hero_join_click")}>
+                {t.home.heroJoin}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
