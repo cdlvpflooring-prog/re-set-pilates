@@ -4,7 +4,7 @@ import { GoogleReviews, MapEmbed, PersonCard, ScheduleBoard, effectivePrice, pla
 import { openChat } from "../components/ChatWidget";
 import { Wordmark } from "../components/Shell";
 import { Accordion, Reveal, useParallax, Verified } from "../components/ui";
-import { ReformerLineArt } from "../components/art";
+import { ReformerLineArt, ReformerTopArt } from "../components/art";
 import { useReducedMotion } from "motion/react";
 import { pricing } from "../config/pricing";
 import { services } from "../config/services";
@@ -107,7 +107,7 @@ export default function Home() {
       {/* Why */}
       <section className="section">
         <div className="wrap block tone-raise block--sketch">
-          <ReformerLineArt className="sketch sketch--small" />
+          <ReformerTopArt className="sketch sketch--small sketch--top" />
           <Reveal>
             <h2 className="display d-lg">
               {t.home.statHead.map((l) => (

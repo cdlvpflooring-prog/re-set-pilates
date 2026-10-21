@@ -2149,3 +2149,13 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 /* Home "Say hello": the WhatsApp number first, as a line with the glyph */
 .hello__wa { display: inline-flex; align-items: center; gap: 8px; align-self: flex-start; font-weight: 600; color: #1f1612; }
 .hello__wa svg { color: var(--wa); }
+
+/* "Five beds": the reformer seen from above, headrest up, standing along the end edge with the same slight lean */
+.block--sketch .sketch--top, [dir="rtl"] .block--sketch .sketch--top {
+  width: auto; height: 92%; top: 50%; left: auto; right: -6px; transform: translateY(-50%) rotate(-6deg); opacity: 0.16;
+}
+[dir="rtl"] .block--sketch .sketch--top { right: auto; left: -6px; transform: translateY(-50%) rotate(6deg); }
+@media (min-width: 1000px) {
+  .block--sketch .sketch--top, [dir="rtl"] .block--sketch .sketch--top { right: 24px; }
+  [dir="rtl"] .block--sketch .sketch--top { right: auto; left: 24px; }
+}
