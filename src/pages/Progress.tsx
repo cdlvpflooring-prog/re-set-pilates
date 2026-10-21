@@ -69,7 +69,7 @@ function Intro() {
             <li key={p}>{p}</li>
           ))}
         </ul>
-        <Link to={href("progress/start")} className="btn btn--primary btn--block">
+        <Link to={href("progress/start")} className="btn btn--primary btn--go btn--block">
           {started ? c.intro.resume : c.intro.start}
         </Link>
         {siteConfig.flags.demoMode && (

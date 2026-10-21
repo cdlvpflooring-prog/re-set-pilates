@@ -2165,3 +2165,6 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 .btn--block::after { margin-inline-start: 2px; }
 .menu__foot .btn--wa svg { width: 16px; height: 16px; flex: none; }
 .menu__tel { font-size: 14px; }
+/* "Go" green for start actions (My progress → Start). Not the WhatsApp green, which is reserved for WhatsApp. White text 5.1:1. */
+.btn--go, .btn--primary.btn--go { background: #2a7d47; color: #fff; border-color: #2a7d47; }
+@media (hover: hover) and (pointer: fine) { .btn--go:hover { background: #236b3c; } }
