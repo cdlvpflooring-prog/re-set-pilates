@@ -89,8 +89,8 @@ export const intents: Intent[] = [
     keys: ["type", "kind", "what classes", "which classes", "reformer", "mat ", "difference", "what do you offer", "offer", "סוג", "סוגי", "אילו שיעורים", "איזה שיעורים", "רפורמר", "מזרן", "מכשירים", "ההבדל", "מה יש"],
     reply: (he) => ({
       text: he
-        ? "יש לנו:\n• רפורמר בקבוצות של עד 5 (55 דק׳)\n• פילאטיס מזרן בקבוצה קטנה\n• אימון פרטי 1:1\n• אימון זוגי\n• פילאטיס לנערות 12–17\n• קבוצות סגורות ואירועים: סוגרים את הסטודיו בשבילכן\n• קבוצת נשים בלבד, בתיאום\nרפורמר הוא מיטה עם קפיצים שמוסיפים התנגדות או תמיכה, ומזרן מתמקד בליבה ובגמישות. המנויים לרפורמר ולמזרן באותו מחיר."
-        : "We offer:\n• Reformer in groups of up to 5 (55 min)\n• Mat Pilates in a small group\n• Private 1:1\n• Duo training\n• Teen Pilates (girls 12–17)\n• Closed groups & events: the studio is yours\n• Women-only groups, by request\nThe Reformer uses springs for resistance or support; Mat focuses on core and mobility. Reformer and Mat plans cost the same.",
+        ? "יש לנו:\n• רפורמר בקבוצות של עד 5 (50 דק׳)\n• פילאטיס מזרן בקבוצה קטנה\n• אימון פרטי 1:1\n• אימון זוגי\n• פילאטיס לנערות 12–17\n• קבוצות סגורות ואירועים: סוגרים את הסטודיו בשבילכן\n• קבוצת נשים בלבד, בתיאום\nרפורמר הוא מיטה עם קפיצים שמוסיפים התנגדות או תמיכה, ומזרן מתמקד בליבה ובגמישות. המנויים לרפורמר ולמזרן באותו מחיר."
+        : "We offer:\n• Reformer in groups of up to 5 (50 min)\n• Mat Pilates in a small group\n• Private 1:1\n• Duo training\n• Teen Pilates (girls 12–17)\n• Closed groups & events: the studio is yours\n• Women-only groups, by request\nThe Reformer uses springs for resistance or support; Mat focuses on core and mobility. Reformer and Mat plans cost the same.",
       actions: [{ label: he ? "לכל השירותים" : "All services", to: "services" }, book(he)],
     }),
   },
@@ -99,8 +99,8 @@ export const intents: Intent[] = [
     keys: ["private", "1:1", "one on one", "personal", "duo", "couple", "partner", "friend", "פרטי", "אישי", "זוגי", "חברה", "בת זוג"],
     reply: (he) => ({
       text: he
-        ? "אימון פרטי (1:1) ואימון זוגי מתואמים מראש, 55 דקות, ונבנים סביבך. השאירי פרטים או שלחי הודעה ונמצא שעה שמתאימה."
-        : "Private (1:1) and duo sessions are booked by appointment, 55 minutes, built around you. Leave your details or message us and we'll find a time.",
+        ? "אימון פרטי (1:1) ואימון זוגי מתואמים מראש, 50 דקות, ונבנים סביבך. השאירי פרטים או שלחי הודעה ונמצא שעה שמתאימה."
+        : "Private (1:1) and duo sessions are booked by appointment, 50 minutes, built around you. Leave your details or message us and we'll find a time.",
       actions: [{ label: he ? "לתיאום" : "Request a session", to: "contact?interest=private" }],
       handoff: true,
     }),
@@ -110,8 +110,8 @@ export const intents: Intent[] = [
     keys: ["teen", "teens", "girl", "daughter", "12", "13", "14", "15", "16", "17", "נערות", "נערה", "ילדה", "בת שלי", "הבת", "לנוער"],
     reply: (he) => ({
       text: he
-        ? "פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, 55 דקות. 180 ₪ לחודש (4 אימונים). חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי."
-        : "Teen Pilates for girls aged 12–17: a fixed group of up to 5, 55 minutes. ₪180 a month (4 sessions). Strength, posture, mobility and confidence.",
+        ? "פילאטיס לנערות בגילאי 12–17: קבוצה קבועה של עד 5 נערות, 50 דקות. 180 ₪ לחודש (4 אימונים). חיזוק הגוף, יציבה נכונה, גמישות וביטחון עצמי."
+        : "Teen Pilates for girls aged 12–17: a fixed group of up to 5, 50 minutes. ₪180 a month (4 sessions). Strength, posture, mobility and confidence.",
       actions: [{ label: he ? "לפרטים ולהרשמה" : "Details & sign up", to: "services/teens" }],
     }),
   },
@@ -141,8 +141,8 @@ export const intents: Intent[] = [
     keys: ["beginner", "never", "first time", "new to", "experience", "level", "first class", "מתחילה", "פעם ראשונה", "שיעור ראשון", "ניסיון", "רמה", "אף פעם"],
     reply: (he) => ({
       text: he
-        ? "בטח! לא צריך ניסיון. עם 5 מתאמנות בלבד המדריכה מכירה לך את הרפורמר ומתאימה כל תרגיל. בשיעור הראשון כדאי להגיע 10 דקות לפני."
-        : "Absolutely, no experience needed. With only 5 people in the room, your instructor walks you through the Reformer and adapts every exercise. For your first class, arrive 10 minutes early.",
+        ? "בטח! לא צריך ניסיון. עם 5 מתאמנות בלבד המדריכה מכירה לך את הרפורמר ומתאימה כל תרגיל."
+        : "Absolutely, no experience needed. With only 5 people in the room, your instructor walks you through the Reformer and adapts every exercise.",
       actions: [book(he)],
     }),
   },
@@ -151,8 +151,8 @@ export const intents: Intent[] = [
     keys: ["wear", "bring", "clothes", "socks", "grip", "water", "towel", "shoes", "ללבוש", "להביא", "בגדים", "גרביים", "מים", "מגבת", "נעליים"],
     reply: (he) => ({
       text: he
-        ? "בגדים נוחים וצמודים, גרביים עם אחיזה ובקבוק מים. מתאמנים בלי נעליים. כל הציוד מחכה בסטודיו."
-        : "Comfortable, fitted clothes, grip socks and a water bottle. We train without shoes. All the equipment is at the studio.",
+        ? "בגדים נוחים וצמודים ובקבוק מים. מתאמנים בלי נעליים. כל הציוד מחכה בסטודיו."
+        : "Comfortable, fitted clothes and a water bottle. We train without shoes. All the equipment is at the studio.",
     }),
   },
   {

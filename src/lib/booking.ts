@@ -23,11 +23,11 @@ export interface BookingProvider {
   getSlot(id: string): Promise<ClassSlot | null>;
 }
 
-// Planned week (owner, 20 Oct 2026): 55-minute classes on the hour with a 5-minute changeover.
+// Planned week (owner, 21 Oct 2026): 50-minute classes on the hour with a 10-minute changeover.
 // Adults train in the morning (08:00-12:00, Sun-Fri); the 17:00-21:00 evening slots (Sun-Thu) are for
 // the teens group, booked by request for now. Mornings are Reformer until Mat instructors join;
 // Mat has no slots yet, so its schedule tab is hidden. Final timetable is set closer to opening.
-export const CLASS_MINUTES = 55;
+export const CLASS_MINUTES = 50;
 const TEMPLATE: Record<BookableService, [time: string, instructor: number][]> = {
   reformer: [["08:00", 0], ["09:00", 0], ["10:00", 0], ["11:00", 0]],
   mat: [],
