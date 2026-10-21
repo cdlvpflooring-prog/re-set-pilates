@@ -633,7 +633,7 @@ export const en = {
     heard: "How did you hear about us?",
     heardPick: "Choose…",
     heardOpts: { Instagram: "Instagram", TikTok: "TikTok", Facebook: "Facebook", Google: "Google search or Maps", Referral: "A friend told me", "Walk-in": "Walked past the studio", Other: "Other" },
-    consent: "Send me news and offers (you can stop any time)",
+    consent: "Receive notifications (opt out anytime)",
     terms: "I accept the studio terms and the 24-hour cancellation policy",
     termsNeeded: "Please accept the terms to continue.",
     yourDetails: "Your details",
