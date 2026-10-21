@@ -162,3 +162,41 @@ export function ReformerLineArt({ className = "" }: { className?: string }) {
     </svg>
   );
 }
+
+/**
+ * A reformer seen from above, standing upright: headrest at the top, footbar at the bottom,
+ * as if the person on it were facing you. Decorative (aria-hidden), drawn in `currentColor`.
+ */
+export function ReformerTopArt({ className = "" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 260 660" aria-hidden fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+      {/* frame with the two rails */}
+      <rect x="30" y="24" width="200" height="612" rx="14" />
+      <path d="M52 40v580M208 40v580" opacity="0.6" />
+      {/* risers and pulleys at the head end, ropes hanging down to the loops */}
+      <path d="M30 60h-14M230 60h14" />
+      <circle cx="12" cy="60" r="7" />
+      <circle cx="248" cy="60" r="7" />
+      <path d="M12 67q-2 70 14 150q10 48 26 70" opacity="0.7" />
+      <path d="M248 67q2 70-14 150q-10 48-26 70" opacity="0.7" />
+      <path d="M42 288a8 11 0 1 0 16 0a8 11 0 1 0-16 0" />
+      <path d="M202 288a8 11 0 1 0 16 0a8 11 0 1 0-16 0" />
+      {/* carriage */}
+      <rect x="64" y="52" width="132" height="300" rx="16" />
+      <path d="M130 70v264" opacity="0.35" />
+      {/* headrest and shoulder blocks */}
+      <rect x="92" y="66" width="76" height="40" rx="12" />
+      <rect x="76" y="118" width="24" height="34" rx="7" />
+      <rect x="160" y="118" width="24" height="34" rx="7" />
+      {/* springs between the carriage and the spring bar */}
+      <path d="M86 352v12l-5 8 10 8-10 8 10 8-10 8 10 8-5 8v12M108 352v12l-5 8 10 8-10 8 10 8-10 8 10 8-5 8v12M130 352v12l-5 8 10 8-10 8 10 8-10 8 10 8-5 8v12M152 352v12l-5 8 10 8-10 8 10 8-10 8 10 8-5 8v12M174 352v12l-5 8 10 8-10 8 10 8-10 8 10 8-5 8v12" opacity="0.8" />
+      <path d="M52 444h156" />
+      {/* footbar, sitting above the foot end */}
+      <path d="M30 520h-10v-36q0-8 8-8h204q8 0 8 8v36h-10" />
+      <rect x="20" y="468" width="220" height="16" rx="8" />
+      {/* standing platform at the foot end */}
+      <rect x="52" y="548" width="156" height="70" rx="10" />
+      <path d="M52 583h156" opacity="0.5" />
+    </svg>
+  );
+}
