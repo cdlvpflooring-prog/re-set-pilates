@@ -25,6 +25,25 @@ export function normalizePhone(raw: string): string | null {
   return /^0\d{8,9}$/.test(d) ? d : null;
 }
 
+/** How a person's name appears on the public schedule beds: "Maya Levi", "Maya L." or not at all. */
+export type ShowAs = "full" | "short" | "anon";
+export const SHOW_AS: ShowAs[] = ["short", "full", "anon"];
+
+/** The name shown on the schedule for a booking ("" = anonymous). Never includes phone or email. */
+export function scheduleName(c: Pick<Contact, "firstName" | "lastName">, showAs: ShowAs = "short"): string {
+  const first = c.firstName.trim();
+  const last = c.lastName.trim();
+  if (showAs === "anon" || !first) return "";
+  if (showAs === "full") return `${first} ${last}`.trim();
+  return last ? `${first} ${[...last][0]}.` : first;
+}
+
+/** GET /api/roster?date=YYYY-MM-DD → who is on which bed, per class slot (names only as each person chose). */
+export interface RosterReply {
+  ok: boolean;
+  slots?: Record<string, { bed: number | null; name: string }[]>; // bed 0-4, null = "any bed"; name "" = anonymous
+}
+
 /** Who the person is. Phone is the key used to find them again in Airtable. */
 export interface Contact {
   firstName: string;
@@ -86,6 +105,7 @@ export interface BookingMsg extends Base {
   contact: Contact;
   slot: SlotRef;
   bed: number | null; // 0-based on the site; Airtable shows 1-5
+  showAs?: ShowAs; // name on the schedule beds (default "short")
 }
 
 export interface CancelMsg extends Base {

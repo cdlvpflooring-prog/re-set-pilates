@@ -1729,9 +1729,6 @@ html[lang="he"] .hero--sport .btn--gold { text-transform: none; letter-spacing: 
 .nextstep--progress { padding: 22px 52px 22px 18px; gap: 14px; justify-content: flex-start;
   border-width: 3px; box-shadow: 0 10px 26px rgba(74, 117, 144, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
 .nextstep--progress:active { transform: scale(0.98); box-shadow: 0 4px 12px rgba(74, 117, 144, 0.22); }
-.nextstep__logo { flex: none; display: inline-flex; padding: 6px 10px 7px; border-radius: 12px; background: #1f1612; color: #fcf1dc; }
-.nextstep__logo .wordmark { font-size: 16px; }
-.nextstep__logo .wordmark i { color: var(--b-peach, #d4e5f1); }
 .nextstep__title, html[lang="he"] .nextstep__title { font-style: normal; font-weight: 900; font-size: clamp(24px, 6.8vw, 30px); letter-spacing: -0.02em; text-align: start; white-space: normal; line-height: 0.95; }
 .nextstep__title::before, .nextstep__title::after { content: none; }
 .nextstep--progress .chev { inset-inline-end: 20px; width: 14px; height: 14px; border-width: 3px; }
@@ -2088,3 +2085,64 @@ html[lang="he"] .hero--v4 .hero__offer .btn { font-size: 17.5px; letter-spacing:
 [dir="rtl"] .block--sketch .sketch--small { transform: translateY(-50%) rotate(12deg); }
 @media (min-width: 720px) { .block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small { width: 96%; left: 14%; top: 50%; transform: translateY(-50%) rotate(-9deg); } [dir="rtl"] .block--sketch .sketch--small { left: -10%; transform: translateY(-50%) rotate(9deg); } }
 @media (min-width: 1000px) { .block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small { width: 72%; left: 34%; } [dir="rtl"] .block--sketch .sketch--small { left: -6%; } }
+
+/* ───────── v3.7 · wordmark without the dark box, bigger, "pilates" centred; milestone progress card; vertical sketch ───────── */
+/* "pilates" sits centred under "re:set" (its letter-spacing is balanced so it looks centred) */
+.wordmark, [dir="rtl"] .wordmark { align-items: center; }
+.wordmark__sub { padding-inline-start: 0.32em; }
+.hdr .wordmark { font-size: 33px; }
+@media (min-width: 1000px) { .hdr__brand .wordmark { font-size: 38px; } }
+.footer .wordmark { font-size: 46px; }
+.mcard .wordmark, .mcard--member .wordmark { font-size: 32px; }
+/* Profile: the wordmark on its own, no black tile */
+.avatar--brand { background: transparent; border: 0; padding: 0; min-width: 0; height: auto; color: #1f1612; border-radius: 0; }
+.avatar--brand .wordmark { font-size: 30px; }
+.avatar--brand .wordmark i { color: var(--clay); }
+
+/* My progress: a milestone bar that fills with every class, on a warm gold-to-blue ground */
+.pgcard, .nextstep--progress.pgcard { display: grid; gap: 16px; padding: 20px 20px 18px; text-align: start; justify-content: stretch;
+  background: linear-gradient(120deg, #f6e3c8 0%, #f1d3ad 30%, #d4e5f1 100%); }
+.pgcard__head { position: relative; display: flex; align-items: center; gap: 14px; padding-inline-end: 28px; }
+.pgcard__logo .wordmark { font-size: 26px; color: #1f1612; }
+.pgcard__logo .wordmark i { color: var(--clay); }
+.pgcard .nextstep__title { font-family: "Inter", "Heebo", sans-serif; font-style: italic; font-weight: 900; text-transform: uppercase; letter-spacing: -0.01em; font-size: clamp(22px, 6.4vw, 28px); line-height: 1; }
+html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: none; }
+.pgcard .chev { position: absolute; inset-inline-end: 4px; top: 50%; margin-top: -7px; }
+.pgcard__track { position: relative; display: block; height: 12px; margin: 6px 8px 22px; border-radius: 999px; background: rgba(31, 22, 18, 0.12); }
+.pgcard__fill { position: absolute; inset-block: 0; inset-inline-start: 0; border-radius: inherit; min-width: 12px;
+  background: linear-gradient(90deg, #4a7590, #1f1612); transition: width 600ms cubic-bezier(0.2, 0.7, 0.2, 1); }
+[dir="rtl"] .pgcard__fill { background: linear-gradient(270deg, #4a7590, #1f1612); }
+.pgcard__stop { position: absolute; top: 50%; transform: translate(-50%, -50%); display: grid; justify-items: center; }
+[dir="rtl"] .pgcard__stop { transform: translate(50%, -50%); }
+.pgcard__stop i { width: 22px; height: 22px; border-radius: 50%; background: #fffdfa; border: 2.5px solid #1f1612; }
+.pgcard__stop.is-won i { background: #f1d3ad; box-shadow: 0 0 0 3px rgba(241, 211, 173, 0.6); }
+.pgcard__stop small { position: absolute; top: 26px; font: 800 12px/1 "Inter", sans-serif; color: #1f1612; font-variant-numeric: tabular-nums; }
+.pgcard__line { font-size: 14.5px; font-weight: 600; color: rgba(31, 22, 18, 0.82); }
+.pgcard__count { font: 900 22px/1 "Inter", sans-serif; color: #1f1612; margin-inline-end: 2px; }
+
+/* "Five beds": the reformer drawing stands upright along the end edge of the box, crossing into the text a little */
+.block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small {
+  width: 420px; top: 50%; left: auto; right: -112px; transform: translateY(-50%) rotate(84deg); opacity: 0.16;
+}
+[dir="rtl"] .block--sketch .sketch--small { right: auto; left: -112px; transform: translateY(-50%) rotate(-84deg); }
+@media (min-width: 1000px) {
+  .block--sketch .sketch--small, [dir="rtl"] .block--sketch .sketch--small { width: 360px; right: -60px; }
+  [dir="rtl"] .block--sketch .sketch--small { right: auto; left: -60px; }
+}
+
+/* Schedule: five tiny reformers show who is booked (name as each person chose; a dot = anonymous) */
+.beds5 { display: flex; gap: 8px; margin-top: 8px; max-width: 100%; }
+.bed5 { display: grid; justify-items: center; gap: 3px; flex: 1 1 0; min-width: 0; max-width: 64px; color: rgba(31, 22, 18, 0.45); }
+.bed5 svg { width: 100%; height: auto; max-width: 44px; }
+.bed5 .bed5__frame { fill: none; stroke: currentColor; stroke-width: 1.6; }
+.bed5 .bed5__carriage { fill: currentColor; opacity: 0.45; }
+.bed5.is-taken { color: #1f1612; }
+.bed5.is-taken .bed5__frame { fill: #1f1612; stroke: #1f1612; }
+.bed5.is-taken .bed5__carriage { fill: #fffdfa; opacity: 1; }
+.bed5.is-mine { color: var(--clay); }
+.bed5.is-mine .bed5__frame { fill: var(--clay); stroke: var(--clay); }
+.bed5 small { font: 600 10.5px/1.1 "Inter", "Heebo", sans-serif; color: #1f1612; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 10px; }
+.showas { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+.showas legend { padding: 0; margin-bottom: 2px; color: rgba(31, 22, 18, 0.7); }
+.showas .chip.is-on { background: #1f1612; color: #fffdfa; border-color: #1f1612; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }

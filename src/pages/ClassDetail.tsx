@@ -13,7 +13,7 @@ import { downloadIcs } from "../lib/ics";
 import { planUsage } from "../lib/plan";
 import { useSeo } from "../lib/seo";
 import { relay } from "../lib/relay";
-import type { Contact, SlotRef } from "../lib/relayTypes";
+import { SHOW_AS, scheduleName, type Contact, type ShowAs, type SlotRef } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
 import { ContactFields, readContact } from "../components/forms";
 
@@ -64,6 +64,9 @@ export default function ClassDetail() {
   const atLimit = !!usage && usage.left <= 0;
   // Name and phone are asked once (first booking or waitlist), then remembered on this device.
   const needsDetails = !store.profile.firstName || !store.profile.lastName || !store.profile.phone;
+  // How the name shows on the schedule beds for the others in the class; remembered for next time
+  const showAs: ShowAs = store.profile.showAs ?? "short";
+  const setShowAs = (v: ShowAs) => store.saveProfile({ showAs: v });
   const slotRef: SlotRef = { slotId: slot.id, service: slot.service, date: slot.date, time: slot.time, minutes: slot.minutes, capacity: slot.capacity };
   const whoFrom = (form: HTMLFormElement | null): Contact => {
     if (form && needsDetails) {
@@ -80,7 +83,7 @@ export default function ClassDetail() {
     const local = store.book(slot, isReformer ? bed : null, remind);
     if (!local) return;
     const contact = whoFrom(e.currentTarget as HTMLFormElement);
-    relay("booking", { lang, contact, slot: slotRef, bed: isReformer ? bed : null }, { ref: local.id }).then(
+    relay("booking", { lang, contact, slot: slotRef, bed: isReformer ? bed : null, showAs }, { ref: local.id }).then(
       (r) => r.id && store.setRemoteId(local.id, r.id),
     );
     track("booking_confirmed", { service: slot.service });
@@ -263,6 +266,9 @@ export default function ClassDetail() {
                     <ContactFields id="bk" profile={store.profile} email="none" />
                   </>
                 )}
+                {isReformer && (
+                  <ShowAsPicker value={showAs} onChange={setShowAs} name={needsDetails ? undefined : store.profile} />
+                )}
                 <button className="btn btn--sand btn--block">{t.confirm.confirmBtn}</button>
               </form>
             ) : (
@@ -319,5 +325,23 @@ export default function ClassDetail() {
         )}
       </Sheet>
     </div>
+  );
+}
+
+/** "On the schedule, show me as": full name, first name + initial, or anonymous (a filled bed, no name). */
+export function ShowAsPicker({ value, onChange, name, label = true }: { value: ShowAs; onChange: (v: ShowAs) => void; name?: { firstName: string; lastName: string }; label?: boolean }) {
+  const { t } = useI18n();
+  const sample = name ?? { firstName: t.profile.firstName, lastName: t.profile.name.split(" ").slice(-1)[0] ?? "" };
+  return (
+    <fieldset className="showas">
+      <legend className={label ? "tiny" : "sr-only"}>{t.schedule.showAsTitle}</legend>
+      <div className="row gap-8" style={{ flexWrap: "wrap" }}>
+        {SHOW_AS.map((v) => (
+          <button key={v} type="button" className={`chip ${value === v ? "is-on" : ""}`} aria-pressed={value === v} onClick={() => onChange(v)}>
+            {v === "anon" ? t.schedule.showAs.anon : scheduleName(sample, v)}
+          </button>
+        ))}
+      </div>
+    </fieldset>
   );
 }

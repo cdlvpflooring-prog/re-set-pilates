@@ -13,6 +13,8 @@ import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
 import { PREF_TIMES, type PrefTime } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
+import { useRoster, type RosterSlots } from "../lib/roster";
+import { scheduleName } from "../lib/relayTypes";
 import { loadTurnstile } from "../lib/turnstile";
 import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "./forms";
 import { MaskImg, Price, Segmented } from "./ui";
@@ -96,13 +98,17 @@ export function ServiceCard({ s, delay = 0 }: { s: ServiceConfig; delay?: number
   );
 }
 
-export function SlotRow({ slot, index = 0 }: { slot: ClassSlot; index?: number }) {
+export function SlotRow({ slot, index = 0, roster }: { slot: ClassSlot; index?: number; roster?: RosterSlots | null }) {
   const { t, href, isHe } = useI18n();
-  const { upcoming } = useStore();
-  const mine = upcoming.some((b) => b.slotId === slot.id);
+  const { upcoming, profile } = useStore();
+  const myBooking = upcoming.find((b) => b.slotId === slot.id);
+  const mine = !!myBooking;
   const cap = slot.capacity;
-  // Your own booking takes a bed too.
-  const taken = slot.takenBeds.length + (mine && !slot.full ? 1 : 0);
+  // Who is on the beds: the studio's bookings (names as each person chose), plus your own from this phone.
+  // Without the roster (offline, local dev) the sample availability stands in, as anonymous beds.
+  const booked = roster?.[slot.id] ?? (roster ? [] : slot.takenBeds.map((bed) => ({ bed, name: "" })));
+  const beds = cap ? placeBeds(cap, booked, mine ? { bed: myBooking.bed, name: scheduleName(profile, profile.showAs ?? "short") || t.schedule.you, mine: true } : undefined) : null;
+  const taken = beds ? beds.filter(Boolean).length : slot.takenBeds.length + (mine ? 1 : 0);
   const left = cap ? cap - taken : null;
   const full = slot.full || left === 0;
   const status = mine
@@ -129,6 +135,7 @@ export function SlotRow({ slot, index = 0 }: { slot: ClassSlot; index?: number }
           <b>₪{classPrices("adult").single}</b> {t.schedule.introSingle} <i aria-hidden>·</i> <b>₪{classPrices("adult").plan}</b> {t.schedule.introPlan}
         </span>
       )}
+      {beds && <BedsRow beds={beds} />}
       <span className="row between gap-12" style={{ marginTop: 6 }}>
         <span className="small muted">
           {slot.minutes} {t.common.min}
@@ -138,6 +145,42 @@ export function SlotRow({ slot, index = 0 }: { slot: ClassSlot; index?: number }
         </span>
       </span>
     </Link>
+  );
+}
+
+type BedSeat = { name: string; mine?: boolean } | null;
+
+/** Puts each booking on its bed (1-5); "any bed" bookings take the first free one. */
+function placeBeds(cap: number, booked: { bed: number | null; name: string }[], me?: { bed: number | null; name: string; mine: true }): BedSeat[] {
+  const beds: BedSeat[] = Array.from({ length: cap }, () => null);
+  const all = me ? [...booked, me] : booked;
+  const free = () => beds.findIndex((b) => b === null);
+  for (const b of all.filter((x) => x.bed !== null)) if (b.bed! < cap && !beds[b.bed!]) beds[b.bed!] = { name: b.name, mine: "mine" in b };
+  for (const b of all.filter((x) => x.bed === null || beds[x.bed] === null || beds[x.bed]?.name !== x.name)) {
+    if (b.bed !== null && beds[b.bed] && beds[b.bed]!.name === b.name) continue;
+    const i = free();
+    if (i !== -1) beds[i] = { name: b.name, mine: "mine" in b };
+  }
+  return beds;
+}
+
+/** Five little reformers in a row: filled when booked, with the name the person chose to show underneath. */
+function BedsRow({ beds }: { beds: BedSeat[] }) {
+  const { t } = useI18n();
+  const names = beds.filter((b): b is NonNullable<BedSeat> => !!b).map((b) => b.name || t.schedule.someone);
+  return (
+    <span className="beds5" role="img" aria-label={names.length ? `${t.schedule.whoBooked}: ${names.join(", ")}` : t.schedule.nobodyYet}>
+      {beds.map((b, i) => (
+        <span key={i} className={`bed5 ${b ? "is-taken" : ""} ${b?.mine ? "is-mine" : ""}`}>
+          <svg viewBox="0 0 36 18" width="36" height="18" aria-hidden>
+            <rect x="1" y="4" width="34" height="10" rx="3" className="bed5__frame" />
+            <rect x="12" y="6.5" width="13" height="5" rx="2" className="bed5__carriage" />
+            <rect x="3" y="7" width="5" height="4" rx="1" className="bed5__carriage" />
+          </svg>
+          <small>{b ? b.name || "·" : ""}</small>
+        </span>
+      ))}
+    </span>
   );
 }
 
@@ -510,6 +553,7 @@ export function ScheduleBoard() {
     track("schedule_view", { service });
   }, [service]);
 
+  const roster = useRoster(date);
   useEffect(() => {
     let alive = true;
     bookingProvider.getSchedule(service, date).then((s) => alive && setSlots(s));
@@ -576,7 +620,7 @@ export function ScheduleBoard() {
             </Link>
           </div>
         )}
-        {slots?.map((s, i) => <SlotRow key={s.id} slot={s} index={i} />)}
+        {slots?.map((s, i) => <SlotRow key={s.id} slot={s} index={i} roster={roster} />)}
       </div>
       {!bookingProvider.isLive && <p className="tiny center">{t.common.demoData}</p>}
     </div>
