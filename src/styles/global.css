@@ -748,7 +748,7 @@ html[lang="he"] .btn { font-size: 16px; }
   transition: transform var(--t-ui) var(--ease-out);
 }
 [dir="rtl"] .btn--primary::after, [dir="rtl"] .btn--sand::after, [dir="rtl"] .btn--arrow::after, [dir="rtl"] .btn--dark::after { transform: scaleX(-1); }
-.btn--block { justify-content: space-between; padding-inline: 24px; }
+.btn--block { justify-content: center; gap: 8px; padding-inline: 24px; } /* text centred, arrow inline after it: the same on every full-width button */
 .btn--dark { background: var(--charcoal); color: var(--ivory); }
 @media (hover: hover) and (pointer: fine) {
   .btn:hover::after { transform: translateX(3px); }
@@ -2161,7 +2161,7 @@ html[lang="he"] .pgcard .nextstep__title { font-style: normal; text-transform: n
 }
 
 /* Menu foot: both buttons centred with a small inline icon (arrow after "Book a class", WhatsApp glyph before the text) */
-.menu__foot .btn--block { justify-content: center; gap: 8px; min-height: 52px; }
-.menu__foot .btn--block::after { margin-inline-start: 2px; }
+.menu__foot .btn--block { min-height: 52px; }
+.btn--block::after { margin-inline-start: 2px; }
 .menu__foot .btn--wa svg { width: 16px; height: 16px; flex: none; }
 .menu__tel { font-size: 14px; }
