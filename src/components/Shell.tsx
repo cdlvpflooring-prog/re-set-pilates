@@ -1,6 +1,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { PayCards } from "./ui";
 import { addressLine, isTodo, siteConfig, telLink } from "../config/site";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
@@ -320,6 +321,7 @@ function Footer() {
             </ul>
           </div>
         </div>
+        <PayCards className="footer__pay" />
         <div className="footer__base">
           <span>
             © {new Date().getFullYear()} re:set pilates · {t.footer.rights}

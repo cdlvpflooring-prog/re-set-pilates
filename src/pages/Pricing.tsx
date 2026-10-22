@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { PageHead, PricingList, effectivePrice, planName, pricesVisible } from "../components/blocks";
-import { Check, Price } from "../components/ui";
+import { Check, PayCards, Price } from "../components/ui";
 import { isClassKind, planById } from "../config/pricing";
 import { RENEW_DAYS, checkPurchase, planEnd } from "../lib/plan";
 import { buildReceipt, systemNotice } from "../lib/purchase";
@@ -35,6 +35,7 @@ export function Pricing() {
               {t.nav.gift}
             </Link>
           </div>
+          <PayCards />
         </div>
       </div>
     </div>
@@ -288,6 +289,7 @@ export function Checkout() {
                   {t.form.failed}
                 </p>
               )}
+              <PayCards className="paycards--center" />
             </div>
             )}
             {!plan.approved && (

@@ -750,6 +750,7 @@ export const en = {
     rights: "All rights reserved.",
     newsletterTitle: "Studio notes",
     newsletterSub: "Schedule updates and openings. Nothing else.",
+    payments: "We accept",
   },
 };
 

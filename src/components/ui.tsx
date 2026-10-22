@@ -10,6 +10,20 @@ import {
   type ReactNode,
 } from "react";
 import { isTodo } from "../config/site";
+
+/** Accepted payment methods: the card-logo strip the owner supplied, with bit beside it. Footer, pricing and checkout. */
+export function PayCards({ className = "" }: { className?: string }) {
+  const { t } = useI18n();
+  return (
+    <div className={`paycards ${className}`} role="group" aria-label={t.footer.payments}>
+      <span className="paycards__label">{t.footer.payments}</span>
+      <span className="paycards__row">
+        <img src="/assets/pay-cards.png" alt="Mastercard, Visa, American Express, Discover, PayPal" width={321} height={50} loading="lazy" decoding="async" />
+        <span className="paycards__bit" aria-label="bit">bit</span>
+      </span>
+    </div>
+  );
+}
 import { useI18n } from "../lib/i18n";
 
 /** Adds `.is-in` once the element scrolls into view (runs once). */

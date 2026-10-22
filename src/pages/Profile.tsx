@@ -68,7 +68,7 @@ export default function Profile() {
             <h2 className="display d-sm">{t.profile.signedOut}</h2>
             <p className="small muted">{t.profile.signedOutSub}</p>
             <div className="row gap-8" style={{ flexWrap: "wrap" }}>
-              <button className="btn btn--primary" style={{ flex: 1 }} onClick={() => setSignIn(true)}>
+              <button className="btn btn--blue" style={{ flex: 1 }} onClick={() => setSignIn(true)}>
                 {t.profile.signIn}
               </button>
               <Link to={href("pricing")} className="btn btn--secondary" style={{ flex: 1 }}>

@@ -751,5 +751,6 @@ export const he: Content = {
     rights: "כל הזכויות שמורות.",
     newsletterTitle: "עדכונים מהסטודיו",
     newsletterSub: "עדכוני לוח ופתיחת שיעורים. שום דבר אחר.",
+    payments: "אמצעי תשלום",
   },
 };
