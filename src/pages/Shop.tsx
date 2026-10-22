@@ -1,14 +1,14 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useState, type CSSProperties, type FormEvent } from "react";
 import { ConsentField, ContactFields, profileFrom, readContact, readExtras } from "../components/forms";
 import { Accordion, Check, Reveal, Sheet } from "../components/ui";
-import { bundleSinglesTotal, shopCategories, shopItem, shopItems, shopMedia, teenBundle, type ShopCategory, type ShopItem } from "../config/shop";
+import { bundleSinglesTotal, shopCategories, shopItem, shopItems, shopMedia, teenBundle, type ShopCategory, type ShopItem, type ShopItemId } from "../config/shop";
 import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { relay } from "../lib/relay";
 import { useSeo } from "../lib/seo";
 import { useStore } from "../lib/store";
 
-type Pick = { id: string; name: string; price: number; sizes?: string[] };
+type Pick = { id: ShopItemId; name: string; price: number; sizes?: string[] };
 
 /**
  * Studio shop, "coming soon": the catalog (teen set first), each piece with a planned price and a
@@ -25,10 +25,7 @@ export default function Shop() {
   const items = shopItems.filter((i) => i.active && (cat === "all" || i.category === cat));
   const saves = bundleSinglesTotal() - teenBundle.price;
   const bundleName = c.items["teen-set"].name;
-  const open = (p: Pick) => {
-    setPick(p);
-    track("shop_notify", { item: p.id });
-  };
+  const open = (p: Pick) => setPick(p);
 
   return (
     <div className="page tone-dark has-tabbar shop">
@@ -73,7 +70,7 @@ export default function Shop() {
                   const it = shopItem(id);
                   return (
                     <li key={id}>
-                      <span>{c.items[id as keyof typeof c.items].name}</span>
+                      <span>{c.items[id].name}</span>
                       {it && <span className="tiny nums">₪{it.price}</span>}
                     </li>
                   );
@@ -102,20 +99,20 @@ export default function Shop() {
         <div className="wrap stack gap-24">
           <div className="row between gap-12 shop-cat">
             <h2 className="display d-md">{c.catalogTitle}</h2>
-            <div className="row gap-8" role="tablist" style={{ flexWrap: "wrap" }}>
-              <button type="button" role="tab" className="pill" aria-pressed={cat === "all"} aria-selected={cat === "all"} onClick={() => setCat("all")}>
+            <div className="row gap-8" style={{ flexWrap: "wrap" }}>
+              <button type="button" className="pill" aria-pressed={cat === "all"} onClick={() => setCat("all")}>
                 {c.all}
               </button>
               {shopCategories.map((k) => (
-                <button type="button" role="tab" key={k} className="pill" aria-pressed={cat === k} aria-selected={cat === k} onClick={() => setCat(k)}>
+                <button type="button" key={k} className="pill" aria-pressed={cat === k} onClick={() => setCat(k)}>
                   {c.cats[k]}
                 </button>
               ))}
             </div>
           </div>
-          <div className="shop-grid list-in" key={cat}>
+          <div className="shop-grid list-in">
             {items.map((it, i) => (
-              <ProductCard key={it.id} it={it} index={i} onNotify={() => open({ id: it.id, name: c.items[it.id as keyof typeof c.items].name, price: it.price, sizes: it.sizes })} />
+              <ProductCard key={it.id} it={it} index={i} onNotify={() => open({ id: it.id, name: c.items[it.id].name, price: it.price, sizes: it.sizes })} />
             ))}
           </div>
           <p className="tiny">{c.priceNote}</p>
@@ -157,9 +154,9 @@ export default function Shop() {
 function ProductCard({ it, index, onNotify }: { it: ShopItem; index: number; onNotify: () => void }) {
   const { t } = useI18n();
   const c = t.shop;
-  const copy = c.items[it.id as keyof typeof c.items];
+  const copy = c.items[it.id];
   return (
-    <article className="shop-card" style={{ "--i": index } as React.CSSProperties}>
+    <article className="shop-card" style={{ "--i": index } as CSSProperties}>
       <button type="button" className="shop-card__media" onClick={onNotify} aria-label={`${copy.name} · ${c.notifyShort}`}>
         <img src={it.image} alt="" style={{ objectPosition: it.pos }} loading="lazy" decoding="async" />
         <span className="shop-tag">{c.comingSoon}</span>
@@ -210,6 +207,7 @@ function NotifyForm({ pick }: { pick: Pick }) {
     setSending(false);
     if (!r.ok && !r.queued) return setFailed(true);
     store.saveProfile(profileFrom(contact, x));
+    track("shop_notify", { item: pick.id, who });
     track("launch_waitlist_join", { source: "Shop", item: pick.id });
     setDone(r.ok ? "sent" : "queued");
   };
