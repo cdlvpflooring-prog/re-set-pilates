@@ -2345,3 +2345,6 @@ html[lang="he"] .paycards__label { letter-spacing: 0.04em; font-size: 12.5px; }
 @media (max-width: 380px) { .pgcard__logo .wordmark { font-size: 20px; } }
 /* Schedule beds: the name under a booked bed, readable */
 .bed5 small { font-size: 12.5px; min-height: 15px; }
+
+/* Bed names may use two lines (full names) instead of being cut off */
+.bed5 small { white-space: normal; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.15; }
