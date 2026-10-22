@@ -2305,19 +2305,23 @@ html[lang="he"] .shop-tag { letter-spacing: 0.04em; font-size: 12px; }
 .btn--blue { background: var(--clay); color: #fffdfa; }
 .btn--blue:active { background: var(--peach-ink); }
 
-/* Shop header: the site wordmark + "shop" on baby blue, "coming soon" above, the subline in the display serif */
-.shop-head { background: var(--b-peach); position: relative; overflow: hidden; }
+/* Shop header: centred on baby blue. "Coming soon" on top, then "re:set shop" as one serif line, letter-spaced like a design house */
+.shop-head { background: var(--b-peach); position: relative; overflow: hidden; text-align: center; }
 .shop-head::before {
-  content: ""; position: absolute; inset: auto -10% -60% auto; width: 60%; aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 253, 250, 0.7), rgba(255, 253, 250, 0) 70%); pointer-events: none;
+  content: ""; position: absolute; inset: -40% auto auto 50%; transform: translateX(-50%); width: 70%; aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 253, 250, 0.75), rgba(255, 253, 250, 0) 70%); pointer-events: none;
 }
-.shop-head__in { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 10px; }
-.shop-head__eyebrow { color: var(--peach-ink); }
-.shop-head__title { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.3em 0.45em; color: var(--ink); }
-.shop-head__title .wordmark { font-size: clamp(40px, 6vw, 68px); }
-.shop-head__title .display { font-size: clamp(40px, 6vw, 68px); font-weight: 500; letter-spacing: -0.03em; line-height: 1; }
-.shop-head__sub { font-size: clamp(21px, 2.4vw, 30px); font-weight: 400; font-style: italic; line-height: 1.25; color: rgba(31, 22, 18, 0.78); max-width: 30ch; margin-top: 4px; }
-html[lang="he"] .shop-head__sub { font-style: normal; }
+.shop-head__in { position: relative; display: flex; flex-direction: column; align-items: center; gap: clamp(14px, 2vw, 22px); }
+.shop-head__eyebrow { font-size: clamp(13px, 1.4vw, 16px); font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--peach-ink); padding-inline-start: 0.3em; }
+html[lang="he"] .shop-head__eyebrow { letter-spacing: 0.12em; padding-inline-start: 0; }
+.shop-head__title {
+  display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 0 0.55em;
+  font-family: "Cormorant Garamond", "Frank Ruhl Libre", serif; font-weight: 500; font-size: clamp(48px, 8vw, 96px); line-height: 1; color: var(--ink);
+  letter-spacing: 0.01em; direction: ltr;
+}
+.shop-head__mark i { font-style: normal; color: var(--clay); }
+.shop-head__word { letter-spacing: 0.22em; margin-inline-end: -0.22em; }
+html[lang="he"] .shop-head__word { letter-spacing: 0.04em; margin-inline-end: 0; font-family: "Frank Ruhl Libre", "Cormorant Garamond", serif; }
 @media (max-width: 560px) {
-  .shop-head__title .wordmark, .shop-head__title .display { font-size: 34px; }
+  .shop-head__title { font-size: 42px; }
 }
