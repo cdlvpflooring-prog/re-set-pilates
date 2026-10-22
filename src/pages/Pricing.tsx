@@ -289,7 +289,7 @@ export function Checkout() {
                   {t.form.failed}
                 </p>
               )}
-              <PayCards className="paycards--center" />
+              {live && <PayCards className="paycards--center" />}
             </div>
             )}
             {!plan.approved && (

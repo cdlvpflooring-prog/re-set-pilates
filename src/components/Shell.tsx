@@ -321,7 +321,7 @@ function Footer() {
             </ul>
           </div>
         </div>
-        <PayCards className="footer__pay" />
+        <PayCards />
         <div className="footer__base">
           <span>
             © {new Date().getFullYear()} re:set pilates · {t.footer.rights}
