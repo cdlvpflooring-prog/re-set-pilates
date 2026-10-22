@@ -53,8 +53,10 @@ export function useRoster(date: string): RosterSlots | null {
  */
 export async function withRoster(slot: ClassSlot): Promise<ClassSlot> {
   if (!slot.capacity) return slot;
-  const booked = sampleBeds(slot.time) ?? (await fetchRoster(slot.date))?.[slot.id];
-  if (!booked) return slot;
+  const roster = sampleBeds(slot.time) ? null : await fetchRoster(slot.date);
+  // A class with no bookings is simply absent from the roster: all beds free (not the sample availability)
+  const booked = sampleBeds(slot.time) ?? (roster ? (roster[slot.id] ?? []) : undefined);
+  if (!booked) return slot; // relay unreachable (offline, local dev): keep the slot as given
   const taken = new Set(booked.map((b) => b.bed).filter((b): b is number => b !== null && b < slot.capacity!));
   for (let n = booked.filter((x) => x.bed === null).length; n > 0; n--) {
     const free = Array.from({ length: slot.capacity }, (_, i) => i).find((i) => !taken.has(i));
