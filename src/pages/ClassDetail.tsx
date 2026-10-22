@@ -7,7 +7,7 @@ import { Check, Sheet, Switch } from "../components/ui";
 import { classPrices, intro, planById, singleClass } from "../config/pricing";
 import { serviceById } from "../config/services";
 import { track } from "../lib/analytics";
-import { bookingProvider, fromISO, slotStart, type ClassSlot } from "../lib/booking";
+import { bookingProvider, fromISO, rememberBed, slotStart, type ClassSlot } from "../lib/booking";
 import { withRoster } from "../lib/roster";
 import { useI18n } from "../lib/i18n";
 import { downloadIcs } from "../lib/ics";
@@ -291,11 +291,14 @@ export default function ClassDetail() {
                 <Link
                   to={href(`checkout/${singleClass.id}?kind=${slot.service}&next=${slot.id}`)}
                   className="btn btn--sand btn--block"
-                  onClick={() => track("membership_click", { plan: singleClass.id, kind: slot.service })}
+                  onClick={() => {
+                    rememberBed(slot.id, isReformer ? bed : null);
+                    track("membership_click", { plan: singleClass.id, kind: slot.service });
+                  }}
                 >
                   {t.confirm.single.replace("{price}", String(singleClass.price))}
                 </Link>
-                <Link to={href(`pricing?kind=${slot.service}&next=${slot.id}`)} className="btn btn--secondary btn--block">
+                <Link to={href(`pricing?kind=${slot.service}&next=${slot.id}`)} className="btn btn--secondary btn--block" onClick={() => rememberBed(slot.id, isReformer ? bed : null)}>
                   {t.confirm.choosePlan}
                 </Link>
               </>

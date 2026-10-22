@@ -106,6 +106,7 @@ export interface BookingMsg extends Base {
   slot: SlotRef;
   bed: number | null; // 0-based on the site; Airtable shows 1-5
   showAs?: ShowAs; // name on the schedule beds (default "short")
+  held?: boolean; // checkout before online payment is open: the bed is held (Airtable status "Held") until Orit takes payment
 }
 
 export interface CancelMsg extends Base {

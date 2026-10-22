@@ -47,7 +47,12 @@ beforeEach(() => {
       return ok({ records: rows.filter((r) => want.includes(r.id) && (!after || String(r.fields[after[1]] ?? "") > after[2])) });
     }
     // AND(... FIND(...)): every quoted value matches a field exactly or as a substring (roster: Booked + slot date)
-    if (f.startsWith("AND(") && f.includes("FIND(")) return ok({ records: rows.filter((r) => want.every((w) => Object.values(r.fields).some((v) => typeof v === "string" && v.includes(w)))) });
+    // AND(OR(status Booked/Held), …): an active booking whose other fields match every remaining quoted value
+    if (f.startsWith("AND(OR(")) {
+      const active = ["Booked", "Held"];
+      const rest = want.filter((w) => !active.includes(w));
+      return ok({ records: rows.filter((r) => active.includes(String(r.fields[F.bookings.status])) && rest.every((w) => Object.values(r.fields).some((v) => typeof v === "string" && v.includes(w)))) });
+    }
     // FIND('text',{field}): substring match (order ids inside payment names)
     if (f.startsWith("FIND(")) return ok({ records: rows.filter((r) => Object.values(r.fields).some((v) => typeof v === "string" && want.some((w) => v.includes(w)))) });
     const hit = rows.filter((r) => Object.values(r.fields).some((v) => want.includes(String(v).replace(/\D/g, "")) || want.includes(String(v)) || want.includes(String(v).toLowerCase())));
@@ -305,4 +310,24 @@ test("roster: names only as each person chose, by bed, for that day only", async
   ]);
   expect(JSON.stringify(body)).not.toContain("052"); // no phone numbers
   expect((await worker.fetch(new Request("https://reset.example/api/roster?date=bad") as never, env, {} as never)).status).toBe(400);
+});
+
+test("checkout before payments open holds the bed; a full class refuses; a held bed shows on the roster", async () => {
+  const s2 = { ...slot, date: "2026-11-02", time: "08:00", capacity: 5 };
+  const people = ["0521000001", "0521000002", "0521000003", "0521000004", "0521000005", "0521000006"].map((phone, i) => ({ firstName: `P${i}`, lastName: `Last${i}`, phone }));
+  const first = await call("booking", { lang: "he", contact: people[0], slot: s2, bed: 2, held: true });
+  expect(first.status).toBe(200);
+  const held = db[T.bookings].at(-1)!;
+  expect(held.fields[F.bookings.status]).toBe("Held");
+  expect(held.fields[F.bookings.bed]).toBe("3");
+  // Someone else asks for the same bed: they get any free bed instead
+  await call("booking", { lang: "he", contact: people[1], slot: s2, bed: 2, held: true });
+  expect(db[T.bookings].at(-1)!.fields[F.bookings.bed]).toBe("Any");
+  for (const p of people.slice(2, 5)) await call("booking", { lang: "he", contact: p, slot: s2, bed: null, held: true });
+  // Five beds taken: the sixth is refused
+  expect((await call("booking", { lang: "he", contact: people[5], slot: s2, bed: null, held: true })).status).toBe(409);
+  const res = await worker.fetch(new Request("https://reset.example/api/roster?date=2026-11-02") as never, env, { waitUntil() {} } as never);
+  const body = (await res.json()) as { slots: Record<string, { bed: number | null; name: string }[]> };
+  expect(body.slots["reformer_2026-11-02_0800"].length).toBe(5);
+  expect(body.slots["reformer_2026-11-02_0800"][0]).toEqual({ bed: 2, name: "P. Last0" });
 });
