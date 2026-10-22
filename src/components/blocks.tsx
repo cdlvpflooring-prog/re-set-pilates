@@ -113,7 +113,8 @@ export function SlotRow({ slot, index = 0, roster }: { slot: ClassSlot; index?: 
   const beds = cap ? placeBeds(cap, booked, mine ? { bed: myBooking.bed, name: scheduleName(profile, profile.showAs ?? "short") || t.schedule.you, mine: true } : undefined) : null;
   const taken = beds ? beds.filter(Boolean).length : slot.takenBeds.length + (mine ? 1 : 0);
   const left = cap ? cap - taken : null;
-  const full = slot.full || left === 0;
+  // With real bookings known, "full" means all beds taken (the sample availability flag no longer applies)
+  const full = beds ? left === 0 : slot.full || left === 0;
   const status = mine
     ? t.schedule.booked
     : cap === null
