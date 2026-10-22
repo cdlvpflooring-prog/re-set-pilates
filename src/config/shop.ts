@@ -23,7 +23,8 @@ export const shopItems: ShopItem[] = [
   { id: "towel", category: "accessories", price: 59, currency: "ILS", image: "/assets/shop/towel.webp", active: true, approved: true },
   { id: "socks", category: "accessories", price: 35, currency: "ILS", image: "/assets/shop/socks.webp", sizes: ["35–38", "39–42"], active: true, approved: true },
   { id: "tote", category: "accessories", price: 69, currency: "ILS", image: "/assets/shop/tote.webp", active: true, approved: true },
-  { id: "weights", category: "accessories", price: 89, currency: "ILS", image: "/assets/shop/weights.webp", active: true, approved: true },
+  // Hand weights pulled from the catalog (owner, 22 Oct): the look did not sit with the rest of the set.
+  { id: "weights", category: "accessories", price: 89, currency: "ILS", image: "/assets/shop/weights.webp", active: false, approved: true },
   { id: "bottle", category: "accessories", price: 49, currency: "ILS", image: "/assets/shop/bottle.webp", active: true, approved: true },
 ];
 
