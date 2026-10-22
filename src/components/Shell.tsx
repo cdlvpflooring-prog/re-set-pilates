@@ -320,6 +320,11 @@ function Footer() {
             </ul>
           </div>
         </div>
+        <ul className="footer__pay" aria-label={t.footer.payments}>
+          {["Visa", "Mastercard", "American Express", "Discover", "bit"].map((p) => (
+            <li key={p} className={p === "bit" ? "is-bit" : ""}>{p}</li>
+          ))}
+        </ul>
         <div className="footer__base">
           <span>
             © {new Date().getFullYear()} re:set pilates · {t.footer.rights}

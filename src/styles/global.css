@@ -2321,3 +2321,25 @@ html[lang="he"] .shop-head__sub { font-style: normal; }
 @media (max-width: 560px) {
   .shop-head__title .wordmark, .shop-head__title .display { font-size: 34px; }
 }
+
+/* ───────── v2.4 · owner polish (22 Oct) ───────── */
+/* Footer: headings and links easier to read */
+.footer h3 { font-size: 16px; font-weight: 700; letter-spacing: 0.08em; color: var(--clay); margin-bottom: 8px; }
+.footer li a { font-size: 17px; font-weight: 500; color: #1f1612; }
+@media (hover: hover) and (pointer: fine) { .footer li a:hover { color: var(--clay); } }
+/* Footer: accepted payment methods, quiet badges between the link columns and the copyright line */
+.footer ul.footer__pay { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 36px; padding: 0; list-style: none; }
+.footer ul.footer__pay li {
+  display: inline-flex; align-items: center; min-height: 32px; padding: 0 14px; border-radius: 8px;
+  border: 1px solid rgba(31, 22, 18, 0.16); background: #fff; color: rgba(31, 22, 18, 0.78);
+  font: 700 12px/1 "Inter", "Heebo", sans-serif; letter-spacing: 0.02em; text-transform: uppercase; direction: ltr;
+}
+.footer ul.footer__pay li.is-bit { text-transform: none; font-size: 14px; font-weight: 800; letter-spacing: -0.02em; color: #fffdfa; background: var(--clay); border-color: var(--clay); }
+.footer__pay + .footer__base { margin-top: 20px; }
+/* My progress card: the title centred over the track */
+.pgcard__head { justify-content: center; padding-inline: 0; min-height: 36px; }
+.pgcard__logo { position: absolute; inset-inline-start: 0; top: 50%; transform: translateY(-50%); }
+.pgcard .nextstep__title { text-align: center; }
+@media (max-width: 380px) { .pgcard__logo .wordmark { font-size: 20px; } }
+/* Schedule beds: the name under a booked bed, readable */
+.bed5 small { font-size: 12.5px; min-height: 15px; }
