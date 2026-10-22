@@ -185,8 +185,15 @@ export default function Home() {
                     <span className="ccard__body">
                       <span className="display d-md ccard__title">{sc.name}</span>
                       <span className="ccard__blurb">{sc.blurb}</span>
-                      <span className="ccard__cta ccard__cta--book ccard__cta--mat">
-                        <span className="mat-roll" aria-hidden />
+                      <span className="ccard__cta ccard__cta--book ccard__cta--reformer">
+                        {/* A reformer from the side: frame on legs, carriage, footbar */}
+                        <svg className="reformer-ico" viewBox="0 0 44 18" width="44" height="18" aria-hidden>
+                          <path d="M3 13v3M41 13v3" />
+                          <rect x="1.5" y="9.5" width="41" height="3.5" rx="1.75" />
+                          <rect x="7" y="4.5" width="17" height="4" rx="1.5" className="reformer-ico__carriage" />
+                          <path d="M24 6.5h3.5" />
+                          <path d="M34 9.5V3h5v6.5" />
+                        </svg>
                         {t.nav.bookTitle}
                         <span className="chev" aria-hidden />
                       </span>
