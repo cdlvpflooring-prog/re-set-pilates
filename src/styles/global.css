@@ -2315,13 +2315,10 @@ html[lang="he"] .shop-tag { letter-spacing: 0.04em; font-size: 12px; }
 .shop-head__eyebrow { font-size: clamp(13px, 1.4vw, 16px); font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; color: var(--peach-ink); padding-inline-start: 0.3em; }
 html[lang="he"] .shop-head__eyebrow { letter-spacing: 0.12em; padding-inline-start: 0; }
 .shop-head__title {
-  display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 0 0.55em;
-  font-family: "Cormorant Garamond", "Frank Ruhl Libre", serif; font-weight: 500; font-size: clamp(48px, 8vw, 96px); line-height: 1; color: var(--ink);
-  letter-spacing: 0.01em; direction: ltr;
+  font-family: "Cormorant Garamond", "Frank Ruhl Libre", serif; font-weight: 500; font-size: clamp(52px, 9vw, 104px); line-height: 1; color: var(--ink);
+  letter-spacing: 0.26em; margin-inline-end: -0.26em; text-transform: lowercase;
 }
-.shop-head__mark i { font-style: normal; color: var(--clay); }
-.shop-head__word { letter-spacing: 0.22em; margin-inline-end: -0.22em; }
-html[lang="he"] .shop-head__word { letter-spacing: 0.04em; margin-inline-end: 0; font-family: "Frank Ruhl Libre", "Cormorant Garamond", serif; }
+html[lang="he"] .shop-head__title { letter-spacing: 0.06em; margin-inline-end: 0; text-transform: none; font-family: "Frank Ruhl Libre", "Cormorant Garamond", serif; }
 @media (max-width: 560px) {
-  .shop-head__title { font-size: 42px; }
+  .shop-head__title { font-size: 44px; }
 }

@@ -35,14 +35,7 @@ export default function Shop() {
       <header className="phead shop-head">
         <div className="wrap shop-head__in screen">
           <span className="shop-head__eyebrow">{c.comingSoon}</span>
-          <h1 className="shop-head__title" aria-label={`re:set ${c.title}`}>
-            <span className="shop-head__mark" aria-hidden>
-              re<i>:</i>set
-            </span>
-            <span className="shop-head__word" aria-hidden>
-              {c.title}
-            </span>
-          </h1>
+          <h1 className="shop-head__title">{c.title}</h1>
         </div>
       </header>
 
