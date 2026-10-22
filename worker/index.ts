@@ -41,6 +41,9 @@ const MAX_BODY = 8 * 1024;
 
 class BadRequest extends Error {}
 /** The request is fine but would duplicate something that exists (e.g. the same membership is still running). */
+/** Airtable formula: a booking that holds a bed (a paid booking, or a bed held at checkout before payment opened). */
+const ACTIVE_BOOKING = `OR({${F.bookings.status}}='Booked', {${F.bookings.status}}='Held')`;
+
 class Conflict extends Error {
   constructor(message: string, public until?: string) {
     super(message);
@@ -464,11 +467,15 @@ const handlers: Record<RelayEvent, Handler> = {
     const m = b as unknown as BookingMsg;
     const c = contact(m.contact);
     const s = slot(m.slot);
-    const bed = typeof m.bed === "number" && m.bed >= 0 && m.bed < 5 ? String(m.bed + 1) : "Any";
+    const B = F.bookings;
+    let bed = typeof m.bed === "number" && m.bed >= 0 && m.bed < 5 ? String(m.bed + 1) : "Any";
+    // A full class can't take another booking; a bed someone else already holds becomes "any free bed"
+    const taken = await at.find(T.bookings, `AND(${ACTIVE_BOOKING}, {${B.slotId}}=${q(s.slotId)})`, 20);
+    if (s.capacity && taken.length >= s.capacity) throw new Conflict("full");
+    if (bed !== "Any" && taken.some((r) => String(r.fields[B.bed] ?? "") === bed)) bed = "Any";
     const member = await upsertMember(at, c, { lang: lang(m.lang), attribution: attribution(m.attribution) });
     const klass = await findOrCreateClass(at, s);
     const membership = await activeMembership(at, member);
-    const B = F.bookings;
     const booking = await at.create(T.bookings, {
       [B.name]: `${fullName(c)} · ${slotLabel(s)}`,
       [B.member]: [member.id],
@@ -477,8 +484,8 @@ const handlers: Record<RelayEvent, Handler> = {
       ...(s.service === "reformer" ? { [B.bed]: bed } : {}),
       [B.slotId]: s.slotId,
       [B.shownOn]: scheduleName(c, oneOf(m.showAs, SHOW_AS) ?? "short"),
-      [B.via]: "App",
-      [B.status]: "Booked",
+      [B.via]: m.held ? "Checkout (payment pending)" : "App",
+      [B.status]: m.held ? "Held" : "Booked",
     });
     const stage = member.fields[F.members.lifecycle];
     if (stage === "New enquiry" || stage === "Contacted") await at.update(T.members, member.id, { [F.members.lifecycle]: "First class booked" });
@@ -496,7 +503,7 @@ const handlers: Record<RelayEvent, Handler> = {
     const member = await at.get(T.members, memberId);
     const onFile = String(member.fields[F.members.phone] ?? "").replace(/\D/g, "").replace(/^972/, "0");
     if (onFile !== phoneDigits(m.phone)) throw new BadRequest("not found");
-    if (booking.fields[B.status] !== "Booked") return { ok: true, id };
+    if (booking.fields[B.status] !== "Booked" && booking.fields[B.status] !== "Held") return { ok: true, id };
     const start = Number(booking.fields[B.classStartUnix] ?? 0) * 1000;
     const hours = start ? (start - Date.now()) / 3_600_000 : CANCEL_HOURS;
     await at.update(T.bookings, id, {
@@ -762,7 +769,7 @@ async function roster(env: Env, url: URL, ectx: ExecutionContext): Promise<Respo
   try {
     const rows = await new Airtable(env.AIRTABLE_TOKEN, env.AIRTABLE_BASE).find(
       T.bookings,
-      `AND({${B.status}}='Booked', FIND(${q(`_${date}_`)}, {${B.slotId}}))`,
+      `AND(${ACTIVE_BOOKING}, FIND(${q(`_${date}_`)}, {${B.slotId}}))`,
       100,
     );
     const slots: NonNullable<RosterReply["slots"]> = {};

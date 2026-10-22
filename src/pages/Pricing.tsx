@@ -12,9 +12,10 @@ import { track } from "../lib/analytics";
 import { useI18n } from "../lib/i18n";
 import { useSeo } from "../lib/seo";
 import { relay } from "../lib/relay";
+import type { Contact, SlotRef } from "../lib/relayTypes";
 import { useStore } from "../lib/store";
 import { ConsentField, ContactFields, HeardField, profileFrom, readContact, readExtras } from "../components/forms";
-import { fromISO } from "../lib/booking";
+import { bookingProvider, fromISO, rememberBed, rememberedBed } from "../lib/booking";
 
 export function Pricing() {
   const { t, href } = useI18n();
@@ -56,6 +57,7 @@ export function Checkout() {
   const [blockedUntil, setBlockedUntil] = useState<Date | null>(null); // the relay found the same membership still running
   const [receiptNo, setReceiptNo] = useState("");
   const [waitlisted, setWaitlisted] = useState(false); // payments not live: the order went to the launch waitlist
+  const [hold, setHold] = useState<"held" | "full" | null>(null); // checkout for a class: its bed was held, or it had just filled
   const [sentVia, setSentVia] = useState<string[]>([]);
   const plan = planById(planId);
   const next = params.get("next");
@@ -171,8 +173,32 @@ export function Checkout() {
     }
     store.saveProfile(profileFrom(contact, x));
     track("launch_waitlist_join", { source: next ? "Booking" : "Pricing", plan: plan.id, method });
+    if (next) await holdBed(next, contact);
     setWaitlisted(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  /**
+   * Checkout for a specific class before payments open: hold the bed (Airtable status "Held") so the person's
+   * name shows on the schedule. If the class filled up meanwhile, they go on that class's waitlist instead.
+   */
+  const holdBed = async (slotId: string, contact: Contact) => {
+    const s = await bookingProvider.getSlot(slotId);
+    if (!s) return;
+    const bed = s.service === "reformer" ? rememberedBed(s.id) : null;
+    const slot: SlotRef = { slotId: s.id, service: s.service, date: s.date, time: s.time, minutes: s.minutes, capacity: s.capacity };
+    const local = store.book(s, bed, store.reminders);
+    const r = await relay("booking", { lang, contact, slot, bed, showAs: store.profile.showAs ?? "short", held: true }, local ? { ref: local.id } : undefined);
+    if (r.error === "full") {
+      if (local) store.cancel(local.id);
+      store.joinWaitlist(s.id);
+      relay("waitlist", { lang, contact, slot });
+      setHold("full");
+      return;
+    }
+    if (local && r.id) store.setRemoteId(local.id, r.id);
+    rememberBed(s.id, null);
+    setHold("held");
   };
 
   if (waitlisted)
@@ -183,6 +209,8 @@ export function Checkout() {
             <Check />
             <h1 className="display d-md">{t.launchWaitlist.doneTitle}</h1>
             <p className="muted">{t.launchWaitlist.atPay}</p>
+            {hold === "held" && <p className="small hi">{t.launchWaitlist.bedHeld}</p>}
+            {hold === "full" && <p className="small hi">{t.launchWaitlist.classFull}</p>}
             <p className="small">
               <b>{t.launchWaitlist.youChose}:</b> {[`${planName(plan, t, slotLabel ? null : kind)} · ₪${effectivePrice(plan)}`, slotLabel].filter(Boolean).join(" · ")}
             </p>

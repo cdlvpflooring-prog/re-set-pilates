@@ -630,6 +630,8 @@ export const en = {
     note: "Nothing is charged. We only use your number to contact you about opening.",
     doneTitle: "You're on the list",
     doneSub: "Thank you! Orit will be in touch as soon as booking opens.",
+    bedHeld: "Your bed is held for this class and your name now shows on the schedule.",
+    classFull: "That class filled up just now, so you're on its waitlist. Orit will call you if a bed opens.",
     atPay: "Online payment isn't open yet, so nothing was charged. Your order is saved and Orit will call you to confirm your spot and take payment as soon as it opens.",
   },
   form: {

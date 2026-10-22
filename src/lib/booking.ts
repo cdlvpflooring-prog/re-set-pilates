@@ -101,3 +101,21 @@ export const upcomingDays = (count = 10) =>
     d.setDate(d.getDate() + i);
     return d;
   });
+
+/** The bed picked on a class page, kept for this tab until checkout holds it (it may pass through the pricing page). */
+export function rememberBed(slotId: string, bed: number | null) {
+  try {
+    if (bed === null) sessionStorage.removeItem(`reset.bed.${slotId}`);
+    else sessionStorage.setItem(`reset.bed.${slotId}`, String(bed));
+  } catch {
+    /* storage blocked: checkout falls back to any free bed */
+  }
+}
+export function rememberedBed(slotId: string): number | null {
+  try {
+    const v = sessionStorage.getItem(`reset.bed.${slotId}`);
+    return v === null ? null : Number(v);
+  } catch {
+    return null;
+  }
+}
